@@ -1,0 +1,5 @@
+.svnignore
+.sass-cache
+.DS_Store
+.thumbsdb
+.svn
