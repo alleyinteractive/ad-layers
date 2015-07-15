@@ -23,7 +23,7 @@ class Ad_Layers_Widget extends WP_Widget {
 			'ad_layers_ad_widget',
 			__( 'Ad Layers Ad Widget', 'ad-layers' ),
 			array( 
-				'description' => esc_html__( 'Adds the specified ad slot to any sidebar.', 'nypost' ), 
+				'description' => esc_html__( 'Adds the specified ad slot to any sidebar.', 'ad-layers' ), 
 			)
 		);
 	}
@@ -66,7 +66,7 @@ class Ad_Layers_Widget extends WP_Widget {
 		$ad_slot = ( isset( $instance['ad_slot'] ) ) ? $instance['ad_slot'] : '';
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id( 'ad_slot' ) ?>"><?php esc_html_e( 'Ad Slot', 'nypost' ) ?></label>
+			<label for="<?php echo $this->get_field_id( 'ad_slot' ) ?>"><?php esc_html_e( 'Ad Slot', 'ad-layers' ) ?></label>
 			<br />
 			<?php echo $this->ad_slot_select_field( $ad_slot ) ?>
 		</p>
