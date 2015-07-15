@@ -99,16 +99,14 @@ class Ad_Layers extends Ad_Layers_Singleton {
 	 *
 	 * @var Ad_Layers
 	 */
-	private $ad_servers = array(
-		'DFP' => AD_LAYERS_BASE_DIR . '/php/ad-servers/class-dfp.php',
-	);
+	public $ad_servers;
 	
 	/**
 	 * Current ad layers settings
 	 *
 	 * @var string
 	 */
-	private $settings = 'ad_layers_options';
+	public $settings;
 	
 	/**
 	 * Setup the singleton.
@@ -118,10 +116,12 @@ class Ad_Layers extends Ad_Layers_Singleton {
 		$this->settings = get_option( AD_LAYERS_OPTION_NAME );
 	
 		// Allow additional ad servers to be loaded via filter within a theme
-		$ad_servers = apply_filters( 'ad_layers_ad_servers', $this->ad_servers );
+		$this->ad_servers = apply_filters( 'ad_layers_ad_servers', array(
+			'DFP' => AD_LAYERS_BASE_DIR . '/php/ad-servers/class-dfp.php',
+		) );
 		
-		if ( ! empty( $ad_servers ) && is_array( $ad_servers ) ) {
-			foreach ( $ad_servers as $ad_server ) {
+		if ( ! empty( $this->ad_servers ) && is_array( $this->ad_servers ) ) {
+			foreach ( $this->ad_servers as $ad_server ) {
 				if ( file_exists( $ad_server ) ) {
 					require_once( $ad_server );
 				}

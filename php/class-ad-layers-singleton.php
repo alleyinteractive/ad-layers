@@ -35,8 +35,10 @@ abstract class Ad_Layers_Singleton {
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
 			$class_name = __CLASS__;
-			self::$instance = new $class_name;
-			self::$instance->setup();
+			if ( 'Ad_Layers_Singleton' != $class_name ) {
+				self::$instance = new $class_name;
+				self::$instance->setup();
+			}
 		}
 		return self::$instance;
 	}
