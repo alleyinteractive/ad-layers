@@ -57,7 +57,7 @@ define( 'AD_LAYERS_GLOBAL_ASSET_VERSION', '0.0.1' );
  *
  * @var string
  */
-define( 'AD_LAYERS_OPTION_NAME', 'ad_layers_settings' );
+define( 'AD_LAYERS_OPTION_NAME', 'ad_layers' );
 
 /**
  * Base singleton class for Ad Layers classes.
@@ -83,6 +83,11 @@ require_once( AD_LAYERS_BASE_DIR . '/php/class-ad-layers-widget.php' );
  * Ad shortcode.
  */
 require_once( AD_LAYERS_BASE_DIR . '/php/class-ad-layers-shortcode.php' );
+
+/**
+ * Ad servers.
+ */
+require_once( AD_LAYERS_BASE_DIR . '/php/ad-servers/class-ad-layers-ad-server.php' );
 
 /**
  * Admin dashboard features.

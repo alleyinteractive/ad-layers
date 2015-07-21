@@ -14,9 +14,22 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 
 	/**
 	 * Setup the singleton.
+	 * @access public
 	 */
 	public function setup() {
 		
+	}
+	
+	/**
+	 * Gets available ad units
+	 * @access public
+	 * @static
+	 */
+	public static function get_ad_units() {
+		return array(
+			'leaderboard' => __( 'Leaderboard', 'ad-layers' ),
+			'rectangle' => __( 'Rectangle', 'ad-layers' ),
+		);
 	}
 }
 
