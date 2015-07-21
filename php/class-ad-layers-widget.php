@@ -71,9 +71,6 @@ class Ad_Layers_Widget extends WP_Widget {
 			<?php echo $this->ad_slot_select_field( $ad_slot ) ?>
 		</p>
 		<?php
-		
-		// Call the parent function to add global fields
-		return parent::form( $instance );
 	}
 
 	/**
@@ -92,9 +89,6 @@ class Ad_Layers_Widget extends WP_Widget {
 		if ( empty( $instance['ad_slot'] ) ) {
 			return false;
 		}
-		
-		// Call the parent function for sidebar validation
-		return parent::validate( $instance, $new_instance, $old_instance );
 	}
 	
 	/**
@@ -110,8 +104,7 @@ class Ad_Layers_Widget extends WP_Widget {
 		// This will also prevent the widget from being saved due to the validation rules in update().
 		$no_slots = '<p>' . esc_html__( 'No ad slots are currently available.', 'ad-layers' ) . '</p>';
 		
-		$ad_server = Ad_Layers_Ad_Server::instance();
-		$ad_slots = $ad_server->ad_slots();
+		$ad_slots = Ad_Layers_Ad_Server::get_ad_slots();
 
 		// Build the option list.
 		$options = '';

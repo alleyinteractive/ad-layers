@@ -86,18 +86,18 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 	 */
 	public function add_meta_boxes() {
 		// Add ad units
-		$fm_ad_units = new Fieldmanager_Select(
+		$fm_ad_slots = new Fieldmanager_Select(
 			array(
-				'name' => 'ad_layer_ad_units',
+				'name' => 'ad_layer_ad_slots',
 				'limit' => 0,
 				'extra_elements' => 0,
 				'one_label_per_item' => false,
 				'label' => __( 'Select one or more ad units.', 'ad-layers' ),
 				'add_more_label' =>  __( 'Add an ad unit', 'ad-layers' ),
-				'options' => Ad_Layers_Ad_Server::get_ad_units(),
+				'options' => Ad_Layers_Ad_Server::get_ad_slots(),
 			)
 		);
-		$fm_ad_units->add_meta_box( __( 'Ad Units', 'ad-layers' ), self::$post_type, 'normal', 'high' );
+		$fm_ad_slots->add_meta_box( __( 'Ad Slots', 'ad-layers' ), self::$post_type, 'normal', 'high' );
 		
 		// Add taxonomies
 		$fm_taxonomies = new Fieldmanager_Select(

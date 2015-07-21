@@ -21,11 +21,11 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	}
 	
 	/**
-	 * Gets available ad units
+	 * Gets available ad slots
 	 * @access public
 	 * @static
 	 */
-	public static function get_ad_units() {
+	public static function get_ad_slots() {
 		return array(
 			'leaderboard' => __( 'Leaderboard', 'ad-layers' ),
 			'rectangle' => __( 'Rectangle', 'ad-layers' ),
