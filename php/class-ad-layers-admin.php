@@ -16,21 +16,36 @@ class Ad_Layers_Admin extends Ad_Layers_Singleton {
 	 * Setup the singleton.
 	 */
 	public function setup() {
-		// Register the ad layer priority settings page
-		add_action( 'init', array( $this, 'add_priority_page' ) );
+		// Register the ad layer settings pages
+		add_action( 'init', array( $this, 'add_settings_pages' ) );
 		
-		// Register the ad layer custom variables page
+		// Load admin-only JS and CSS
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+	}
+	
+	/**
+	 * Load scripts.
+	 * @access public
+	 */
+	public function enqueue_scripts() {
+		// Load the CSS to customize some Fieldmanager features
+		$current_screen = get_current_screen();
+		if ( 'ad-layer_page_ad_layers' == $current_screen->base ) {
+			wp_enqueue_style( 'ad-layers-admin-css', AD_LAYERS_ASSETS_DIR . '/css/ad-layers-admin.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
+		}
 	}
 	
 	/**
 	 * Add the ad layer priority management page
 	 */
-	public function add_priority_page() {
+	public function add_settings_pages() {
 		$fm_priority = new Fieldmanager_Group( array(
 			'name' => 'ad_layers',
 			'sortable' => true,
 			'collapsible' => true,
 			'collapsed' => true,
+			'limit' => 0,
+			'extra_elements' => 0,
 			'label' => __( 'Ad Layer', 'ad-layers' ),
 			'label_macro' => array( __( '%s', 'ad-layers' ), 'title' ),
 			'children' => array(
@@ -43,53 +58,19 @@ class Ad_Layers_Admin extends Ad_Layers_Singleton {
 						),
 					)
 				),
-				'ad_units' => new Fieldmanager_Select(
-					array(
-						'label' => __( 'Ad Units', 'ad-layers' ),
-						'multiple' => true,
-						'attributes' => array(
-							'readonly' => 'readonly',
-						),
-					)
-				),
 			)
 		) );
 		$fm_priority->add_submenu_page( 'edit.php?post_type=ad-layer', __( 'Layer Priority', 'ad-layers' ) );
-	}
-	
-	/**
-	 * Add the ad layer priority management page
-	 */
-	public function add_priority_page() {
-		$fm_priority = new Fieldmanager_Group( array(
-			'name' => 'ad_layers_priority',
-			'sortable' => true,
-			'collapsible' => true,
-			'collapsed' => true,
-			'label' => __( 'Ad Layer', 'ad-layers' ),
-			'label_macro' => array( __( '%s', 'ad-layers' ), 'title' ),
-			'children' => array(
-				'post_id' => new Fieldmanager_Hidden(),
-				'title' => new Fieldmanager_Textfield(
-					array(
-						'label' => __( 'Title', 'ad-layers' ),
-						'attributes' => array(
-							'readonly' => 'readonly',
-						),
-					)
-				),
-				'ad_units' => new Fieldmanager_Select(
-					array(
-						'label' => __( 'Ad Units', 'ad-layers' ),
-						'multiple' => true,
-						'attributes' => array(
-							'readonly' => 'readonly',
-						),
-					)
-				),
-			)
+		
+		$fm_custom = new Fieldmanager_Textfield( array(
+			'name' => 'ad_layers_custom_variables',
+			'limit' => 0,
+			'extra_elements' => 0,
+			'one_label_per_item' => false,
+			'label' => __( 'Add one or more custom variables for targeting.', 'ad-layers' ),
+			'add_more_label' =>  __( 'Add a custom variable', 'ad-layers' ),
 		) );
-		$fm_priority->add_submenu_page( 'edit.php?post_type=ad-layer', __( 'Layer Priority', 'ad-layers' ) );
+		$fm_custom->add_submenu_page( 'edit.php?post_type=ad-layer', __( 'Custom Variables', 'ad-layers' ) );
 	}
 }
 

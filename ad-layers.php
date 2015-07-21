@@ -46,6 +46,13 @@ define( 'AD_LAYERS_VERSION', '0.0.1' );
 define( 'AD_LAYERS_BASE_DIR', dirname( __FILE__ ) );
 
 /**
+ * Asset path to Ad Layers.
+ *
+ * @var string
+ */
+define( 'AD_LAYERS_ASSETS_DIR', plugin_dir_url( __FILE__ ) );
+
+/**
  * Default version number for static assets.
  *
  * @var int

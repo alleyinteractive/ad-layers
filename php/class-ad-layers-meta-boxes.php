@@ -47,7 +47,7 @@ class Ad_Layers_Meta_Boxes extends Ad_Layers_Singleton {
 				'description' => __( 'Select a specific custom ad layer to use with this post.', 'ad-layers' ),
 				'datasource' => new Fieldmanager_Datasource_Post( array(
 					'query_args' => array(
-						'post_type' => array( Ad_Layers_Post_Type::$post_type ),
+						'post_type' => array( Ad_Layers_Post_Type::get_post_type() ),
 						'post_status' => 'publish',
 						'order_by' => 'title',
 					),
