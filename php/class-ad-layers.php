@@ -16,15 +16,6 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 class Ad_Layers extends Ad_Layers_Singleton {
 	
 	/**
-	 * Built-in ad server support
-	 *
-	 * @access public
-	 * @static
-	 * @var Ad_Layers
-	 */
-	public static $ad_servers;
-	
-	/**
 	 * Current ad layers
 	 *
 	 * @access public
@@ -48,21 +39,8 @@ class Ad_Layers extends Ad_Layers_Singleton {
 	 */
 	public function setup() {
 		// Load current settings
-		self::$ad_layers = get_option( 'ad_layers' );
-		self::$custom_variables = get_option( 'ad_layers_custom_variables' );
-	
-		// Allow additional ad servers to be loaded via filter within a theme
-		$this->ad_servers = apply_filters( 'ad_layers_ad_servers', array(
-			'DFP' => AD_LAYERS_BASE_DIR . '/php/ad-servers/class-dfp.php',
-		) );
-		
-		if ( ! empty( $this->ad_servers ) && is_array( $this->ad_servers ) ) {
-			foreach ( $this->ad_servers as $ad_server ) {
-				if ( file_exists( $ad_server ) ) {
-					require_once( $ad_server );
-				}
-			}
-		}
+		self::$ad_layers = apply_filters( 'ad_layers', get_option( 'ad_layers' ) );
+		self::$custom_variables = apply_filters( 'ad_layers_custom_variables', get_option( 'ad_layers_custom_variables' ) );
 		
 		// Load the base Javascript library early
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 5 );
@@ -75,13 +53,6 @@ class Ad_Layers extends Ad_Layers_Singleton {
 	public function enqueue_scripts() {
 		// Load the base Javascript library
 		wp_enqueue_script( 'ad-layers-js', AD_LAYERS_ASSETS_DIR . '/js/ad-layers.js', array( 'jquery' ), AD_LAYERS_GLOBAL_ASSET_VERSION, false );
-		
-		// If set, localize with the active ad server
-		if ( ! empty( $this->settings['ad_server'] ) ) {
-			wp_localize_script( 'ad-layers-js', 'ad-layers', array(
-				'ad_server' => $this->settings['ad_server'],
-			) );
-		}
 		
 		// Load the CSS. Mostly used in debug mode.
 		wp_enqueue_style( 'ad-layers-css', AD_LAYERS_ASSETS_DIR . '/css/ad-layers.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
@@ -116,17 +87,6 @@ class Ad_Layers extends Ad_Layers_Singleton {
 	 * @static
 	 * @return array
 	 */
-	public static function get_ad_servers() {
-		return self::$ad_servers;
-	}
-	
-	/**
-	 * Get current ad layers in priority order
-	 *
-	 * @access public
-	 * @static
-	 * @return array
-	 */
 	public static function get_ad_layers() {
 		return self::$ad_layers;
 	}
@@ -140,6 +100,17 @@ class Ad_Layers extends Ad_Layers_Singleton {
 	 */
 	public static function get_custom_variables() {
 		return self::$custom_variables;
+	}
+	
+	/**
+	 * Get current custom targeting variables
+	 *
+	 * @access public
+	 * @static
+	 * @return array
+	 */
+	public static function get_edit_link() {
+		return 'edit.php?post_type=' . Ad_Layers_Post_Type::$post_type;
 	}
 	
 	/**
