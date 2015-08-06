@@ -31,6 +31,15 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	public static $settings;
 	
 	/**
+	 * Page types available for targeting
+	 *
+	 * @access public
+	 * @static
+	 * @var array
+	 */
+	public static $page_types;
+	
+	/**
 	 * Option name for ad settings
 	 *
 	 * @access public
@@ -52,16 +61,18 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * @access public
 	 */
 	public function setup() {
-		// Load current settings
-		self::$settings = apply_filters( $option_name, get_option( self::$option_name, array() ) );
-	
 		// Register the ad server settings page
 		add_action( 'init', array( $this, 'add_settings_page' ) );
-		add_action( 'load-settings_page_' . self::$option_name, array( $this, 'add_help_tab' ) );
 		
 		// Add the required header and footer setup. May differ for each server.
 		add_action( 'wp_head', array( $this, 'header_setup' ) );
 		add_action( 'wp_footer', array( $this, 'footer_setup' ) );
+		
+		// Load current settings
+		self::$settings = apply_filters( 'ad_layers_ad_server_settings', get_option( self::$option_name, array() ) );
+		
+		// Set the page types available to all ad servers
+		self::$ad_servers = apply_filters( 'ad_layers_ad_server_page_types', self::get_page_types() );
 		
 		// Allow additional ad servers to be loaded via filter within a theme
 		self::$ad_servers = apply_filters( 'ad_layers_ad_servers', array(
@@ -124,6 +135,88 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 			'leaderboard' => __( 'Leaderboard', 'ad-layers' ),
 			'rectangle' => __( 'Rectangle', 'ad-layers' ),
 		);
+	}
+	
+	/**
+	 * Get the code for a specific ad slot.
+	 * Should be implemented by all child classes.
+	 * Since $ad_server will be empty for child classes,
+	 * this will automatically do nothing if they choose not to implement it.
+	 * @access public
+	 */
+	public function get_ad_slot( $ad_slot ) {
+		if ( ! empty( $this->ad_server ) ) {
+			$this->ad_server->get_ad_slot( $ad_slot );
+		}
+	}
+	
+	/**
+	 * Get the available page types for all ad servers.
+	 * These are especially used by path targeting.
+	 * @access public
+	 * @static
+	 * @return array
+	 */
+	public static function get_page_types() {
+		if ( ! empty( self::$page_types ) ) {
+			return self::$page_types;
+		}
+		
+		// Build the page types.
+		// First add global types.
+		$page_types = array(
+			'home' => __( 'Home Page', 'ad-layers' ),
+		);
+		
+		// Add single post types
+		$single_post_types = apply_filters( 'ad_layers_ad_server_single_post_types', wp_list_filter( get_post_types( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+		if ( ! empty( $single_post_types ) ) {
+			foreach ( $single_post_types as $post_type ) {
+				if ( Ad_Layers_Post_Type::get_post_type() != $post_type->name ) {
+					$page_types[ $post_type->name ] = $post_type->label;
+				}
+			}
+		}
+
+		// Add archived post types
+		$archived_post_types = apply_filters( 'ad_layers_ad_server_archived_post_types', wp_list_filter( get_post_types( array( 'has_archive' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+		if ( ! empty( $archived_post_types ) ) {
+			foreach ( $archived_post_types as $post_type ) {
+				$page_types[ $post_type->name ] = $post_type->label . __( ' Archive', 'ad-layers' );
+			}
+		}
+
+		// Add taxonomies
+		$taxonomies = apply_filters( 'ad_layers_ad_server_taxonomies', wp_list_filter( get_taxonomies( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+		if ( ! empty( $taxonomies ) ) {
+			foreach ( $taxonomies as $taxonomy ) {
+				$page_types[ $taxonomy->name ] = $taxonomy->label . __( ' Archive', 'ad-layers' );
+			}
+		}
+		
+		// Add some other templates at the bottom
+		$page_types = array_merge( $page_types, array(
+			'author' => __( 'Author Archive', 'ad-layers' ),
+			'date' => __ ( 'Date Archive', 'ad-layers' ),
+			'404' => __( '404 Page', 'ad-layers' ),
+			'search' => __( 'Search Results', 'ad-layers' ),
+			'default' => __( 'Default', 'ad-layers' ),
+		) );
+		
+		return $page_types;
+	}
+	
+	/**
+	 * Gets a particular ad server setting or all settings if none is specified.
+	 * @access public
+	 * @return mixed
+	 */
+	public function get_setting( $key = '' ) {
+		if ( empty( $key ) ) {
+			return self::$settings;
+		}
+		
+		return ( ! empty( self::$settings[ $key ] ) ) ? self::$settings[ $key ] : null;
 	}
 	
 	/**

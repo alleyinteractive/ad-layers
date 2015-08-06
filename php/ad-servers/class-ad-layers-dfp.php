@@ -35,6 +35,9 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	public function setup() {
 		// Define the available formatting tags
 		$this->formatting_tags = apply_filters( 'ad_layers_dfp_formatting_tags', $this->set_formatting_tags() );
+		
+		// Add a help tab
+		add_action( 'load-' . Ad_Layers_Post_Type::get_post_type() . '_page_' . self::$option_name, array( $this, 'add_help_tab' ) );
 	}
 	
 	/**
@@ -56,9 +59,21 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	public function set_formatting_tags() {
 		// Set the base options
 		$formatting_tags = array(
-			'#account_id#' => __( 'Your DFP account ID', 'dfp' ),
-			'#ad_unit#' => __( 'The ad unit name', 'dfp' ),
+			'#account_id#' => __( 'Your DFP account ID', 'ad-layers' ),
+			'#domain#' => __( 'The domain of the current site, taken from home_url', 'ad-layers' ),
+			'#ad_unit#' => __( 'The ad unit name', 'ad-layers' ),
+			'#post_type#' => __( 'The post type of the current page, if applicable', 'ad-layers' ),
 		);
+		
+		// Add all registered taxonomies as an option since these are commonly used
+		$taxonomies = Ad_Layers::get_taxonomies();
+		if ( ! empty( $taxonomies ) ) {
+			foreach ( $taxonomies as $taxonomy_name => $taxonomy_label ) {
+				$formatting_tags[ '#' . $taxonomy_name . '#' ] = sprintf( __( 'The current term from the %s taxonomy, if applicable. If the taxonomy is hierarchical, each term in the hierarchy above the current term will be added to the path.', 'ad-layers' ), $taxonomy_label );
+			}
+		}
+		
+		return $formatting_tags;
 	}
 	
 	/**
@@ -123,11 +138,27 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 					'label' => __( 'DFP Account ID', 'ad-layers' ),
 				)
 			),
-			'path_template' => new Fieldmanager_Textfield(
-				array(
-					'label' => __( 'Path Template', 'ad-layers' ),
-				)
-			),
+			'path_templates' => new Fieldmanager_Group( array(
+				'collapsible' => true,
+				'limit' => 0,
+				'extra_elements' => 0,
+				'label' => __( 'Path Templates', 'ad-layers' ),
+				'add_more_label' => __( 'Add Path Template', 'ad-layers' ),
+				'children' => array(
+					'path_template' => new Fieldmanager_Textfield(
+						array(
+							'label' => __( 'Path Template', 'ad-layers' ),
+							'description' => __( 'See the Help tab above for formatting tags', 'ad-layers' ),
+						)
+					),
+					'page_type' => new Fieldmanager_Select(
+						array(
+							'label' => __( 'Page Type', 'ad-layers' ),
+							'options' => $this->get_page_types(),
+						)
+					),
+				),
+			) ),
 			'ad_setup' => new Fieldmanager_Group( array(
 				'collapsible' => true,
 				'limit' => 0,
@@ -218,7 +249,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 */
 	public function add_help_tab() {
 		get_current_screen()->add_help_tab( array(
-			'id'       => 'ad-layers-dfp-setup-help',
+			'id'       => 'dfp-setup-help',
 			'title'    => __( 'DFP Setup Help', 'wp-seo' ),
 			'callback' => array( $this, 'formatting_tags_help_tab' ),
 		) );
@@ -230,16 +261,16 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * The tab displays a table of each available formatting tab and any
 	 * provided description.
 	 */
-	public function view_formatting_tags_help_tab() {
+	public function formatting_tags_help_tab() {
 		if ( ! empty( $this->formatting_tags ) ) :
 			?>
 			<aside>
-				<h1><?php esc_html_e( 'The following formatting tags are available for use in creating the path structure:', 'wp-seo' ); ?></h1>
+				<h2><?php esc_html_e( 'The following formatting tags are available for the path template:', 'wp-seo' ); ?></h2>
 				<dl class="formatting-tags">
-					<?php foreach( $formatting_tags as $tag ) : ?>
+					<?php foreach( $this->formatting_tags as $tag => $description ) : ?>
 						<div class="formatting-tag-wrapper">
-							<dt class="formatting-tag-name"><?php echo esc_html( $tag->tag ); ?></dt>
-							<dd class="formatting-tag-description"><?php echo esc_html( $tag->get_description() ); ?></dd>
+							<dt class="formatting-tag-name"><?php echo esc_html( $tag ); ?></dt>
+							<dd class="formatting-tag-description"><?php echo esc_html( $description ); ?></dd>
 						</div><!-- .formatting-tag-wrapper -->
 					<?php endforeach; ?>
 				</dl>
