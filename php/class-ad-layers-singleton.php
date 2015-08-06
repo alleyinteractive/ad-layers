@@ -19,7 +19,7 @@ abstract class Ad_Layers_Singleton {
 	 */
 	private static $instances;
 	
-	private function __construct() {
+	protected function __construct() {
 		/* Don't do anything, needs to be initialized via instance() method */
 	}
 

@@ -13,7 +13,7 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 
 	/**
-	 * Built-in ad server support
+	 * All available ad servers
 	 *
 	 * @access public
 	 * @static
@@ -29,6 +29,14 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * @var array
 	 */
 	public static $settings;
+	
+	/**
+	 * Instance of the current ad server class
+	 *
+	 * @access public
+	 * @var mixed
+	 */
+	public $ad_server;
 
 	/**
 	 * Setup the singleton.
@@ -47,16 +55,21 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		
 		// Allow additional ad servers to be loaded via filter within a theme
 		self::$ad_servers = apply_filters( 'ad_layers_ad_servers', array(
-			'dfp' => AD_LAYERS_BASE_DIR . '/php/ad-servers/class-ad-layers-dfp.php',
+			'Ad_Layers_DFP' => AD_LAYERS_BASE_DIR . '/php/ad-servers/class-ad-layers-dfp.php',
 		) );
 		
 		// Load ad server classes
-		if ( ! empty( $this->ad_servers ) && is_array( $this->ad_servers ) ) {
-			foreach ( $this->ad_servers as $ad_server ) {
+		if ( ! empty( self::$ad_servers ) && is_array( self::$ad_servers ) ) {
+			foreach ( self::$ad_servers as $ad_server ) {
 				if ( file_exists( $ad_server ) ) {
 					require_once( $ad_server );
 				}
 			}
+		}
+		
+		// Set the current ad server class, if defined.
+		if ( ! empty( self::$settings['ad_server'] ) && class_exists( self::$settings['ad_server'] ) ) {
+			$this->ad_server = new self::$settings['ad_server'];
 		}
 	}
 	
@@ -89,8 +102,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 */
 	public function add_settings_page( $args = array() ) {
 		// Provide basic ad server selection.
-		// Child classes can add additional functionality.
-		$fm_ad_servers = new Fieldmanager_Group( array(
+		$args = array(
 			'name' => 'ad_layers_ad_server_settings',
 			'label' => __( 'Ad Server Settings', 'ad-layers' ),
 			'children' => array(
@@ -98,30 +110,64 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 					array(
 						'label' => __( 'Ad Server', 'ad-layers' ),
 						'options' => array_keys( self::$ad_servers ),
+						'first_empty' => true,
 					)
 				),
 			)
-		) );
+		);
+		
+		// Child classes can add additional functionality.
+		$args['children'] = array_merge( $args['children'], $this->get_settings_fields() );
+		
+		$fm_ad_servers = new Fieldmanager_Group( $args );
 		$fm_ad_servers->add_submenu_page( Ad_Layers::get_edit_link(), __( 'Ad Server Settings', 'ad-layers' ) );
 	}
 	
 	/**
 	 * Handle ad server header setup code.
-	 * Should be implemented by all child classes.
+	 * Should be implemented by all child classes, if needed.
+	 * Since $ad_server will be empty for child classes,
+	 * this will automatically do nothing if they choose not to implement it.
 	 * @access public
-	 * @static
-	 * @return array
 	 */
-	public function header_setup() {}
+	public function header_setup() {
+		if ( ! empty( $this->ad_server ) ) {
+			$this->ad_server->header_setup();
+		}
+	}
 	
 	/**
 	 * Handle ad server header setup code.
+	 * Should be implemented by all child classes, if needed.
+	 * Since $ad_server will be empty for child classes,
+	 * this will automatically do nothing if they choose not to implement it.
+	 * @access public
+	 */
+	public function footer_setup() {
+		if ( ! empty( $this->ad_server ) ) {
+			$this->ad_server->header_setup();
+		}
+	}
+	
+	/**
+	 * Returns the ad server display label.
 	 * Should be implemented by all child classes.
 	 * @access public
-	 * @static
+	 * @return string
+	 */
+	public function get_display_label() {
+		return ( ! empty( $this->ad_server ) ) ? $this->ad_server->get_display_label() : '';
+	}
+	
+	/**
+	 * Returns the ad server settings fields to merge into the ad settings page.
+	 * Should be implemented by all child classes.
+	 * @access public
 	 * @return array
 	 */
-	public function footer_setup() {}
+	public function get_settings_fields() {
+		return ( ! empty( $this->ad_server ) ) ? $this->ad_server->get_settings_fields() : array();
+	}
 }
 
 Ad_Layers_Ad_Server::instance();
