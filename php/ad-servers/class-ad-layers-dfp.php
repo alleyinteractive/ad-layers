@@ -19,14 +19,46 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * @static
 	 * @var array
 	 */
-	public static $display_name = 'DoubleClick for Publishers (DFP)';
-
+	public static $display_label = 'DoubleClick for Publishers (DFP)';
+	
+	/**
+	 * Formatting tags
+	 *
+	 * @access public
+	 * @var array
+	 */
+	public $formatting_tags;
 
 	/**
 	 * Setup the singleton.
 	 */
 	public function setup() {
-		
+		// Define the available formatting tags
+		$this->formatting_tags = apply_filters( 'ad_layers_dfp_formatting_tags', $this->set_formatting_tags() );
+	}
+	
+	/**
+	 * Returns the ad server display label.
+	 * Should be implemented by all child classes.
+	 * @access public
+	 * @return array
+	 */
+	public function get_display_label() {
+		return self::$display_label;
+	}
+	
+	/**
+	 * Set the available formatting tags
+	 * Should be implemented by all child classes.
+	 * @access public
+	 * @return array
+	 */
+	public function set_formatting_tags() {
+		// Set the base options
+		$formatting_tags = array(
+			'#account_id#' => __( 'Your DFP account ID', 'dfp' ),
+			'#ad_unit#' => __( 'The ad unit name', 'dfp' ),
+		);
 	}
 	
 	/**
@@ -79,16 +111,6 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	}
 	
 	/**
-	 * Returns the ad server display label.
-	 * Should be implemented by all child classes.
-	 * @access public
-	 * @return array
-	 */
-	public function get_display_label() {
-		return self::$display_label;
-	}
-	
-	/**
 	 * Returns the ad server settings fields to merge into the ad settings page.
 	 * Should be implemented by all child classes.
 	 * @access public
@@ -96,6 +118,11 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 */
 	public function get_settings_fields() {
 		return array(
+			'account_id' => new Fieldmanager_Textfield(
+				array(
+					'label' => __( 'DFP Account ID', 'ad-layers' ),
+				)
+			),
 			'path_template' => new Fieldmanager_Textfield(
 				array(
 					'label' => __( 'Path Template', 'ad-layers' ),
@@ -134,7 +161,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 						'children' => array(
 							'code' => new Fieldmanager_Textfield(
 								array(
-									'label' => __( 'code', 'ad-layers' ),
+									'label' => __( 'Code', 'ad-layers' ),
 								)
 							),
 							'sizes' => new Fieldmanager_Group( array(
@@ -183,6 +210,42 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		/*if ( ! empty( $targeting_js ) ) {
 			echo 'googletag.pubads()' . $targeting_js . ";\n";
 		}*/
+	}
+	
+	/**
+	 * Add tabs to the help menu on the plugin options page.
+	 * @access public
+	 */
+	public function add_help_tab() {
+		get_current_screen()->add_help_tab( array(
+			'id'       => 'ad-layers-dfp-setup-help',
+			'title'    => __( 'DFP Setup Help', 'wp-seo' ),
+			'callback' => array( $this, 'formatting_tags_help_tab' ),
+		) );
+	}
+	
+	/**
+	 * Render the content of the "Formatting Tags" help tab.
+	 *
+	 * The tab displays a table of each available formatting tab and any
+	 * provided description.
+	 */
+	public function view_formatting_tags_help_tab() {
+		if ( ! empty( $this->formatting_tags ) ) :
+			?>
+			<aside>
+				<h1><?php esc_html_e( 'The following formatting tags are available for use in creating the path structure:', 'wp-seo' ); ?></h1>
+				<dl class="formatting-tags">
+					<?php foreach( $formatting_tags as $tag ) : ?>
+						<div class="formatting-tag-wrapper">
+							<dt class="formatting-tag-name"><?php echo esc_html( $tag->tag ); ?></dt>
+							<dd class="formatting-tag-description"><?php echo esc_html( $tag->get_description() ); ?></dd>
+						</div><!-- .formatting-tag-wrapper -->
+					<?php endforeach; ?>
+				</dl>
+			</aside>
+			<?php
+		endif;
 	}
 }
 

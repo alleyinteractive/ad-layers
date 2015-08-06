@@ -31,6 +31,15 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	public static $settings;
 	
 	/**
+	 * Option name for ad settings
+	 *
+	 * @access public
+	 * @static
+	 * @var array
+	 */
+	public static $option_name = 'ad_layers_ad_server_settings';
+	
+	/**
 	 * Instance of the current ad server class
 	 *
 	 * @access public
@@ -44,10 +53,11 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 */
 	public function setup() {
 		// Load current settings
-		self::$settings = apply_filters( 'ad_layers_ad_server_settings', get_option( 'ad_layers_ad_server_settings', array() ) );
+		self::$settings = apply_filters( $option_name, get_option( self::$option_name, array() ) );
 	
 		// Register the ad server settings page
 		add_action( 'init', array( $this, 'add_settings_page' ) );
+		add_action( 'load-settings_page_' . self::$option_name, array( $this, 'add_help_tab' ) );
 		
 		// Add the required header and footer setup. May differ for each server.
 		add_action( 'wp_head', array( $this, 'header_setup' ) );
@@ -84,6 +94,26 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	}
 	
 	/**
+	 * Get current available ad servers for use in an option list.
+	 * @access public
+	 * @static
+	 * @return array
+	 */
+	public static function get_ad_server_options() {
+		$options = array();
+		
+		if ( ! empty( self::$ad_servers ) ) {
+			foreach ( array_keys( self::$ad_servers ) as $ad_server ) {
+				if ( class_exists( $ad_server ) ) {
+					$options[ $ad_server ] = $ad_server::get_display_label();
+				}
+			}
+		}
+		
+		return $options;
+	}
+	
+	/**
 	 * Gets available ad slots.
 	 * TODO - MAKE REAL
 	 * @access public
@@ -103,13 +133,13 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	public function add_settings_page( $args = array() ) {
 		// Provide basic ad server selection.
 		$args = array(
-			'name' => 'ad_layers_ad_server_settings',
+			'name' => self::$option_name,
 			'label' => __( 'Ad Server Settings', 'ad-layers' ),
 			'children' => array(
 				'ad_server' => new Fieldmanager_Select(
 					array(
 						'label' => __( 'Ad Server', 'ad-layers' ),
-						'options' => array_keys( self::$ad_servers ),
+						'options' => self::get_ad_server_options(),
 						'first_empty' => true,
 					)
 				),
@@ -145,7 +175,20 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 */
 	public function footer_setup() {
 		if ( ! empty( $this->ad_server ) ) {
-			$this->ad_server->header_setup();
+			$this->ad_server->footer_setup();
+		}
+	}
+	
+	/**
+	 * Handle adding a help tab for the current ad server.
+	 * Should be implemented by all child classes, if needed.
+	 * Since $ad_server will be empty for child classes,
+	 * this will automatically do nothing if they choose not to implement it.
+	 * @access public
+	 */
+	public function add_help_tab() {
+		if ( ! empty( $this->ad_server ) ) {
+			$this->ad_server->add_help_tab();
 		}
 	}
 	
