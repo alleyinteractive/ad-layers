@@ -24,9 +24,10 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * Current ad server settings
 	 *
 	 * @access public
+	 * @static
 	 * @var array
 	 */
-	public $settings;
+	public static $settings;
 	
 	/**
 	 * Page types available for targeting
@@ -65,7 +66,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		add_action( 'wp_footer', array( $this, 'footer_setup' ) );
 		
 		// Load current settings
-		$this->settings = apply_filters( 'ad_layers_ad_server_settings', get_option( $this->option_name, array() ) );
+		self::$settings = apply_filters( 'ad_layers_ad_server_settings', get_option( $this->option_name, array() ) );
 		
 		// Set the page types available to all ad servers
 		$this->ad_servers = apply_filters( 'ad_layers_ad_server_page_types', $this->get_page_types() );
@@ -85,8 +86,8 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		}
 		
 		// Set the current ad server class, if defined.
-		if ( ! empty( $this->settings['ad_server'] ) && class_exists( $this->settings['ad_server'] ) ) {
-			$this->ad_server = new $this->settings['ad_server'];
+		if ( ! empty( self::$settings['ad_server'] ) && class_exists( self::$settings['ad_server'] ) ) {
+			$this->ad_server = new self::$settings['ad_server'];
 		}
 	}
 	
@@ -204,10 +205,10 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 */
 	public function get_setting( $key = '' ) {
 		if ( empty( $key ) ) {
-			return $this->settings;
+			return self::$settings;
 		}
 		
-		return ( ! empty( $this->settings[ $key ] ) ) ? $this->settings[ $key ] : null;
+		return ( ! empty( self::$settings[ $key ] ) ) ? self::$settings[ $key ] : null;
 	}
 	
 	/**

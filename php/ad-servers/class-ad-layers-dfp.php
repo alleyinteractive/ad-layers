@@ -248,7 +248,20 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 */
 	public function get_ad_slots() {
 		$ad_slots = array();
-		// TODO
+		$ad_setup = $this->get_setting( 'ad_setup' );
+		if ( ! empty( $ad_setup ) ) {
+			foreach ( $ad_setup as $breakpoint ) {
+				if ( ! empty( $breakpoint['ad_units'] ) ) {
+					foreach ( $breakpoint['ad_units'] as $ad_unit ) {
+						if ( ! empty( $ad_unit['code'] ) ) {	
+							$ad_slots[] = $ad_unit['code'];
+						}
+					}
+				}
+			}
+			$ad_slots = array_unique( $ad_slots );
+			sort( $ad_slots );
+		}
 		return $ad_slots;
 	}
 	
