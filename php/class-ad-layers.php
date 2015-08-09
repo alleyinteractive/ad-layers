@@ -19,19 +19,17 @@ class Ad_Layers extends Ad_Layers_Singleton {
 	 * Current ad layers
 	 *
 	 * @access public
-	 * @static
 	 * @var string
 	 */
-	public static $ad_layers;
+	public $ad_layers;
 	
 	/**
 	 * Available custom targeting variables
 	 *
 	 * @access public
-	 * @static
 	 * @var string
 	 */
-	public static $custom_variables;
+	public $custom_variables;
 	
 	/**
 	 * Setup the singleton.
@@ -39,8 +37,8 @@ class Ad_Layers extends Ad_Layers_Singleton {
 	 */
 	public function setup() {
 		// Load current settings
-		self::$ad_layers = apply_filters( 'ad_layers', get_option( 'ad_layers' ) );
-		self::$custom_variables = apply_filters( 'ad_layers_custom_variables', get_option( 'ad_layers_custom_variables' ) );
+		$this->ad_layers = apply_filters( 'ad_layers', get_option( 'ad_layers' ) );
+		$this->custom_variables = apply_filters( 'ad_layers_custom_variables', get_option( 'ad_layers_custom_variables' ) );
 		
 		// Load the base Javascript library early
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 5 );
@@ -62,55 +60,50 @@ class Ad_Layers extends Ad_Layers_Singleton {
 	 * Get taxonomies that can be used for targeting.
 	 *
 	 * @access public
-	 * @static
 	 * @return array Taxonomy names as keys, display labels as values
 	 */
-	public static function get_taxonomies() {
-		return self::get_objects( 'taxonomies' );
+	public function get_taxonomies() {
+		return $this->get_objects( 'taxonomies' );
 	}
 	
 	/**
 	 * Get post types that can be used for targeting.
 	 *
 	 * @access public
-	 * @static
 	 * @return array Post type names as keys, display labels as values
 	 */
-	public static function get_post_types() {
-		return self::get_objects( 'post_types' );
+	public function get_post_types() {
+		return $this->get_objects( 'post_types' );
 	}
 	
 	/**
 	 * Get current ad layers in priority order
 	 *
 	 * @access public
-	 * @static
 	 * @return array
 	 */
-	public static function get_ad_layers() {
-		return self::$ad_layers;
+	public function get_ad_layers() {
+		return $this->ad_layers;
 	}
 	
 	/**
 	 * Get current custom targeting variables
 	 *
 	 * @access public
-	 * @static
 	 * @return array
 	 */
-	public static function get_custom_variables() {
-		return self::$custom_variables;
+	public function get_custom_variables() {
+		return $this->custom_variables;
 	}
 	
 	/**
 	 * Get current custom targeting variables
 	 *
 	 * @access public
-	 * @static
 	 * @return array
 	 */
-	public static function get_edit_link() {
-		return 'edit.php?post_type=' . Ad_Layers_Post_Type::$post_type;
+	public function get_edit_link() {
+		return 'edit.php?post_type=' . Ad_Layers_Post_Type::instance()->get_post_type();
 	}
 	
 	/**

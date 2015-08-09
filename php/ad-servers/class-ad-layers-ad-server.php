@@ -16,37 +16,33 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * All available ad servers
 	 *
 	 * @access public
-	 * @static
 	 * @var array
 	 */
-	public static $ad_servers;
+	public $ad_servers;
 	
 	/**
 	 * Current ad server settings
 	 *
 	 * @access public
-	 * @static
 	 * @var array
 	 */
-	public static $settings;
+	public $settings;
 	
 	/**
 	 * Page types available for targeting
 	 *
 	 * @access public
-	 * @static
 	 * @var array
 	 */
-	public static $page_types;
+	public $page_types;
 	
 	/**
 	 * Option name for ad settings
 	 *
 	 * @access public
-	 * @static
 	 * @var array
 	 */
-	public static $option_name = 'ad_layers_ad_server_settings';
+	public $option_name = 'ad_layers_ad_server_settings';
 	
 	/**
 	 * Instance of the current ad server class
@@ -69,19 +65,19 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		add_action( 'wp_footer', array( $this, 'footer_setup' ) );
 		
 		// Load current settings
-		self::$settings = apply_filters( 'ad_layers_ad_server_settings', get_option( self::$option_name, array() ) );
+		$this->settings = apply_filters( 'ad_layers_ad_server_settings', get_option( $this->option_name, array() ) );
 		
 		// Set the page types available to all ad servers
-		self::$ad_servers = apply_filters( 'ad_layers_ad_server_page_types', self::get_page_types() );
+		$this->ad_servers = apply_filters( 'ad_layers_ad_server_page_types', $this->get_page_types() );
 		
 		// Allow additional ad servers to be loaded via filter within a theme
-		self::$ad_servers = apply_filters( 'ad_layers_ad_servers', array(
+		$this->ad_servers = apply_filters( 'ad_layers_ad_servers', array(
 			'Ad_Layers_DFP' => AD_LAYERS_BASE_DIR . '/php/ad-servers/class-ad-layers-dfp.php',
 		) );
 		
 		// Load ad server classes
-		if ( ! empty( self::$ad_servers ) && is_array( self::$ad_servers ) ) {
-			foreach ( self::$ad_servers as $ad_server ) {
+		if ( ! empty( $this->ad_servers ) && is_array( $this->ad_servers ) ) {
+			foreach ( $this->ad_servers as $ad_server ) {
 				if ( file_exists( $ad_server ) ) {
 					require_once( $ad_server );
 				}
@@ -89,34 +85,32 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		}
 		
 		// Set the current ad server class, if defined.
-		if ( ! empty( self::$settings['ad_server'] ) && class_exists( self::$settings['ad_server'] ) ) {
-			$this->ad_server = new self::$settings['ad_server'];
+		if ( ! empty( $this->settings['ad_server'] ) && class_exists( $this->settings['ad_server'] ) ) {
+			$this->ad_server = new $this->settings['ad_server'];
 		}
 	}
 	
 	/**
 	 * Get current available ad servers.
 	 * @access public
-	 * @static
 	 * @return array
 	 */
-	public static function get_ad_servers() {
-		return self::$ad_servers;
+	public function get_ad_servers() {
+		return $this->ad_servers;
 	}
 	
 	/**
 	 * Get current available ad servers for use in an option list.
 	 * @access public
-	 * @static
 	 * @return array
 	 */
-	public static function get_ad_server_options() {
+	public function get_ad_server_options() {
 		$options = array();
 		
-		if ( ! empty( self::$ad_servers ) ) {
-			foreach ( array_keys( self::$ad_servers ) as $ad_server ) {
+		if ( ! empty( $this->ad_servers ) ) {
+			foreach ( array_keys( $this->ad_servers ) as $ad_server ) {
 				if ( class_exists( $ad_server ) ) {
-					$options[ $ad_server ] = $ad_server::get_display_label();
+					$options[ $ad_server ] = $ad_server::instance()->get_display_label();
 				}
 			}
 		}
@@ -126,15 +120,13 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	
 	/**
 	 * Gets available ad slots.
-	 * TODO - MAKE REAL
 	 * @access public
-	 * @static
+	 * @return array
 	 */
-	public static function get_ad_slots() {
-		return array(
-			'leaderboard' => __( 'Leaderboard', 'ad-layers' ),
-			'rectangle' => __( 'Rectangle', 'ad-layers' ),
-		);
+	public function get_ad_slots() {
+		if ( ! empty( $this->ad_server ) ) {
+			return $this->ad_server->get_ad_slots( $ad_slot );
+		}
 	}
 	
 	/**
@@ -154,12 +146,11 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * Get the available page types for all ad servers.
 	 * These are especially used by path targeting.
 	 * @access public
-	 * @static
 	 * @return array
 	 */
-	public static function get_page_types() {
-		if ( ! empty( self::$page_types ) ) {
-			return self::$page_types;
+	public function get_page_types() {
+		if ( ! empty( $this->page_types ) ) {
+			return $this->page_types;
 		}
 		
 		// Build the page types.
@@ -172,7 +163,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		$single_post_types = apply_filters( 'ad_layers_ad_server_single_post_types', wp_list_filter( get_post_types( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
 		if ( ! empty( $single_post_types ) ) {
 			foreach ( $single_post_types as $post_type ) {
-				if ( Ad_Layers_Post_Type::get_post_type() != $post_type->name ) {
+				if ( Ad_Layers_Post_Type::instance()->get_post_type() != $post_type->name ) {
 					$page_types[ $post_type->name ] = $post_type->label;
 				}
 			}
@@ -198,7 +189,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		$page_types = array_merge( $page_types, array(
 			'author' => __( 'Author Archive', 'ad-layers' ),
 			'date' => __ ( 'Date Archive', 'ad-layers' ),
-			'404' => __( '404 Page', 'ad-layers' ),
+			'notfound' => __( '404 Page', 'ad-layers' ),
 			'search' => __( 'Search Results', 'ad-layers' ),
 			'default' => __( 'Default', 'ad-layers' ),
 		) );
@@ -213,10 +204,10 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 */
 	public function get_setting( $key = '' ) {
 		if ( empty( $key ) ) {
-			return self::$settings;
+			return $this->settings;
 		}
 		
-		return ( ! empty( self::$settings[ $key ] ) ) ? self::$settings[ $key ] : null;
+		return ( ! empty( $this->settings[ $key ] ) ) ? $this->settings[ $key ] : null;
 	}
 	
 	/**
@@ -226,13 +217,13 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	public function add_settings_page( $args = array() ) {
 		// Provide basic ad server selection.
 		$args = array(
-			'name' => self::$option_name,
+			'name' => $this->option_name,
 			'label' => __( 'Ad Server Settings', 'ad-layers' ),
 			'children' => array(
 				'ad_server' => new Fieldmanager_Select(
 					array(
 						'label' => __( 'Ad Server', 'ad-layers' ),
-						'options' => self::get_ad_server_options(),
+						'options' => $this->get_ad_server_options(),
 						'first_empty' => true,
 					)
 				),
@@ -243,7 +234,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		$args['children'] = array_merge( $args['children'], $this->get_settings_fields() );
 		
 		$fm_ad_servers = new Fieldmanager_Group( $args );
-		$fm_ad_servers->add_submenu_page( Ad_Layers::get_edit_link(), __( 'Ad Server Settings', 'ad-layers' ) );
+		$fm_ad_servers->add_submenu_page( Ad_Layers::instance()->get_edit_link(), __( 'Ad Server Settings', 'ad-layers' ) );
 	}
 	
 	/**

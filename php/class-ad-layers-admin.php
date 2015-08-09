@@ -61,7 +61,7 @@ class Ad_Layers_Admin extends Ad_Layers_Singleton {
 				),
 			)
 		) );
-		$fm_priority->add_submenu_page( Ad_Layers::get_edit_link(), __( 'Layer Priority', 'ad-layers' ) );
+		$fm_priority->add_submenu_page( Ad_Layers::instance()->get_edit_link(), __( 'Layer Priority', 'ad-layers' ) );
 		
 		$fm_custom = new Fieldmanager_Textfield( array(
 			'name' => 'ad_layers_custom_variables',
@@ -71,7 +71,7 @@ class Ad_Layers_Admin extends Ad_Layers_Singleton {
 			'label' => __( 'Add one or more custom variables for targeting.', 'ad-layers' ),
 			'add_more_label' =>  __( 'Add a custom variable', 'ad-layers' ),
 		) );
-		$fm_custom->add_submenu_page( Ad_Layers::get_edit_link(), __( 'Custom Variables', 'ad-layers' ) );
+		$fm_custom->add_submenu_page( Ad_Layers::instance()->get_edit_link(), __( 'Custom Variables', 'ad-layers' ) );
 	}
 }
 

@@ -16,10 +16,9 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * All available ad servers
 	 *
 	 * @access public
-	 * @static
 	 * @var array
 	 */
-	public static $display_label = 'DoubleClick for Publishers (DFP)';
+	public $display_label = 'DoubleClick for Publishers (DFP)';
 	
 	/**
 	 * Formatting tags
@@ -37,7 +36,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		$this->formatting_tags = apply_filters( 'ad_layers_dfp_formatting_tags', $this->set_formatting_tags() );
 		
 		// Add a help tab
-		add_action( 'load-' . Ad_Layers_Post_Type::get_post_type() . '_page_' . self::$option_name, array( $this, 'add_help_tab' ) );
+		add_action( 'load-' . Ad_Layers_Post_Type::instance()->get_post_type() . '_page_' . $this->option_name, array( $this, 'add_help_tab' ) );
 	}
 	
 	/**
@@ -47,7 +46,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * @return array
 	 */
 	public function get_display_label() {
-		return self::$display_label;
+		return $this->display_label;
 	}
 	
 	/**
@@ -66,7 +65,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		);
 		
 		// Add all registered taxonomies as an option since these are commonly used
-		$taxonomies = Ad_Layers::get_taxonomies();
+		$taxonomies = Ad_Layers::instance()->get_taxonomies();
 		if ( ! empty( $taxonomies ) ) {
 			foreach ( $taxonomies as $taxonomy_name => $taxonomy_label ) {
 				$formatting_tags[ '#' . $taxonomy_name . '#' ] = sprintf( __( 'The current term from the %s taxonomy, if applicable. If the taxonomy is hierarchical, each term in the hierarchy above the current term will be added to the path.', 'ad-layers' ), $taxonomy_label );
@@ -80,7 +79,6 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * Handle ad server header setup code.
 	 * Should be implemented by all child classes, if needed.
 	 * @access public
-	 * @static
 	 * @return array
 	 */
 	public function header_setup() {
@@ -244,13 +242,32 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	}
 	
 	/**
+	 * Gets available ad slots.
+	 * @access public
+	 * @return array
+	 */
+	public function get_ad_slots() {
+		$ad_slots = array();
+		// TODO
+		return $ad_slots;
+	}
+	
+	/**
+	 * Generate the code for a single ad slot.
+	 * @access public
+	 */
+	public function get_ad_slot() {
+		// TODO
+	}
+	
+	/**
 	 * Add tabs to the help menu on the plugin options page.
 	 * @access public
 	 */
 	public function add_help_tab() {
 		get_current_screen()->add_help_tab( array(
 			'id'       => 'dfp-setup-help',
-			'title'    => __( 'DFP Setup Help', 'wp-seo' ),
+			'title'    => __( 'Ad Server Settings Help', 'wp-seo' ),
 			'callback' => array( $this, 'formatting_tags_help_tab' ),
 		) );
 	}
