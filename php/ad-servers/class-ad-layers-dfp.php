@@ -14,6 +14,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	
 	/**
 	 * The display label for this ad server.
+	 *
 	 * @access public
 	 * @var array
 	 */
@@ -21,6 +22,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	
 	/**
 	 * Formatting tags.
+	 *
 	 * @access public
 	 * @var array
 	 */
@@ -28,6 +30,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	
 	/**
 	 * The regular expression used to find formatting tags.
+	 *
 	 * @access public
 	 * @var string
 	 */
@@ -35,10 +38,19 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	
 	/**
 	 * Ad slot prefix.
+	 *
 	 * @access public
 	 * @var string
 	 */
 	public $ad_slot_prefix = 'div-gpt-ad-';
+	
+	/**
+	 * Available ad units on the page.
+	 *
+	 * @access public
+	 * @var array
+	 */
+	public $ad_units;
 	
 	/**
 	 * Setup the singleton.
@@ -264,8 +276,8 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		}
 		
 		// Get the units included in this ad layer
-		$ad_units = get_post_meta( $ad_layer['post_id'], 'ad_layer_ad_slots', true );
-		if ( empty( $ad_units ) ) {
+		$this->ad_units = get_post_meta( $ad_layer['post_id'], 'ad_layer_ad_slots', true );
+		if ( empty( $this->ad_units ) ) {
 			return;
 		}
 				
@@ -464,6 +476,11 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * @return string
 	 */
 	public function get_ad_slot( $ad_unit, $echo = true ) {
+		// Make sure this is in the current ad layer and an ad layer is defined
+		if ( empty( $this->ad_units ) || ! in_array( $ad_unit, $this->ad_units ) ) {
+			return;
+		}
+	
 		$ad_unit_id = $this->get_ad_unit_id( $ad_unit );
 		$ad_unit_class = apply_filters( 'ad_layers_dfp_ad_unit_class', sanitize_html_class( 'dfp-' . $slot ), $slot );
 		$output = '';
