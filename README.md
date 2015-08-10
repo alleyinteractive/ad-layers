@@ -64,3 +64,41 @@ The architecture of Ad Layers abstracts the functionality that would be common t
 DFP adds the following settings to the Ad Server Settings page:
 
 *Account ID*
+This sets the DFP account ID which is used throughout the DFP header code.
+
+*Path Template*
+This allows the creation of one or more templates to define the path for DFP ad slots. Under the help tab in the upper right, there are multiple template tags to make these dynamic. They include:
+
+#account_id#
+Your DFP account ID
+
+#domain#
+The domain of the current site, taken from get_site_url
+
+#ad_unit#
+The ad unit name
+
+#post_type#
+The post type of the current page, if applicable
+
+#taxonomy# (repeated for each taxonomy used with Ad Layers
+The current term from the specified taxonomy, if applicable. If the taxonomy is hierarchical, each term in the hierarchy above the current term will be added to the path. If there is more than one term, only the first will be used.
+
+*Breakpoints*
+This allows for the addition of one or more breakpoints for responsive ad serving and is the heart of creating the DFP ad setup. For each breakpoint, you can add:
+
+Title: Mostly a display label.
+Minimum Width: The minimum width at which this breakpoint is displayed.
+Maximum Width: The maximum width at which this breakpoint is displayed.
+
+The above two fields correspond to how DFP handles responsive ad serving. Depending on how your ad units are configured, these might not correspond exactly to your design breakpoints.
+
+You can then click "Add Ad Unit" to add one or more ad units for this breakpoint. For each you can add:
+
+Code: This the DFP Ad Unit code. It is preferable to the name since it acts a key without 
+
+After that, add one or more sizes with following fields:
+Width: Width of the ad
+Height: Height of the ad
+Default Size: Check this if this is the default size for this ad unit across all breakpoints. This value is required for responsive ad serving. If not checked for at least one size, the ad will not be displayed.
+Out of Page: Indicates this size is an Out of Page unit for DFP.
