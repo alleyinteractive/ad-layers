@@ -43,8 +43,7 @@ class Ad_Layers_Widget extends WP_Widget {
 		// Ensure there is a valid ad slot to display before continuing.
 		// Although the slot may exist on the site, it may not be available on this particular page.
 		// In that instance, fail gracefully and just hide the widget to avoid extra whitespace in the sidebar.
-		$ad_server = Ad_Layers_Ad_Server::instance();
-		$ad_slot_html = $ad_server->ad_slot( $ad_slot );
+		$ad_slot_html = Ad_Layers_Ad_Server::instance()->get_ad_slot( $ad_slot );
 		if ( empty( $ad_slot_html ) ) {
 			return;
 		}
@@ -104,7 +103,7 @@ class Ad_Layers_Widget extends WP_Widget {
 		// This will also prevent the widget from being saved due to the validation rules in update().
 		$no_slots = '<p>' . esc_html__( 'No ad slots are currently available.', 'ad-layers' ) . '</p>';
 		
-		$ad_slots = Ad_Layers_Ad_Server::get_ad_slots();
+		$ad_slots = Ad_Layers_Ad_Server::instance()->get_ad_slots();
 
 		// Build the option list.
 		$options = '';

@@ -27,6 +27,14 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * @var array
 	 */
 	public $formatting_tags;
+	
+	/**
+	 * Ad slot prefix
+	 *
+	 * @var string
+	 * @access private
+	 */
+	public $ad_slot_prefix = 'div-gpt-ad-';
 
 	/**
 	 * Setup the singleton.
@@ -34,6 +42,9 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	public function setup() {
 		// Define the available formatting tags
 		$this->formatting_tags = apply_filters( 'ad_layers_dfp_formatting_tags', $this->set_formatting_tags() );
+		
+		// Allow filtering of the ad slot prefix
+		$this->ad_slot_prefix = apply_filters( 'ad_layers_dfp_ad_slot_prefix', $this->ad_slot_prefix );
 		
 		// Add a help tab
 		add_action( 'load-' . Ad_Layers_Post_Type::instance()->get_post_type() . '_page_' . $this->option_name, array( $this, 'add_help_tab' ) );
@@ -165,7 +176,6 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 				'label_macro' => array( __( 'Breakpoint: %s', 'ad-layers' ), 'name' ),
 				'add_more_label' => __( 'Add Breakpoint', 'ad-layers' ),
 				'children' => array(
-					'key' => new Fieldmanager_Hidden(),
 					'title' => new Fieldmanager_Textfield(
 						array(
 							'label' => __( 'Title', 'ad-layers' ),
@@ -174,11 +184,13 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 					'min_width' => new Fieldmanager_Textfield(
 						array(
 							'label' => __( 'Minimum Width', 'ad-layers' ),
+							'sanitize' => 'absint',
 						)
 					),
 					'min_height' => new Fieldmanager_Textfield(
 						array(
 							'label' => __( 'Minimum Height', 'ad-layers' ),
+							'sanitize' => 'absint',
 						)
 					),
 					'ad_units' => new Fieldmanager_Group( array(
@@ -203,11 +215,13 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 									'width' => new Fieldmanager_Textfield(
 										array(
 											'label' => __( 'Width', 'ad-layers' ),
+											'sanitize' => 'absint',
 										)
 									),
 									'height' => new Fieldmanager_Textfield(
 										array(
 											'label' => __( 'Height', 'ad-layers' ),
+											'sanitize' => 'absint',
 										)
 									),
 								)
@@ -223,13 +237,73 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * Creates the mapping Javascript required for responsive ad serving.
 	 * @access private
 	 */
-	private function mapping_js() {}
+	private function mapping_js() {
+		// Get the ad setup and ensure it's valid
+		$ad_setup = $this->get_setting( 'ad_setup' );
+		if ( empty( $ad_setup ) ) {
+			return;
+		}
+		
+		// Loop through the sizes available for each breakpoint
+		$mapping_by_ad_unit = array();
+		foreach ( $ad_setup as $i => $breakpoint ) {
+			// Ensure this breakpoint is valid or else skip it
+			if ( empty( $breakpoint['ad_units'] ) ) {
+				continue;
+			}
+			
+			// Loop through the sizes and add them to the mapping
+			foreach ( $breakpoint['ad_units'] as $ad_unit ) {
+				// Skip this unit if invalid
+				if ( empty( $ad_unit['code'] ) || empty( $ad_unit['sizes'] ) ) {
+					continue;
+				}
+				
+				// Set the sizes
+				$sizes = array();
+				foreach ( $ad_unit['sizes'] as $size ) {
+					if ( ! empty( $size['width'] ) && ! empty( $size['height'] ) ) {
+						$sizes[] = array( absint( $size['width'] ), absint( $size['height'] ) );
+					}
+				}
+				$sizes = apply_filters( 'ad_layers_ad_unit_sizes', $sizes, $ad_unit, $breakpoint );
+				
+				// Generate the mapping JS and store it with the unit
+				$unit_key = $this->get_key( $ad_unit['code'] );
+				if ( empty( $unit_key ) ) {
+					continue; 
+				}
+				
+				// Initialize as an array
+				if ( ! isset( $mapping_by_ad_unit[ $unit_key ] ) ) {
+					$mapping_by_ad_unit[ $unit_key ] = array();
+				}
+				
+				$mapping_by_ad_unit[ $unit_key ][] = sprintf(
+					".addSize(%s,%s)",
+					json_encode( array( absint( $breakpoint['min_width'] ), absint( $breakpoint['min_height'] ) ) ),
+					json_encode( $sizes )
+				);
+			}
+		}
+		
+		// Echo the final mappings by ad unit
+		foreach ( $mapping_by_ad_unit as $ad_unit => $mappings ) {
+			echo sprintf(
+				"var mapping%s = googletag.sizeMapping()%s.build();\n",
+				esc_js( preg_replace( '/[^a-zA-Z0-9]+/', '', $ad_unit ) ),
+				implode( '', $mappings )
+			);
+		}
+	}
 	
 	/**
 	 * Creates the ad slot Javascript.
 	 * @access private
 	 */
-	private function ad_slot_js() {}
+	private function ad_slot_js() {
+	
+	}
 	
 	/**
 	 * Creates the DFP targeting Javascript.
@@ -268,9 +342,32 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	/**
 	 * Generate the code for a single ad slot.
 	 * @access public
+	 * @param string $slot
+	 * @return string
 	 */
-	public function get_ad_slot() {
-		// TODO
+	public function get_ad_slot( $slot ) {
+		$slot_name = $this->ad_slot_prefix . $slot;
+		$slot_class = apply_filters( 'ad_layers_dfp_slot_class', sanitize_html_class( 'dfp-' . $slot ), $slot );
+		$output = '';
+		$output = "<div id='" . esc_attr( $slot_name ) . "' class='dfp-ad " . esc_attr( $slot_class ) . "'>\n";
+		$output .= "\t<script type='text/javascript'>\n";
+		$output .= "\t\tif ( typeof googletag != 'undefined' ) {\n";
+		$output .= "\t\tgoogletag.cmd.push(function() { googletag.display('" . esc_js( $slot_name ) . "'); });\n";
+		$output .= "\t\t}\n";
+		$output .= "\t</script>\n";
+		$output .= "</div>\n";
+		
+		return apply_filters( 'ad_layers_dfp_slot_html', $output, $slot );
+	}
+	
+	/**
+	 * Create a key from a string value, likely for use in Javascript.
+	 * @access public
+	 * @param string $value
+	 * @return string
+	 */
+	public function get_key( $value ) {
+		return apply_filters( 'ad_layers_dfp_breakpoint_key', sanitize_key( $value ) );
 	}
 	
 	/**
