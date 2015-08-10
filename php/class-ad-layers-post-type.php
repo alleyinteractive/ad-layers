@@ -84,15 +84,15 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 	 * @param string $priority
 	 */
 	public function add_meta_boxes() {
-		// Add ad units
+		// Add ad slots
 		$fm_ad_slots = new Fieldmanager_Select(
 			array(
 				'name' => 'ad_layer_ad_slots',
 				'limit' => 0,
 				'extra_elements' => 0,
 				'one_label_per_item' => false,
-				'label' => __( 'Select one or more ad units.', 'ad-layers' ),
-				'add_more_label' =>  __( 'Add an ad unit', 'ad-layers' ),
+				'label' => __( 'Select one or more ad slots.', 'ad-layers' ),
+				'add_more_label' =>  __( 'Add an ad slot', 'ad-layers' ),
 				'options' => Ad_Layers_Ad_Server::instance()->get_ad_slots(),
 			)
 		);
