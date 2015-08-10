@@ -17,9 +17,9 @@ abstract class Ad_Layers_Singleton {
 	 *
 	 * @var Ad_Layers_Singleton
 	 */
-	private static $instance;
+	private static $instances;
 	
-	private function __construct() {
+	protected function __construct() {
 		/* Don't do anything, needs to be initialized via instance() method */
 	}
 
@@ -33,14 +33,12 @@ abstract class Ad_Layers_Singleton {
 	 * @return Ad_Layers_Singleton
 	 */
 	public static function instance() {
-		if ( ! isset( self::$instance ) ) {
-			$class_name = __CLASS__;
-			if ( 'Ad_Layers_Singleton' != $class_name ) {
-				self::$instance = new $class_name;
-				self::$instance->setup();
-			}
+		$class_name = get_called_class();
+		if ( ! isset( self::$instances[ $class_name ] ) ) {
+			self::$instances[ $class_name ] = new $class_name;
+			self::$instances[ $class_name ]->setup();
 		}
-		return self::$instance;
+		return self::$instances[ $class_name ];
 	}
 	
 	/**

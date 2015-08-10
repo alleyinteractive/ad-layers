@@ -15,7 +15,6 @@ class Ad_Layers_Widget extends WP_Widget {
 	 * Constructor. Creates the widget using the parent class constructor.
 	 *
 	 * @access public
-	 * @return void
 	 */
 	public function __construct() {
 		// Construct the widget
@@ -29,12 +28,11 @@ class Ad_Layers_Widget extends WP_Widget {
 	}
 	
 	/**
-	 * Handles front end display of the widget
+	 * Handles front end display of the widget.
 	 *
 	 * @access public
 	 * @param array $args
 	 * @param array $instance
-	 * @return void
 	 */
 	public function widget( $args, $instance ) {
 		// Get the specified ad slot
@@ -43,8 +41,7 @@ class Ad_Layers_Widget extends WP_Widget {
 		// Ensure there is a valid ad slot to display before continuing.
 		// Although the slot may exist on the site, it may not be available on this particular page.
 		// In that instance, fail gracefully and just hide the widget to avoid extra whitespace in the sidebar.
-		$ad_server = Ad_Layers_Ad_Server::instance();
-		$ad_slot_html = $ad_server->ad_slot( $ad_slot );
+		$ad_slot_html = Ad_Layers_Ad_Server::instance()->get_ad_slot( $ad_slot );
 		if ( empty( $ad_slot_html ) ) {
 			return;
 		}
@@ -54,11 +51,10 @@ class Ad_Layers_Widget extends WP_Widget {
 	}
 
 	/**
-	 * Outputs the admin form for the widget
+	 * Outputs the admin form for the widget.
 	 *
 	 * @access public
 	 * @param array $instance
-	 * @return void
 	 */
 	public function form( $instance ) {
 		// Check if the ad slot is set for this widget.
@@ -71,9 +67,6 @@ class Ad_Layers_Widget extends WP_Widget {
 			<?php echo $this->ad_slot_select_field( $ad_slot ) ?>
 		</p>
 		<?php
-		
-		// Call the parent function to add global fields
-		return parent::form( $instance );
 	}
 
 	/**
@@ -92,13 +85,10 @@ class Ad_Layers_Widget extends WP_Widget {
 		if ( empty( $instance['ad_slot'] ) ) {
 			return false;
 		}
-		
-		// Call the parent function for sidebar validation
-		return parent::validate( $instance, $new_instance, $old_instance );
 	}
 	
 	/**
-	 * Creates a select field to select the ad slot
+	 * Creates a select field to select the ad slot.
 	 *
 	 * @access protected
 	 * @param string $selected_value The currently selected value
@@ -110,8 +100,7 @@ class Ad_Layers_Widget extends WP_Widget {
 		// This will also prevent the widget from being saved due to the validation rules in update().
 		$no_slots = '<p>' . esc_html__( 'No ad slots are currently available.', 'ad-layers' ) . '</p>';
 		
-		$ad_server = Ad_Layers_Ad_Server::instance();
-		$ad_slots = $ad_server->ad_slots();
+		$ad_slots = Ad_Layers_Ad_Server::instance()->get_ad_slots();
 
 		// Build the option list.
 		$options = '';
