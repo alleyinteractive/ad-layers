@@ -68,9 +68,6 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		// Load current settings
 		self::$settings = apply_filters( 'ad_layers_ad_server_settings', get_option( $this->option_name, array() ) );
 		
-		// Set the page types available to all ad servers
-		$this->ad_servers = apply_filters( 'ad_layers_ad_server_page_types', $this->get_page_types() );
-		
 		// Allow additional ad servers to be loaded via filter within a theme
 		$this->ad_servers = apply_filters( 'ad_layers_ad_servers', array(
 			'Ad_Layers_DFP' => AD_LAYERS_BASE_DIR . '/php/ad-servers/class-ad-layers-dfp.php',
@@ -87,7 +84,8 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		
 		// Set the current ad server class, if defined.
 		if ( ! empty( self::$settings['ad_server'] ) && class_exists( self::$settings['ad_server'] ) ) {
-			$this->ad_server = new self::$settings['ad_server'];
+			$ad_server = new self::$settings['ad_server'];
+			$this->ad_server = $ad_server::instance();
 		}
 	}
 	
@@ -146,56 +144,92 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	/**
 	 * Get the available page types for all ad servers.
 	 * These are especially used by path targeting.
+	 * This is kind of expensive so make sure we only do it once.
 	 * @access public
 	 * @return array
 	 */
 	public function get_page_types() {
-		if ( ! empty( $this->page_types ) ) {
-			return $this->page_types;
-		}
+		if ( empty( $this->page_types ) ) {
+			// Build the page types.
+			// First add global types.
+			$page_types = array(
+				'home' => __( 'Home Page', 'ad-layers' ),
+			);
 		
-		// Build the page types.
-		// First add global types.
-		$page_types = array(
-			'home' => __( 'Home Page', 'ad-layers' ),
-		);
-		
-		// Add single post types
-		$single_post_types = apply_filters( 'ad_layers_ad_server_single_post_types', wp_list_filter( get_post_types( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
-		if ( ! empty( $single_post_types ) ) {
-			foreach ( $single_post_types as $post_type ) {
-				if ( Ad_Layers_Post_Type::instance()->get_post_type() != $post_type->name ) {
-					$page_types[ $post_type->name ] = $post_type->label;
+			// Add single post types
+			$single_post_types = apply_filters( 'ad_layers_ad_server_single_post_types', wp_list_filter( get_post_types( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+			if ( ! empty( $single_post_types ) ) {
+				foreach ( $single_post_types as $post_type ) {
+					if ( Ad_Layers_Post_Type::instance()->get_post_type() != $post_type->name ) {
+						$page_types[ $post_type->name ] = $post_type->label;
+					}
 				}
 			}
-		}
 
-		// Add archived post types
-		$archived_post_types = apply_filters( 'ad_layers_ad_server_archived_post_types', wp_list_filter( get_post_types( array( 'has_archive' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
-		if ( ! empty( $archived_post_types ) ) {
-			foreach ( $archived_post_types as $post_type ) {
-				$page_types[ $post_type->name ] = $post_type->label . __( ' Archive', 'ad-layers' );
+			// Add archived post types
+			$archived_post_types = apply_filters( 'ad_layers_ad_server_archived_post_types', wp_list_filter( get_post_types( array( 'has_archive' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+			if ( ! empty( $archived_post_types ) ) {
+				foreach ( $archived_post_types as $post_type ) {
+					$page_types[ $post_type->name ] = $post_type->label . __( ' Archive', 'ad-layers' );
+				}
 			}
-		}
 
-		// Add taxonomies
-		$taxonomies = apply_filters( 'ad_layers_ad_server_taxonomies', wp_list_filter( get_taxonomies( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
-		if ( ! empty( $taxonomies ) ) {
-			foreach ( $taxonomies as $taxonomy ) {
-				$page_types[ $taxonomy->name ] = $taxonomy->label . __( ' Archive', 'ad-layers' );
+			// Add taxonomies
+			$taxonomies = apply_filters( 'ad_layers_ad_server_taxonomies', wp_list_filter( get_taxonomies( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
+			if ( ! empty( $taxonomies ) ) {
+				foreach ( $taxonomies as $taxonomy ) {
+					$page_types[ $taxonomy->name ] = $taxonomy->label . __( ' Archive', 'ad-layers' );
+				}
+			}
+		
+			// Add some other templates at the bottom
+			$page_types = array_merge( $page_types, array(
+				'author' => __( 'Author Archive', 'ad-layers' ),
+				'date' => __ ( 'Date Archive', 'ad-layers' ),
+				'notfound' => __( '404 Page', 'ad-layers' ),
+				'search' => __( 'Search Results', 'ad-layers' ),
+				'default' => __( 'Default', 'ad-layers' ),
+			) );
+			
+			$this->page_types = $page_types;
+		}
+		
+		return apply_filters( 'ad_layers_ad_server_page_types', $this->page_types );
+	}
+	
+	/**
+	 * Get the current page type.
+	 * @access public
+	 * @return string
+	 */
+	public function get_current_page_type() {
+		// Get the current page types
+		$page_types = $this->get_page_types();
+		
+		// Iterate for a match
+		$page_type = '';
+		foreach ( $page_types as $key => $label ) {
+			if ( 
+				( function_exists( 'is_' . $key ) && true === call_user_func( 'is_' . $key ) ) 
+				|| ( 'notfound' == $key && is_404() ) 
+				|| ( post_type_exists( $key ) && is_singular( $key ) ) 
+				|| ( taxonomy_exists( $key ) && is_tax( $key ) ) 
+			) {
+				$page_type = $key;
+			}
+			
+			// The page type was found
+			if ( ! empty( $page_type ) ) {
+				break;
 			}
 		}
 		
-		// Add some other templates at the bottom
-		$page_types = array_merge( $page_types, array(
-			'author' => __( 'Author Archive', 'ad-layers' ),
-			'date' => __ ( 'Date Archive', 'ad-layers' ),
-			'notfound' => __( '404 Page', 'ad-layers' ),
-			'search' => __( 'Search Results', 'ad-layers' ),
-			'default' => __( 'Default', 'ad-layers' ),
-		) );
+		// Use default if no match 
+		if ( empty( $page_type ) ) {
+			$page_type = 'default';
+		}
 		
-		return $page_types;
+		return apply_filters( 'ad_layers_ad_server_current_page_type', $page_type );
 	}
 	
 	/**
@@ -208,7 +242,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 			return self::$settings;
 		}
 		
-		return ( ! empty( self::$settings[ $key ] ) ) ? self::$settings[ $key ] : null;
+		return ( ! empty( self::$settings[ $key ] ) ) ? apply_filters( 'ad_layer_ad_server_setting', self::$settings[ $key ], $key ) : null;
 	}
 	
 	/**
@@ -295,6 +329,19 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 */
 	public function get_settings_fields() {
 		return ( ! empty( $this->ad_server ) ) ? $this->ad_server->get_settings_fields() : array();
+	}
+	
+	/**
+	 * Gets the domain of the current site.
+	 * Useful for virtually any ad server.
+	 * @access public
+	 * @return string
+	 */
+	public function get_domain() {
+		return apply_filters(
+			'ad_layers_ad_server_get_domain', 
+			preg_replace( '#^https?://#', '', trim( get_site_url() ) )
+		);
 	}
 }
 
