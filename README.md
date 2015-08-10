@@ -61,6 +61,6 @@ The architecture of Ad Layers abstracts the functionality that would be common t
 
 ### DFP
 
-DFP adds the following settings to the Ad Server Settings page.
+DFP adds the following settings to the Ad Server Settings page:
 
-### Account ID
+*Account ID*
