@@ -69,22 +69,23 @@ This sets the DFP account ID which is used throughout the DFP header code.
 *Path Template*
 This allows the creation of one or more templates to define the path for DFP ad slots. Under the help tab in the upper right, there are multiple template tags to make these dynamic. They include:
 
-#account_id#
+```#account_id#```
 Your DFP account ID
 
-#domain#
+```#domain#```
 The domain of the current site, taken from get_site_url
 
-#ad_unit#
+```#ad_unit#```
 The ad unit name
 
-#post_type#
+```#post_type#```
 The post type of the current page, if applicable
 
-#taxonomy# (repeated for each taxonomy used with Ad Layers
+```#taxonomy#``` (repeated for each taxonomy used with Ad Layers
 The current term from the specified taxonomy, if applicable. If the taxonomy is hierarchical, each term in the hierarchy above the current term will be added to the path. If there is more than one term, only the first will be used.
 
 *Breakpoints*
+
 This allows for the addition of one or more breakpoints for responsive ad serving and is the heart of creating the DFP ad setup. For each breakpoint, you can add:
 
 Title: Mostly a display label.
