@@ -15,7 +15,6 @@ class Ad_Layers_Widget extends WP_Widget {
 	 * Constructor. Creates the widget using the parent class constructor.
 	 *
 	 * @access public
-	 * @return void
 	 */
 	public function __construct() {
 		// Construct the widget
@@ -29,12 +28,11 @@ class Ad_Layers_Widget extends WP_Widget {
 	}
 	
 	/**
-	 * Handles front end display of the widget
+	 * Handles front end display of the widget.
 	 *
 	 * @access public
 	 * @param array $args
 	 * @param array $instance
-	 * @return void
 	 */
 	public function widget( $args, $instance ) {
 		// Get the specified ad slot
@@ -53,11 +51,10 @@ class Ad_Layers_Widget extends WP_Widget {
 	}
 
 	/**
-	 * Outputs the admin form for the widget
+	 * Outputs the admin form for the widget.
 	 *
 	 * @access public
 	 * @param array $instance
-	 * @return void
 	 */
 	public function form( $instance ) {
 		// Check if the ad slot is set for this widget.
@@ -91,7 +88,7 @@ class Ad_Layers_Widget extends WP_Widget {
 	}
 	
 	/**
-	 * Creates a select field to select the ad slot
+	 * Creates a select field to select the ad slot.
 	 *
 	 * @access protected
 	 * @param string $selected_value The currently selected value

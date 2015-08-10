@@ -98,6 +98,20 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 		);
 		$fm_ad_slots->add_meta_box( __( 'Ad Slots', 'ad-layers' ), $this->post_type, 'normal', 'high' );
 		
+		// Add page types
+		$fm_page_types = new Fieldmanager_Select(
+			array(
+				'name' => 'ad_layer_page_types',
+				'limit' => 0,
+				'extra_elements' => 0,
+				'one_label_per_item' => false,
+				'label' => __( 'Select one or more page types to be targeted with this ad layer.', 'ad-layers' ),
+				'add_more_label' =>  __( 'Add a page type', 'ad-layers' ),
+				'options' => Ad_Layers::instance()->get_page_types(),
+			)
+		);
+		$fm_page_types->add_meta_box( __( 'Page Types', 'ad-layers' ), $this->post_type, 'normal', 'high' );
+		
 		// Add taxonomies
 		$fm_taxonomies = new Fieldmanager_Select(
 			array(
@@ -164,6 +178,7 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 	
 	/**
 	 * Gets all available custom targeting options.
+	 *
 	 * @access private
 	 * @return array
 	 */
@@ -185,6 +200,7 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 	
 	/**
 	 * Gets the currently saved taxonomies for this post.
+	 *
 	 * @access private
 	 * @return array
 	 */
@@ -198,6 +214,7 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 	
 	/**
 	 * Gets the post type name used for ad layers.
+	 *
 	 * @access public
 	 * @return string
 	 */
@@ -207,6 +224,7 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 	
 	/**
 	 * Decide how to manage this post in the ad layer list on save.
+	 *
 	 * @access public
 	 * @param int $post_id
 	 * @param WP_Post $post
@@ -256,6 +274,7 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 	
 	/**
 	 * Remove this post from the ad layer list on delete.
+	 *
 	 * @access public
 	 * @param int $post_id
 	 */

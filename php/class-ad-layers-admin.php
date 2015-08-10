@@ -25,6 +25,7 @@ class Ad_Layers_Admin extends Ad_Layers_Singleton {
 	
 	/**
 	 * Load scripts.
+	 *
 	 * @access public
 	 */
 	public function enqueue_scripts() {
@@ -37,6 +38,7 @@ class Ad_Layers_Admin extends Ad_Layers_Singleton {
 	
 	/**
 	 * Add the ad layer priority management page.
+	 *
 	 * @access public
 	 */
 	public function add_settings_pages() {
