@@ -294,7 +294,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			// Loop through the sizes and add them to the mapping
 			foreach ( $breakpoint['ad_units'] as $ad_unit ) {
 				// Skip this unit if invalid or not included in the layer
-				if ( empty( $ad_unit['code'] ) || empty( $ad_unit['sizes'] ) || ! in_array( $ad_unit['code'], $ad_units ) ) {
+				if ( empty( $ad_unit['code'] ) || empty( $ad_unit['sizes'] ) || ! in_array( $ad_unit['code'], $this->ad_units ) ) {
 					continue;
 				}
 				
@@ -356,7 +356,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			
 		// Add the slots
 		$ad_slot_num = 0;
-		foreach ( $ad_units as $ad_unit ) {
+		foreach ( $this->ad_units as $ad_unit ) {
 			// If no default size is defined, skip it
 			if ( empty( $default_by_unit[ $ad_unit ] ) ) {
 				continue;
