@@ -583,12 +583,12 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 									$taxonomy = str_replace( '#', '', $tag );
 									if ( taxonomy_exists( $taxonomy ) ) {
 										if ( is_tax() ) {
-											$value = $this->get_term_path( get_queried_object()->term_id, $tag );
+											$value = $this->get_term_path( get_queried_object()->term_id, $taxonomy );
 										} else if ( is_singular() ) {
 											$terms = get_the_terms( get_the_ID(), $taxonomy );
 											if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
 												$term = array_shift( $terms );
-												$value = $this->get_term_path( $term->term_id, $tag );
+												$value = $this->get_term_path( $term->term_id, $taxonomy );
 											}
 										}
 										
