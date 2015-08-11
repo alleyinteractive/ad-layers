@@ -482,7 +482,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		}
 	
 		$ad_unit_id = $this->get_ad_unit_id( $ad_unit );
-		$ad_unit_class = apply_filters( 'ad_layers_dfp_ad_unit_class', sanitize_html_class( 'dfp-' . $slot ), $slot );
+		$ad_unit_class = apply_filters( 'ad_layers_dfp_ad_unit_class', sanitize_html_class( 'dfp-' . $ad_unit ), $ad_unit );
 		$output = '';
 		$output = "<div id='" . esc_attr( $ad_unit_id ) . "' class='dfp-ad " . esc_attr( $ad_unit_class ) . "'>\n";
 		$output .= "\t<script type='text/javascript'>\n";
