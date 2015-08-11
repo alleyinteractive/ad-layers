@@ -29,6 +29,10 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 		// Add the custom meta boxes for managing this post type
 		add_action( 'fm_post_' . $this->post_type, array( $this, 'add_meta_boxes' ) );
 		
+		// Add custom columns for the list table
+		add_filter( 'manage_' . $this->post_type . '_posts_columns' , array( $this, 'manage_edit_columns' ), 15, 1 );
+		add_action( 'manage_' . $this->post_type . '_posts_custom_column' , array( $this, 'manage_custom_columns' ), 10, 2 );
+		
 		// Enqueue the Javascript required by the custom meta boxe;
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		
@@ -73,6 +77,60 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 		if ( 'edit' == $screen->parent_base && 'post' == $screen->base && ! empty( $screen->post_type ) && $this->post_type == $screen->post_type ) {
 			wp_enqueue_script( 'ad-layers-edit-js', AD_LAYERS_ASSETS_DIR . '/js/ad-layers-edit.js', array( 'jquery' ), AD_LAYERS_GLOBAL_ASSET_VERSION, false );
 			wp_enqueue_style( 'ad-layers-edit-css', AD_LAYERS_ASSETS_DIR . '/css/ad-layers-edit.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
+		}
+	}
+	
+	/**
+	 * Manage available columns on the edit posts table
+	 *
+	 * @access public
+	 * @param array $columns
+	 * @return array
+	 */
+	public function manage_edit_columns( $columns ) {
+  		// Add columns for custom fields
+  		$columns['ad_layer_page_types'] = __( 'Page Type', 'ad-layers' );
+  		$columns['ad_layer_post_types'] = __( 'Post Types', 'ad-layers' );
+  		$columns['ad_layer_taxonomies'] = __( 'Taxonomies', 'ad-layers' );
+  		$columns['ad_layer_ad_slots'] = __( 'Ad Slots', 'ad-layers' );
+  		$columns['ad_layer_priority'] = __( 'Priority', 'ad-layers' );
+  		
+  		// Move date back to the end
+  		unset( $columns['date'] );
+  		$columns['date'] = __( 'Date', 'ad-layers' );
+  		
+  		return apply_filters( 'ad_layers_edit_columns', $columns );
+	}
+	
+	/**
+	 * Manage custom column values.
+	 *
+	 * @access public
+	 * @param string $column
+	 * @param int $post_id
+	 */
+	public function manage_custom_columns( $column, $post_id ) {
+		switch ( $column ) {
+			case 'ad_layer_page_types':
+			case 'ad_layer_post_types':
+			case 'ad_layer_taxonomies':
+			case 'ad_layer_ad_slots':
+				$value = get_post_meta( $post_id, $column, true );
+				if ( ! empty( $value ) ) {
+					if ( is_array( $value ) ) {
+						$value = implode( ', ', $value );
+					}
+					echo esc_html( $value );
+				}
+				break;
+			case 'ad_layer_priority':
+				$priority = Ad_Layers::instance()->get_ad_layer_priority( $post_id );
+				if ( ! empty( $priority ) ) {
+					echo absint( $priority );
+				} else {
+					echo '&mdash;';
+				}
+				break;
 		}
 	}
 	

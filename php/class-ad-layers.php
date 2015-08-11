@@ -118,6 +118,25 @@ class Ad_Layers extends Ad_Layers_Singleton {
 	}
 	
 	/**
+	 * Get the active ad layer.
+	 *
+	 * @access public
+	 * @param int $post_id
+	 * @return int
+	 */
+	public function get_ad_layer_priority( $post_id ) {
+		if ( ! empty( $this->ad_layers ) ) {
+			foreach ( $this->ad_layers as $i => $ad_layer ) {
+				if ( $post_id == $ad_layer['post_id'] ) {
+					return absint( $i + 1 );
+				}
+			}
+		}
+		
+		return null;
+	}
+
+	/**
 	 * Get current custom targeting variables.
 	 *
 	 * @access public
