@@ -118,7 +118,7 @@ Out of Page: Indicates this size is an Out of Page unit for DFP.
 
 ## Adding ad units to a template
 
-There are two ways to add an ad unit to a template. The first is to use the built-in action hook directly in a template file:
+There are three ways to add an ad unit to a template. The first is to use the built-in action hook directly in a template file:
 
 ```
 <?php do_action( 'ad_layers_render_slot', 'slotname' ) ?>
@@ -126,9 +126,11 @@ There are two ways to add an ad unit to a template. The first is to use the buil
 
 There is also an Ad Layers Ad Widget that allows for selection of a slot from a dropdown and can be placed into a sidebar.
 
-In both cases, if the slot isn't defined for the current ad layer, it will simply be skipped and generate no markup.
-
-A shortcode will also be added in the next round of development.
+Finally, a shortcode is available for all posts in the format:
+```
+[ad-slot slot=slotname]
+```
+In all cases, if the slot isn't defined for the current ad layer or is invalid, it will simply be skipped and generate no markup.
 
 ## Hooks and Filters
 
