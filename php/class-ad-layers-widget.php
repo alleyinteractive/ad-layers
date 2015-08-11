@@ -65,6 +65,7 @@ class Ad_Layers_Widget extends WP_Widget {
 			<label for="<?php echo $this->get_field_id( 'ad_slot' ) ?>"><?php esc_html_e( 'Ad Slot', 'ad-layers' ) ?></label>
 			<br />
 			<?php echo $this->ad_slot_select_field( $ad_slot ) ?>
+			<br /><i><?php esc_html_e( 'Select an ad slot to display in this widget. The widget will be automatically hidden if the slot is not present in the current ad layer.', 'ad-layers' ); ?></i>
 		</p>
 		<?php
 	}
