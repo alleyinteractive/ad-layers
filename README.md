@@ -134,13 +134,18 @@ In all cases, if the slot isn't defined for the current ad layer or is invalid, 
 
 ## Hooks and Filters
 
-There are numerous action hooks and filters available throughout the plugin to customize the functionality as needed. These can be clearly found in the plugin source and a full digest will be added to this document in the next round of development.
+There are numerous action hooks and filters available throughout the plugin to customize the functionality as needed. These are listed below by type and class. For further information on specifically what can be done with each hook, please reference it in the source code which is documented throughout.
+
+### Action Hooks by Class
+*Ad_Layers_DFP*
+
+ad_layers_dfp_before_setup
+ad_layers_dfp_after_setup
+ad_layers_dfp_custom_targeting
+ad_layers_dfp_after_ad_slots
 
 ## Future Enhancements
 
 The next round of development on this plugin will include the following enhancements:
 - Frontend Javascript framework for ad refresh, lazy loading for ad viewability, and other features.
-- Ad Layer shortcode
 - Additional caching
-- Additional documentation
-- Fixes for any reported bugs
