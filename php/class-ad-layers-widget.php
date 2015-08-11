@@ -22,7 +22,7 @@ class Ad_Layers_Widget extends WP_Widget {
 			'ad_layers_ad_widget',
 			__( 'Ad Layers Ad Widget', 'ad-layers' ),
 			array( 
-				'description' => esc_html__( 'Adds the specified ad slot to any sidebar.', 'ad-layers' ), 
+				'description' => __( 'Adds the specified ad slot to any sidebar.', 'ad-layers' ), 
 			)
 		);
 	}
