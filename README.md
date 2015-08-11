@@ -140,8 +140,11 @@ There are numerous action hooks and filters available throughout the plugin to c
 *Ad_Layers_DFP*
 
 ad_layers_dfp_before_setup
+
 ad_layers_dfp_after_setup
+
 ad_layers_dfp_custom_targeting
+
 ad_layers_dfp_after_ad_slots
 
 ## Future Enhancements
