@@ -85,6 +85,8 @@ class Ad_Layers_Widget extends WP_Widget {
 		if ( empty( $instance['ad_slot'] ) ) {
 			return false;
 		}
+		
+		return $instance;
 	}
 	
 	/**
