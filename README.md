@@ -137,6 +137,7 @@ In all cases, if the slot isn't defined for the current ad layer or is invalid, 
 There are numerous action hooks and filters available throughout the plugin to customize the functionality as needed. These are listed below by type and class. For further information on specifically what can be done with each hook, please reference it in the source code which is documented throughout.
 
 ### Action Hooks by Class
+
 *Ad_Layers_DFP*
 
 ad_layers_dfp_before_setup
@@ -146,6 +147,98 @@ ad_layers_dfp_after_setup
 ad_layers_dfp_custom_targeting
 
 ad_layers_dfp_after_ad_slots
+
+### Filter Hooks by Class
+
+*Ad_Layers_Ad_Server*
+
+ad_layers_ad_server_settings
+
+ad_layers_ad_servers
+
+ad_layer_ad_server_setting
+
+ad_layers_ad_server_get_domain
+
+*Ad_Layers_DFP*
+
+ad_layers_dfp_formatting_tags
+
+ad_layers_dfp_ad_slot_prefix
+
+ad_layers_dfp_formatting_tags
+
+ad_layers_dfp_async_rendering
+
+ad_layers_dfp_collapse_empty_divs
+
+ad_layers_ad_unit_sizes
+
+ad_layers_dfp_default_by_unit
+
+ad_layers_dfp_oop_units
+
+ad_layers_dfp_custom_target
+
+ad_layers_dfp_ad_unit_class
+
+ad_layers_dfp_ad_slot_html
+
+ad_layers_dfp_breakpoint_key
+
+ad_layers_dfp_ad_unit_id
+
+ad_layers_dfp_formatting_tag_pattern
+
+ad_layers_dfp_formatting_tag_value
+
+ad_layers_dfp_path
+
+*Ad_Layers_Meta_Boxes*
+
+ad_layers_post_types
+
+*Ad_Layers_Post_Type*
+
+ad_layers_taxonomies
+
+ad_layers_edit_columns
+
+ad_layers_custom_targeting_options
+
+ad_layers_save_post
+
+ad_layers_delete_post
+
+*Ad_Layers*
+
+ad_layers
+
+ad_layers_custom_variables
+
+ad_layers_get_ad_layers
+
+ad_layers_get_ad_layer
+
+ad_layers_get_custom_variables
+
+ad_layers_get_(object_type)_args
+
+ad_layers_get_(object_type)_operator
+
+ad_layers_get_(object_type)
+
+ad_layers_active_ad_layer
+
+ad_layers_ad_server_single_post_types
+
+ad_layers_ad_server_archived_post_types
+
+ad_layers_ad_server_taxonomies
+
+ad_layers_page_types
+
+ad_layers_current_page_type
 
 ## Future Enhancements
 
