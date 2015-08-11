@@ -89,7 +89,7 @@ require_once( AD_LAYERS_BASE_DIR . '/php/class-ad-layers-widget.php' );
 /**
  * Ad shortcode.
  */
-require_once( AD_LAYERS_BASE_DIR . '/php/class-ad-layers-shortcode.php' );
+require_once( AD_LAYERS_BASE_DIR . '/php/class-ad-layers-shortcodes.php' );
 
 /**
  * Ad servers.
