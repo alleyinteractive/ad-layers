@@ -38,7 +38,7 @@ class Ad_Layers_Shortcodes extends Ad_Layers_Singleton {
 		// Attempt to display the specified ad slot.
 		// This will just do nothing if the slot is invalid 
 		// or doesn't exist in the current ad layer.
-		return $Ad_Layers_Ad_Server::instance()->get_ad_slot( $atts['slot'] );
+		return Ad_Layers_Ad_Server::instance()->get_ad_slot( $atts['slot'] );
 	}
 }
 

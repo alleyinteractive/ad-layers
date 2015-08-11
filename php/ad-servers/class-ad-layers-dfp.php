@@ -557,7 +557,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 					// Iterate over and replace each
 					foreach ( $this->formatting_tags as $tag => $description ) {
 						if ( in_array( $tag, $unique_matches ) ) {
-							$value = '';
+							$value = null;
 							
 							// Handle built-in formatting tags
 							switch ( $tag ) {
@@ -579,15 +579,22 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 									break;
 								default:
 									// This is one of the available taxonomy tags if it's not custom
-									if ( taxonomy_exists( str_replace( '#', '', $tag ) ) ) {
+									// which would be handled later by the filter.
+									$taxonomy = str_replace( '#', '', $tag );
+									if ( taxonomy_exists( $taxonomy ) ) {
 										if ( is_tax() ) {
 											$value = $this->get_term_path( get_queried_object()->term_id, $tag );
 										} else if ( is_singular() ) {
-											$terms = get_the_terms( get_the_ID(), $tag );
-											if ( ! empty( $terms ) ) {
+											$terms = get_the_terms( get_the_ID(), $taxonomy );
+											if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
 												$term = array_shift( $terms );
 												$value = $this->get_term_path( $term->term_id, $tag );
 											}
+										}
+										
+										// If nothing was found, strip this off the path
+										if ( null === $value ) {
+											$value = '';
 										}
 									}
 									break;
@@ -598,7 +605,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 							
 							// If a value was found, we'll replace it.
 							// Otherwise, the "match" will be ignored.
-							if ( ! empty( $value ) ) {
+							if ( null !== $value ) {
 								$replacements[ $tag ] = $value;
 							}
 						}
@@ -611,6 +618,10 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 				}
 			}
 		}
+		
+		// Finally, the path should never end in a trailing slash.
+		// This would possibly mean a term was stripped that wasn't matched.
+		$path = untrailingslashit( $path );
 		
 		return apply_filters( 'ad_layers_dfp_path', $path, $page_type );
 	}
