@@ -8,7 +8,7 @@ The plugin adds an Ad Layers custom post type to the WordPress dashboard for man
 
 ## Ad Layers
 
-Shows a list of all available ad layers. This uses a standard WordPress List Table.
+Shows a list of all available ad layers. This uses a standard WordPress List Table with columns added for all of the ad layer specific fields listed below.
 
 ## Add New Ad Layer
 
