@@ -211,9 +211,9 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 					'ad_units' => new Fieldmanager_Group( array(
 						'limit' => 0,
 						'extra_elements' => 0,
-						'label' => __( 'Ad Units', 'ad-layers' ),
-						'label_macro' => array( __( 'Ad Unit: %s', 'ad-layers' ), 'code' ),
-						'add_more_label' => __( 'Add Ad Unit', 'ad-layers' ),
+						'label' => __( 'Ad Slots', 'ad-layers' ),
+						'label_macro' => array( __( 'Ad Slot: %s', 'ad-layers' ), 'code' ),
+						'add_more_label' => __( 'Add Ad Slot', 'ad-layers' ),
 						'collapsible' => true,
 						'collapsed' => true,
 						'children' => array(
