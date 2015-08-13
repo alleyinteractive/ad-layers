@@ -16,12 +16,12 @@ class Ad_Layers_Shortcodes extends Ad_Layers_Singleton {
 	 * Setup the singleton.
 	 */
 	public function setup() {
-		// Add the shortcode for ad slots
-		add_shortcode( 'ad-slot', array( $this, 'do_ad_slot' ) );
+		// Add the shortcode for ad units
+		add_shortcode( 'ad-unit', array( $this, 'do_ad_unit' ) );
 	}
 	
 	/**
-	 * Create the script tag for the Infogr.am shortcode
+	 * Add an ad unit to the body of a post
 	 *
 	 * @access public
 	 * @param array $atts
@@ -29,16 +29,16 @@ class Ad_Layers_Shortcodes extends Ad_Layers_Singleton {
 	 * @param string $tag
 	 * @return string
 	 */
-	public function do_ad_slot( $atts, $content, $tag ) {
+	public function do_ad_unit( $atts, $content, $tag ) {
 		// Ensure the shortcode is valid
-		if ( empty( $atts['slot'] ) ) {
+		if ( empty( $atts['unit'] ) ) {
 			return;
 		}
 	
-		// Attempt to display the specified ad slot.
-		// This will just do nothing if the slot is invalid 
+		// Attempt to display the specified ad unit.
+		// This will just do nothing if the unit is invalid 
 		// or doesn't exist in the current ad layer.
-		return Ad_Layers_Ad_Server::instance()->get_ad_slot( $atts['slot'] );
+		return Ad_Layers_Ad_Server::instance()->get_ad_unit( $atts['unit'] );
 	}
 }
 

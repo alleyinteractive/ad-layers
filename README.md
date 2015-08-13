@@ -17,8 +17,8 @@ This allows you to create a new ad layer. This is set up as a WordPress custom p
 ### Title
 The standard WordPress title field acts as a label to reference this ad layer.
 
-### Ad Slots
-Click "Add an ad unit" to add one or more ad slots that are part of this ad layer.
+### Ad Units
+Click "Add an ad unit" to add one or more ad units that are part of this ad layer.
 
 ### Page Types
 Click "Add a page type" to add one or more pages on which this layer can appear. 
@@ -69,7 +69,7 @@ This sets the DFP account ID which is used throughout the DFP header code.
 
 *Path Template*
 
-This allows the creation of one or more templates to define the path for DFP ad slots. Under the help tab in the upper right, there are multiple template tags to make these dynamic. They include:
+This allows the creation of one or more templates to define the path for DFP ad units. Under the help tab in the upper right, there are multiple template tags to make these dynamic. They include:
 
 ```
 #account_id#
@@ -121,16 +121,16 @@ Out of Page: Indicates this size is an Out of Page unit for DFP.
 There are three ways to add an ad unit to a template. The first is to use the built-in action hook directly in a template file:
 
 ```
-<?php do_action( 'ad_layers_render_slot', 'slotname' ) ?>
+<?php do_action( 'ad_layers_render_ad_unit', 'unitname' ) ?>
 ```
 
-There is also an Ad Layers Ad Widget that allows for selection of a slot from a dropdown and can be placed into a sidebar.
+There is also an Ad Layers Ad Widget that allows for selection of an ad unit from a dropdown and can be placed into a sidebar.
 
 Finally, a shortcode is available for all posts in the format:
 ```
-[ad-slot slot=slotname]
+[ad-unit unit=unitname]
 ```
-In all cases, if the slot isn't defined for the current ad layer or is invalid, it will simply be skipped and generate no markup.
+In all cases, if the ad unit isn't defined for the current ad layer or is invalid, it will simply be skipped and generate no markup.
 
 ## Hooks and Filters
 
@@ -146,7 +146,7 @@ ad_layers_dfp_after_setup
 
 ad_layers_dfp_custom_targeting
 
-ad_layers_dfp_after_ad_slots
+ad_layers_dfp_after_ad_units
 
 ### Filter Hooks by Class
 
@@ -164,7 +164,7 @@ ad_layers_ad_server_get_domain
 
 ad_layers_dfp_formatting_tags
 
-ad_layers_dfp_ad_slot_prefix
+ad_layers_dfp_ad_unit_prefix
 
 ad_layers_dfp_formatting_tags
 
@@ -182,7 +182,7 @@ ad_layers_dfp_custom_target
 
 ad_layers_dfp_ad_unit_class
 
-ad_layers_dfp_ad_slot_html
+ad_layers_dfp_ad_unit_html
 
 ad_layers_dfp_breakpoint_key
 

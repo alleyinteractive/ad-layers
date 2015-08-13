@@ -65,8 +65,8 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		add_action( 'wp_head', array( $this, 'header_setup' ) );
 		add_action( 'wp_footer', array( $this, 'footer_setup' ) );
 		
-		// Handle rendering slots
-		add_action( 'ad_layers_render_slot', array( $this, 'get_ad_slot' ) );
+		// Handle rendering units
+		add_action( 'ad_layers_render_ad_unit', array( $this, 'get_ad_unit' ) );
 		
 		// Load current settings
 		self::$settings = apply_filters( 'ad_layers_ad_server_settings', get_option( $this->option_name, array() ) );
@@ -121,26 +121,26 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	}
 	
 	/**
-	 * Gets available ad slots.
+	 * Gets available ad unitss.
 	 * @access public
 	 * @return array
 	 */
-	public function get_ad_slots() {
+	public function get_ad_units() {
 		if ( ! empty( $this->ad_server ) ) {
-			return $this->ad_server->get_ad_slots( $ad_slot );
+			return $this->ad_server->get_ad_units();
 		}
 	}
 	
 	/**
-	 * Get the code for a specific ad slot.
+	 * Get the code for a specific ad unit.
 	 * Should be implemented by all child classes.
 	 * Since $ad_server will be empty for child classes,
 	 * this will automatically do nothing if they choose not to implement it.
 	 * @access public
 	 */
-	public function get_ad_slot( $ad_slot ) {
+	public function get_ad_unit( $ad_unit ) {
 		if ( ! empty( $this->ad_server ) ) {
-			$this->ad_server->get_ad_slot( $ad_slot );
+			$this->ad_server->get_ad_unit( $ad_unit );
 		}
 	}
 	

@@ -37,12 +37,12 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	public $formatting_tag_pattern = '/#[a-zA-Z\_]+#/';
 	
 	/**
-	 * Ad slot prefix.
+	 * Ad unit prefix.
 	 *
 	 * @access public
 	 * @var string
 	 */
-	public $ad_slot_prefix = 'div-gpt-ad-';
+	public $ad_unit_prefix = 'div-gpt-ad-';
 	
 	/**
 	 * Available ad units on the page.
@@ -59,8 +59,8 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		// Define the available formatting tags
 		$this->formatting_tags = apply_filters( 'ad_layers_dfp_formatting_tags', $this->set_formatting_tags() );
 		
-		// Allow filtering of the ad slot prefix
-		$this->ad_slot_prefix = apply_filters( 'ad_layers_dfp_ad_slot_prefix', $this->ad_slot_prefix );
+		// Allow filtering of the ad unit prefix
+		$this->ad_unit_prefix = apply_filters( 'ad_layers_dfp_ad_unit_prefix', $this->ad_unit_prefix );
 		
 		// Add a help tab
 		add_action( 'load-' . Ad_Layers_Post_Type::instance()->get_post_type() . '_page_' . $this->option_name, array( $this, 'add_help_tab' ) );
@@ -111,7 +111,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		do_action( 'ad_layers_dfp_before_setup' ); ?>
 		?>
 		<script type='text/javascript'>
-		var dfp_ad_slots = [];
+		var dfp_ad_units = [];
 		var googletag = googletag || {};
 		googletag.cmd = googletag.cmd || [];
 		(function() {
@@ -129,8 +129,8 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		<script type="text/javascript">
 		googletag.cmd.push(function() {
 			<?php
-				// Add the ad slots
-				$this->ad_slot_js( $ad_layer );
+				// Add the ad units
+				$this->ad_unit_js( $ad_layer );
 				
 				// Add custom targeting
 				$this->targeting_js( $ad_layer );
@@ -142,7 +142,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			?>
 			googletag.enableServices();
 		});
-		<?php do_action( 'ad_layers_dfp_after_ad_slots' ); ?>
+		<?php do_action( 'ad_layers_dfp_after_ad_units' ); ?>
 		</script>
 		<?php
 	}
@@ -263,12 +263,12 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	}
 	
 	/**
-	 * Creates the ad slot Javascript.
+	 * Creates the ad unit Javascript.
 	 *
 	 * @access private
 	 * @param array $ad_layer
 	 */
-	private function ad_slot_js( $ad_layer ) {
+	private function ad_unit_js( $ad_layer ) {
 		// Get the ad setup and ensure it's valid
 		$ad_setup = $this->get_setting( 'ad_setup' );
 		if ( empty( $ad_setup ) ) {
@@ -276,7 +276,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		}
 		
 		// Get the units included in this ad layer
-		$this->ad_units = get_post_meta( $ad_layer['post_id'], 'ad_layer_ad_slots', true );
+		$this->ad_units = get_post_meta( $ad_layer['post_id'], 'ad_layer_ad_units', true );
 		if ( empty( $this->ad_units ) ) {
 			return;
 		}
@@ -354,19 +354,19 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		// Get the page type
 		$page_type = Ad_Layers::instance()->get_current_page_type();
 			
-		// Add the slots
-		$ad_slot_num = 0;
+		// Add the units
+		$ad_unit_num = 0;
 		foreach ( $this->ad_units as $ad_unit ) {
 			// If no default size is defined, skip it
 			if ( empty( $default_by_unit[ $ad_unit ] ) ) {
 				continue;
 			}
 		
-			// Finalize output for this slot and add it to the final return value
-			// Add slots are also saved to an array based on ad type so they can be refreshed if the page size changes
+			// Finalize output for this unit and add it to the final return value
+			// Add units are also saved to an array based on ad type so they can be refreshed if the page size changes
 			echo sprintf(
-				"dfp_ad_slots[%s] = googletag.%s('%s',%s,'%s')%s.addService(googletag.pubads());\n",
-				esc_js( $ad_slot_num ),
+				"dfp_ad_units[%s] = googletag.%s('%s',%s,'%s')%s.addService(googletag.pubads());\n",
+				esc_js( $ad_unit_num ),
 				( in_array( $ad_unit, $oop_units ) ) ? 'defineOutOfPageSlot' : 'defineSlot',
 				esc_js( $this->get_path( $page_type, $ad_unit ) ),
 				json_encode( $default_by_unit[ $ad_unit ] ),
@@ -374,7 +374,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 				( ! empty( $mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $oop_units ) ) ? '.defineSizeMapping(mapping' . esc_js( $this->get_key( $ad_unit ) ) . ')' : ''
 			);
 		
-			$ad_slot_num++;
+			$ad_unit_num++;
 		}
 	}
 	
@@ -442,40 +442,40 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	}
 	
 	/**
-	 * Gets available ad slots.
+	 * Gets available ad units.
 	 *
 	 * @access public
 	 * @return array
 	 */
-	public function get_ad_slots() {
-		$ad_slots = array();
+	public function get_ad_units() {
+		$ad_units = array();
 		$ad_setup = $this->get_setting( 'ad_setup' );
 		if ( ! empty( $ad_setup ) ) {
 			foreach ( $ad_setup as $breakpoint ) {
 				if ( ! empty( $breakpoint['ad_units'] ) ) {
 					foreach ( $breakpoint['ad_units'] as $ad_unit ) {
 						if ( ! empty( $ad_unit['code'] ) ) {	
-							$ad_slots[] = $ad_unit['code'];
+							$ad_units[] = $ad_unit['code'];
 						}
 					}
 				}
 			}
-			$ad_slots = array_unique( $ad_slots );
-			sort( $ad_slots );
+			$ad_units = array_unique( $ad_units );
+			sort( $ad_units );
 		}
-		return $ad_slots;
+		return $ad_units;
 	}
 	
 	/**
 	 * Generate the code for a single ad unit.
-	 * The terminology of the plugin uses slots but we use unit here to be consistent with DFP.
+	 * The terminology of the plugin uses units but we use unit here to be consistent with DFP.
 	 *
 	 * @access public
-	 * @param string $slot
+	 * @param string $ad_unit
 	 * @param boolean $echo
 	 * @return string
 	 */
-	public function get_ad_slot( $ad_unit, $echo = true ) {
+	public function get_ad_unit( $ad_unit, $echo = true ) {
 		// Make sure this is in the current ad layer and an ad layer is defined
 		if ( empty( $this->ad_units ) || ! in_array( $ad_unit, $this->ad_units ) ) {
 			return;
@@ -492,7 +492,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		$output .= "\t</script>\n";
 		$output .= "</div>\n";
 		
-		$output = apply_filters( 'ad_layers_dfp_ad_slot_html', $output, $ad_unit );
+		$output = apply_filters( 'ad_layers_dfp_ad_unit_html', $output, $ad_unit );
 		
 		if ( $echo ) {
 			echo $output;
@@ -520,7 +520,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * @return string
 	 */
 	public function get_ad_unit_id( $ad_unit ) {
-		return apply_filters( 'ad_layers_dfp_ad_unit_id', $this->ad_slot_prefix . $ad_unit, $ad_unit );
+		return apply_filters( 'ad_layers_dfp_ad_unit_id', $this->ad_unit_prefix . $ad_unit, $ad_unit );
 	}
 	
 	/**

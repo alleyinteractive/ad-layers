@@ -92,7 +92,7 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
   		$columns['ad_layer_page_types'] = __( 'Page Type', 'ad-layers' );
   		$columns['ad_layer_post_types'] = __( 'Post Types', 'ad-layers' );
   		$columns['ad_layer_taxonomies'] = __( 'Taxonomies', 'ad-layers' );
-  		$columns['ad_layer_ad_slots'] = __( 'Ad Slots', 'ad-layers' );
+  		$columns['ad_layer_ad_units'] = __( 'Ad Units', 'ad-layers' );
   		$columns['ad_layer_priority'] = __( 'Priority', 'ad-layers' );
   		
   		// Move date back to the end
@@ -114,7 +114,7 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 			case 'ad_layer_page_types':
 			case 'ad_layer_post_types':
 			case 'ad_layer_taxonomies':
-			case 'ad_layer_ad_slots':
+			case 'ad_layer_ad_units':
 				$value = get_post_meta( $post_id, $column, true );
 				if ( ! empty( $value ) ) {
 					if ( is_array( $value ) ) {
@@ -142,19 +142,19 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 	 * @param string $priority
 	 */
 	public function add_meta_boxes() {
-		// Add ad slots
-		$fm_ad_slots = new Fieldmanager_Select(
+		// Add ad units
+		$fm_ad_units = new Fieldmanager_Select(
 			array(
-				'name' => 'ad_layer_ad_slots',
+				'name' => 'ad_layer_ad_units',
 				'limit' => 0,
 				'extra_elements' => 0,
 				'one_label_per_item' => false,
-				'label' => __( 'Select one or more ad slots.', 'ad-layers' ),
-				'add_more_label' =>  __( 'Add an ad slot', 'ad-layers' ),
-				'options' => Ad_Layers_Ad_Server::instance()->get_ad_slots(),
+				'label' => __( 'Select one or more ad units.', 'ad-layers' ),
+				'add_more_label' =>  __( 'Add an ad unit', 'ad-layers' ),
+				'options' => Ad_Layers_Ad_Server::instance()->get_ad_units(),
 			)
 		);
-		$fm_ad_slots->add_meta_box( __( 'Ad Slots', 'ad-layers' ), $this->post_type, 'normal', 'high' );
+		$fm_ad_units->add_meta_box( __( 'Ad Units', 'ad-layers' ), $this->post_type, 'normal', 'high' );
 		
 		// Add page types
 		$fm_page_types = new Fieldmanager_Select(
