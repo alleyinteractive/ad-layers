@@ -481,7 +481,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 */
 	public function get_ad_units() {
 		$ad_units = array();
-		$ad_setup = $this->get_settings;
+		$ad_setup = $this->get_settings();
 		if ( ! empty( $ad_setup ) ) {
 			foreach ( $ad_setup as $breakpoint ) {
 				if ( ! empty( $breakpoint['ad_units'] ) ) {
