@@ -416,48 +416,21 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * @access private
 	 */
 	private function targeting_js( $ad_layer ) {
-		// Handle any additional custom targeting specified for this ad layer.
+		// Handle any page level custom targeting specified for this ad layer.
 		$custom_targeting = get_post_meta( $ad_layer['post_id'], 'ad_layer_custom_targeting', true );
 		if ( empty( $custom_targeting ) ) {
 			return;
 		}
 		
-		$queried_object = get_queried_object();
 		$targeting_values = array();
 		foreach ( $custom_targeting as $custom_target ) {
-			switch ( $custom_target['value'] ) {
-				case 'other':
-					if ( isset( $custom_target['text'] ) ) {
-						$targeting_values[ $custom_target['custom_variable'] ] = $custom_target['text'];
-					}
-					break;
-				case 'author':
-					if ( is_singular() ) {
-						$targeting_values[ $custom_target['custom_variable'] ] = get_the_author_meta( 'display_name', $post->post_author );
-					} else if ( is_author() ) {
-						$targeting_values[ $custom_target['custom_variable'] ] = $queried_object->display_name;
-					}
-					break;
-				case 'post_type':
-					if ( is_singular() ) {
-						$targeting_values[ $custom_target['custom_variable'] ] = get_post_type();
-					} else if ( is_post_type_archive() ) {
-						$targeting_values[ $custom_target['custom_variable'] ] = $queried_object->name;
-					}
-					break;
-				default:
-					if ( taxonomy_exists( $custom_target['value'] ) ) {
-						if ( is_singular() ) {
-							$targeting_values[ $custom_target['custom_variable'] ] = get_the_terms( get_the_ID(), $custom_target['value'] );
-						} else if ( is_tax() ) {
-							$targeting_values[ $custom_target['custom_variable'] ] = $queried_object->slug;
-						}
-					}
-					break;
+			$values = ( isset( $custom_target['values'] ) ) ? $custom_target['values'] : null;
+			$targeting_value = $this->get_targeting_value( $custom_target['custom_variable'], $custom_target['source'], $values );
+			if ( ! empty( $targeting_value ) ) {
+				$targeting_values = array_merge( $targeting_values, $targeting_value );
 			}
-			
-			$targeting_values[ $custom_target['custom_variable'] ] = apply_filters( 'ad_layers_dfp_custom_target', $targeting_values[ $custom_target['custom_variable'] ], $custom_target );
 		}
+		$targeting_values = apply_filters( 'ad_layers_dfp_page_level_targeting', $targeting_values );
 		
 		// Add the JS
 		if ( ! empty( $targeting_values ) ) {
@@ -471,6 +444,59 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			}
 			echo ";\n";
 		}
+	}
+	
+	/**
+	 * Creates the DFP targeting key/value pair for a single targeting variable.
+	 *
+	 * @access public
+	 * @param string $key
+	 * @param string $source
+	 * @param array $values
+	 * @return array
+	 */
+	public function get_targeting_value( $key, $source, $values = null ) {
+		$targeting_values = array();
+		$queried_object = get_queried_object();
+		
+		switch ( $source ) {
+			case 'other':
+				if ( null !== $values ) {
+					$targeting_values[ $key ] = $values;
+				}
+				break;
+			case 'author':
+				if ( is_singular() ) {
+					$targeting_values[ $key ] = get_the_author_meta( apply_filters( 'ad_layers_dfp_author_targeting_field', 'display_name' ), $queried_object->post_author );
+				} else if ( is_author() ) {
+					$targeting_values[ $key ] = $queried_object->display_name;
+				}
+				break;
+			case 'post_type':
+				if ( is_singular() ) {
+					$targeting_values[ $key ] = get_post_type();
+				} else if ( is_post_type_archive() ) {
+					$targeting_values[ $key ] = $queried_object->name;
+				}
+				break;
+			default:
+				if ( taxonomy_exists( $source ) ) {
+					if ( is_singular() ) {
+						$terms = get_the_terms( get_the_ID(), $source );
+						if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+							$value = wp_list_pluck( $terms, apply_filters( 'ad_layers_dfp_term_targeting_field', 'slug' ) );
+						} else {
+							$value = array();
+						}
+						$targeting_values[ $key ] = $value;
+					} else if ( is_tax() ) {
+						$targeting_values[ $key ] = $queried_object->slug;
+					}
+				}
+				break;
+		}
+		
+		return apply_filters( 'ad_layers_dfp_custom_targeting_value', $targeting_values, $key, $source, $values );
 	}
 	
 	/**

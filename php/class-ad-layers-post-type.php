@@ -144,7 +144,7 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 	public function add_meta_boxes() {
 		// Add ad units
 		$fm_ad_units = new Fieldmanager_Select(
-			array(
+			apply_filters( 'ad_layers_ad_units_field_args', array(
 				'name' => 'ad_layer_ad_units',
 				'limit' => 0,
 				'extra_elements' => 0,
@@ -153,13 +153,13 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 				'label' => __( 'Select one or more ad units.', 'ad-layers' ),
 				'add_more_label' =>  __( 'Add an ad unit', 'ad-layers' ),
 				'options' => Ad_Layers_Ad_Server::instance()->get_ad_units(),
-			)
+			) )
 		);
 		$fm_ad_units->add_meta_box( __( 'Ad Units', 'ad-layers' ), $this->post_type, 'normal', 'high' );
 		
 		// Add page types
 		$fm_page_types = new Fieldmanager_Select(
-			array(
+			apply_filters( 'ad_layers_page_types_field_args', array(
 				'name' => 'ad_layer_page_types',
 				'limit' => 0,
 				'extra_elements' => 0,
@@ -167,13 +167,13 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 				'label' => __( 'Select one or more page types to be targeted with this ad layer.', 'ad-layers' ),
 				'add_more_label' =>  __( 'Add a page type', 'ad-layers' ),
 				'options' => Ad_Layers::instance()->get_page_types(),
-			)
+			) )
 		);
 		$fm_page_types->add_meta_box( __( 'Page Types', 'ad-layers' ), $this->post_type, 'normal', 'high' );
 		
 		// Add taxonomies
 		$fm_taxonomies = new Fieldmanager_Select(
-			array(
+			apply_filters( 'ad_layers_taxonomies_field_args', array(
 				'name' => 'ad_layer_taxonomies',
 				'limit' => 0,
 				'extra_elements' => 0,
@@ -181,13 +181,13 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 				'label' => __( 'Select one or more optional taxonomies for targeting. Posts with any term in these taxonomies will get the ad layer.', 'ad-layers' ),
 				'add_more_label' =>  __( 'Add a taxonomy', 'ad-layers' ),
 				'options' => Ad_Layers::instance()->get_taxonomies(),
-			)
+			) )
 		);
 		$fm_taxonomies->add_meta_box( __( 'Taxonomies', 'ad-layers' ), $this->post_type, 'normal', 'high' );
 		
 		// Add post types
 		$fm_post_types = new Fieldmanager_Select(
-			array(
+			apply_filters( 'ad_layers_post_types_field_args', array(
 				'name' => 'ad_layer_post_types',
 				'limit' => 0,
 				'extra_elements' => 0,
@@ -195,66 +195,16 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 				'label' => __( 'Select one or more optional post types for targeting. Any post of this type will get the ad layer.', 'ad-layers' ),
 				'add_more_label' =>  __( 'Add a post type', 'ad-layers' ),
 				'options' => Ad_Layers::instance()->get_post_types(),
-			)
+			) )
 		);
 		$fm_post_types->add_meta_box( __( 'Post Types', 'ad-layers' ), $this->post_type, 'normal', 'high' );
 		
 		// Custom targeting variables
-		$fm_custom = new Fieldmanager_Group( array(
-			'name' => 'ad_layer_custom_targeting',
-			'collapsible' => true,
-			'collapsed' => false,
-			'limit' => 0,
-			'extra_elements' => 0,
-			'label' => __( 'Custom Targeting', 'ad-layers' ),
-			'add_more_label' =>  __( 'Add custom targeting', 'ad-layers' ),
-			'label_macro' => array( __( '%s', 'ad-layers' ), 'title' ),
-			'children' => array(
-				'custom_variable' => new Fieldmanager_Select(
-					array(
-						'label' => __( 'Custom Variable', 'ad-layers' ),
-						'options' => Ad_Layers::instance()->get_custom_variables(),	
-					)
-				),
-				'value' => new Fieldmanager_Select(
-					array(
-						'label' => __( 'Value', 'ad-layers' ),
-						'options' => $this->get_custom_targeting_options(),
-					)
-				),
-				'text' => new Fieldmanager_Textfield(
-					array(
-						'display_if' => array(
-							'src' => 'value',
-							'value' => 'other',
-						),
-					)
-				),
-			)
-		) );
-		$fm_custom->add_meta_box( __( 'Custom Targeting', 'ad-layers' ), $this->post_type, 'normal', 'low' );
-	}
-	
-	/**
-	 * Gets all available custom targeting options.
-	 *
-	 * @access private
-	 * @return array
-	 */
-	private function get_custom_targeting_options() {
-		$options = array();
-
-		// Add all taxonomies available to ad layers
-		$options = array_merge( $options, Ad_Layers::instance()->get_taxonomies() );
-		
-		// Add additional options
-		$options = array_merge( $options, array(
-			'post_type' => __( 'Post Type', 'ad-layers' ),
-			'author' => __( 'Author', 'ad-layers' ),
-			'other' => __( 'Other', 'ad-layers' ),
-		) );
-		
-		return apply_filters( 'ad_layers_custom_targeting_options', $options );
+		$targeting_args = Ad_Layers_Ad_Server::instance()->get_custom_targeting_args();
+		if ( ! empty( $targeting_args ) ) {
+			$fm_custom = new Fieldmanager_Group( apply_filters( 'ad_layers_custom_targeting_field_args', $targeting_args ) );
+			$fm_custom->add_meta_box( __( 'Page Level Custom Targeting', 'ad-layers' ), $this->post_type, 'normal', 'low' );	
+		}
 	}
 	
 	/**

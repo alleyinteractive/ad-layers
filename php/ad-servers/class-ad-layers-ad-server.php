@@ -55,6 +55,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 
 	/**
 	 * Setup the singleton.
+	 *
 	 * @access public
 	 */
 	public function setup() {
@@ -94,6 +95,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	
 	/**
 	 * Get current available ad servers.
+	 *
 	 * @access public
 	 * @return array
 	 */
@@ -103,6 +105,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	
 	/**
 	 * Get current available ad servers for use in an option list.
+	 *
 	 * @access public
 	 * @return array
 	 */
@@ -121,7 +124,8 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	}
 	
 	/**
-	 * Gets available ad unitss.
+	 * Gets available ad units.
+	 *
 	 * @access public
 	 * @return array
 	 */
@@ -136,6 +140,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * Should be implemented by all child classes.
 	 * Since $ad_server will be empty for child classes,
 	 * this will automatically do nothing if they choose not to implement it.
+	 *
 	 * @access public
 	 */
 	public function get_ad_unit( $ad_unit ) {
@@ -146,6 +151,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	
 	/**
 	 * Gets a particular ad server setting or all settings if none is specified.
+	 *
 	 * @access public
 	 * @return mixed
 	 */
@@ -159,6 +165,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	
 	/**
 	 * Add the ad server settings page.
+	 *
 	 * @access public
 	 */
 	public function add_settings_page( $args = array() ) {
@@ -189,6 +196,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * Should be implemented by all child classes, if needed.
 	 * Since $ad_server will be empty for child classes,
 	 * this will automatically do nothing if they choose not to implement it.
+	 *
 	 * @access public
 	 */
 	public function header_setup() {
@@ -202,6 +210,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * Should be implemented by all child classes, if needed.
 	 * Since $ad_server will be empty for child classes,
 	 * this will automatically do nothing if they choose not to implement it.
+	 *
 	 * @access public
 	 */
 	public function footer_setup() {
@@ -215,6 +224,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * Should be implemented by all child classes, if needed.
 	 * Since $ad_server will be empty for child classes,
 	 * this will automatically do nothing if they choose not to implement it.
+	 *
 	 * @access public
 	 */
 	public function add_help_tab() {
@@ -226,6 +236,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	/**
 	 * Returns the ad server display label.
 	 * Should be implemented by all child classes.
+	 *
 	 * @access public
 	 * @return string
 	 */
@@ -236,6 +247,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	/**
 	 * Returns the ad server settings fields to merge into the ad settings page.
 	 * Should be implemented by all child classes.
+	 *
 	 * @access public
 	 * @return array
 	 */
@@ -246,6 +258,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	/**
 	 * Gets the domain of the current site.
 	 * Useful for virtually any ad server.
+	 *
 	 * @access public
 	 * @return string
 	 */
@@ -254,6 +267,72 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 			'ad_layers_ad_server_get_domain', 
 			preg_replace( '#^https?://#', '', trim( get_site_url() ) )
 		);
+	}
+	
+	/**
+	 * Gets the args used to define a custom targeting field.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function get_custom_targeting_args() {
+		return apply_filters( 'ad_layers_custom_targeting_args', array(
+			'name' => 'ad_layer_custom_targeting',
+			'collapsible' => true,
+			'collapsed' => false,
+			'limit' => 0,
+			'extra_elements' => 0,
+			'add_more_label' =>  __( 'Add custom targeting', 'ad-layers' ),
+			'label_macro' => array( __( '%s', 'ad-layers' ), 'title' ),
+			'children' => array(
+				'custom_variable' => new Fieldmanager_Select(
+					array(
+						'label' => __( 'Custom Variable', 'ad-layers' ),
+						'options' => Ad_Layers::instance()->get_custom_variables(),	
+					)
+				),
+				'source' => new Fieldmanager_Select(
+					array(
+						'label' => __( 'Source', 'ad-layers' ),
+						'options' => $this->get_custom_targeting_sources(),
+					)
+				),
+				'values' => new Fieldmanager_Textfield(
+					array(
+						'add_more_label' =>  __( 'Add value', 'ad-layers' ),
+						'one_label_per_item' => false,
+						'limit' => 0,
+						'extra_elements' => 0,
+						'display_if' => array(
+							'src' => 'source',
+							'value' => 'other',
+						),
+					)
+				),
+			)
+		) );
+	}
+	
+	/**
+	 * Gets all available custom targeting sources.
+	 *
+	 * @access private
+	 * @return array
+	 */
+	private function get_custom_targeting_sources() {
+		$options = array();
+
+		// Add all taxonomies available to ad layers
+		$options = array_merge( $options, Ad_Layers::instance()->get_taxonomies() );
+		
+		// Add additional options
+		$options = array_merge( $options, array(
+			'post_type' => __( 'Post Type', 'ad-layers' ),
+			'author' => __( 'Author', 'ad-layers' ),
+			'other' => __( 'Other', 'ad-layers' ),
+		) );
+		
+		return apply_filters( 'ad_layers_custom_targeting_sources', $options );
 	}
 }
 

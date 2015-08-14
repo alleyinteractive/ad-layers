@@ -163,6 +163,10 @@ ad_layer_ad_server_setting
 
 ad_layers_ad_server_get_domain
 
+ad_layers_custom_targeting_args
+
+ad_layers_custom_targeting_sources
+
 *Ad_Layers_DFP*
 
 ad_layers_dfp_formatting_tags
@@ -181,7 +185,13 @@ ad_layers_dfp_default_by_unit
 
 ad_layers_dfp_oop_units
 
-ad_layers_dfp_custom_target
+ad_layers_dfp_page_level_targeting
+
+ad_layers_dfp_custom_targeting_value
+
+ad_layers_dfp_author_targeting_field
+
+ad_layers_dfp_term_targeting_field
 
 ad_layers_dfp_ad_unit_class
 
@@ -208,12 +218,20 @@ ad_layers_post_types
 ad_layers_taxonomies
 
 ad_layers_edit_columns
-
-ad_layers_custom_targeting_options
-
+s
 ad_layers_save_post
 
 ad_layers_delete_post
+
+ad_layers_ad_units_field_args
+
+ad_layers_page_types_field_args
+
+ad_layers_taxonomies_field_args
+
+ad_layers_post_types_field_args
+
+ad_layers_custom_targeting_field_args
 
 *Ad_Layers*
 
