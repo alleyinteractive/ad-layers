@@ -181,7 +181,11 @@ ad_layers_dfp_collapse_empty_divs
 
 ad_layers_ad_unit_sizes
 
+ad_layers_dfp_mapping_by_unit
+
 ad_layers_dfp_default_by_unit
+
+ad_layers_dfp_targeting_by_unit
 
 ad_layers_dfp_oop_units
 

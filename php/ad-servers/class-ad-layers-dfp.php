@@ -192,6 +192,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			)
 		);
 		
+		// Verify if targeting args should be added
 		$targeting_args = $this->get_custom_targeting_args( 'custom_targeting' );
 		if ( ! empty( $targeting_args ) ) {
 			$targeting_args['label'] = __( 'Custom Targeting', 'ad-layers' );
@@ -326,6 +327,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		// Loop through the breakpoints and add the desired units
 		$mapping_by_unit = array();
 		$default_by_unit = array();
+		$targeting_by_unit = array();
 		$oop_units = array();
 		foreach ( $ad_setup as $i => $breakpoint ) {
 			// Ensure this breakpoint is valid or else skip it
@@ -381,7 +383,9 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		}
 		
 		// Apply filters
-		$default_by_unit = apply_filters( 'ad_layers_dfp_default_by_unit', $default_by_unit );
+		$mapping_by_unit = apply_filters( 'ad_layers_dfp_mapping_by_unit', $mapping_by_unit, $ad_layer );
+		$default_by_unit = apply_filters( 'ad_layers_dfp_default_by_unit', $default_by_unit, $ad_layer );
+		$targeting_by_unit = apply_filters( 'ad_layers_dfp_targeting_by_unit', $targeting_by_unit, $ad_layer );
 		$oop_units = apply_filters( 'ad_layers_dfp_oop_units', $oop_units );
 		
 		// Echo the final mappings by ad unit
@@ -403,17 +407,22 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			if ( empty( $default_by_unit[ $ad_unit ] ) ) {
 				continue;
 			}
-		
+			
+			// See if there is any slot level targeting defined.
+			// Build the appropriate targeting code if so.
+			$targeting = ( ! empty( $targeting_by_unit[ $ad_unit ] ) ) ? $this->get_ : '';
+			
 			// Finalize output for this unit and add it to the final return value
 			// Add units are also saved to an array based on ad type so they can be refreshed if the page size changes
 			echo sprintf(
-				"dfp_ad_units[%s] = googletag.%s('%s',%s,'%s')%s.addService(googletag.pubads());\n",
+				"dfp_ad_units[%s] = googletag.%s('%s',%s,'%s')%s%s.addService(googletag.pubads());\n",
 				esc_js( $ad_unit_num ),
 				( in_array( $ad_unit, $oop_units ) ) ? 'defineOutOfPageSlot' : 'defineSlot',
 				esc_js( $this->get_path( $page_type, $ad_unit ) ),
 				json_encode( $default_by_unit[ $ad_unit ] ),
 				esc_js( $this->get_ad_unit_id( $ad_unit ) ),
-				( ! empty( $mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $oop_units ) ) ? '.defineSizeMapping(mapping' . esc_js( $this->get_key( $ad_unit ) ) . ')' : ''
+				( ! empty( $mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $oop_units ) ) ? '.defineSizeMapping(mapping' . esc_js( $this->get_key( $ad_unit ) ) . ')' : '',
+				$targeting // This is escaped above as it is built
 			);
 		
 			$ad_unit_num++;
@@ -424,6 +433,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * Creates the DFP targeting Javascript.
 	 *
 	 * @access private
+	 * @param array $ad_layer
 	 */
 	private function targeting_js( $ad_layer ) {
 		// Handle any page level custom targeting specified for this ad layer.
@@ -444,16 +454,39 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		
 		// Add the JS
 		if ( ! empty( $targeting_values ) ) {
-			echo 'googletag.pubads()';
-			foreach ( $targeting_values as $key => $value ) {
-				echo sprintf(
-					".setTargeting('%s',%s)",
-					esc_js( $key ),
-					json_encode( $value )
-				);
-			}
-			echo ";\n";
+			echo 'googletag.pubads()' . $this->get_targeting_from_array( $targeting_values ) . ";\n";
 		}
+	}
+	
+	/**
+	 * Gets the DFP targeting JS for an array of value
+	 *
+	 * @access private
+	 * @param array $targeting_values
+	 * @return string
+	 */
+	private function get_targeting_from_array( $targeting_values ) {
+		$targeting_js = '';
+		foreach ( $targeting_values as $key => $value ) {
+			$targeting_js .= $this->get_targeting_value_js( $key, $value );
+		}
+		return $targeting_js;
+	}
+	
+	/**
+	 * Gets the DFP targeting JS for a single key/value pair.
+	 *
+	 * @access private
+	 * @param string $key
+	 * @param mixed $value
+	 * @return string
+	 */
+	private function get_targeting_value_js( $key, $value ) {
+		return sprintf(
+			".setTargeting('%s',%s)",
+			esc_js( $key ),
+			json_encode( $value )
+		);
 	}
 	
 	/**
