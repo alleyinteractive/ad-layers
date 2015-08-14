@@ -53,6 +53,14 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	public $ad_units;
 	
 	/**
+	 * Cache key
+	 *
+	 * @access public
+	 * @var string
+	 */
+	public $cache_key = 'ad_layers_dfp_settings';
+	
+	/**
 	 * Setup the singleton.
 	 */
 	public function setup() {
@@ -64,6 +72,9 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		
 		// Add a help tab
 		add_action( 'load-' . Ad_Layers_Post_Type::instance()->get_post_type() . '_page_' . $this->option_name, array( $this, 'add_help_tab' ) );
+		
+		// Handle caching
+		add_action( 'update_option', array( $this, 'cache_settings' ), 10, 3 );
 	}
 	
 	/**
@@ -155,7 +166,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * @return array
 	 */
 	public function get_settings_fields() {
-		return array(
+		return apply_filters( 'ad_layers_dfp_get_settings_fields', array(
 			'account_id' => new Fieldmanager_Textfield(
 				array(
 					'label' => __( 'DFP Account ID', 'ad-layers' ),
@@ -184,7 +195,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 					),
 				),
 			) ),
-			'ad_setup' => new Fieldmanager_Group( array(
+			'breakpoints' => new Fieldmanager_Group( array(
 				'collapsible' => true,
 				'collapsed' => true,
 				'limit' => 0,
@@ -208,58 +219,79 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 							'label' => __( 'Minimum Height', 'ad-layers' ),
 						)
 					),
-					'ad_units' => new Fieldmanager_Group( array(
+				),
+			) ),
+			'ad_units' => new Fieldmanager_Group( array(
+				'collapsible' => true,
+				'collapsed' => true,
+				'limit' => 0,
+				'extra_elements' => 0,
+				'label' => __( 'Ad Units', 'ad-layers' ),
+				'label_macro' => array( __( 'Ad Unit: %s', 'ad-layers' ), 'code' ),
+				'add_more_label' => __( 'Add Ad Unit', 'ad-layers' ),
+				'children' => array(
+					'code' => new Fieldmanager_Textfield(
+						array(
+							'label' => __( 'Code', 'ad-layers' ),
+						)
+					),
+					'sizes' => new Fieldmanager_Group( array(
 						'limit' => 0,
 						'extra_elements' => 0,
-						'label' => __( 'Ad Units', 'ad-layers' ),
-						'label_macro' => array( __( 'Ad Unit: %s', 'ad-layers' ), 'code' ),
-						'add_more_label' => __( 'Add Ad Unit', 'ad-layers' ),
-						'collapsible' => true,
-						'collapsed' => true,
-						'children' => array(
-							'code' => new Fieldmanager_Textfield(
-								array(
-									'label' => __( 'Code', 'ad-layers' ),
-								)
-							),
-							'sizes' => new Fieldmanager_Group( array(
-								'limit' => 0,
-								'extra_elements' => 0,
-								'one_label_per_item' => false,
-								'label' => __( 'Sizes', 'ad-layers' ),
-								'add_more_label' => __( 'Add Size', 'ad-layers' ),
-								'children' => array(
-									'width' => new Fieldmanager_Textfield(
-										array(
-											'label' => __( 'Width', 'ad-layers' ),
-											'sanitize' => 'absint',
-										)
-									),
-									'height' => new Fieldmanager_Textfield(
-										array(
-											'label' => __( 'Height', 'ad-layers' ),
-											'sanitize' => 'absint',
-										)
-									),
-									'out_of_page' => new Fieldmanager_Checkbox(
-										array(
-											'label' => __( 'Out of Page', 'ad-layers' ),
-											'checked_value' => 'oop',
-										)
-									),
-									'default_size' => new Fieldmanager_Checkbox(
-										array(
-											'label' => __( 'Default Size', 'ad-layers' ),
-											'checked_value' => 'default',
-										)
-									),
-								)
-							) )
-						)
-					) )
+						'one_label_per_item' => false,
+						'label' => __( 'Sizes', 'ad-layers' ),
+						'add_more_label' => __( 'Add Size', 'ad-layers' ),
+						'children' => $this->get_size_options(),
+					) ),
 				)
 			) )
+		) );
+	}
+	
+	/**
+	 * Returns the available size options for ad configuration.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function get_size_options() {
+		$args = array(
+			'width' => new Fieldmanager_Textfield(
+				array(
+					'label' => __( 'Width', 'ad-layers' ),
+					'sanitize' => 'absint',
+				)
+			),
+			'height' => new Fieldmanager_Textfield(
+				array(
+					'label' => __( 'Height', 'ad-layers' ),
+					'sanitize' => 'absint',
+				)
+			),
+			'out_of_page' => new Fieldmanager_Checkbox(
+				array(
+					'label' => __( 'Out of Page', 'ad-layers' ),
+					'checked_value' => 'oop',
+				)
+			),
+			'default_size' => new Fieldmanager_Checkbox(
+				array(
+					'label' => __( 'Default Size', 'ad-layers' ),
+					'checked_value' => 'default',
+				)
+			),
 		);
+		
+		// Add any defined breakpoints
+		$breakpoints = $this->get_setting( 'breakpoints' );
+		if ( ! empty( $breakpoints ) ) {
+			$args['breakpoints'] = new Fieldmanager_Checkboxes( array(
+				'label' => __( 'Breakpoints', 'ad-layers' ),
+				'options' => wp_list_pluck( $breakpoints, 'title' ),
+			) );
+		}
+		
+		return $args;
 	}
 	
 	/**
@@ -269,8 +301,8 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * @param array $ad_layer
 	 */
 	private function ad_unit_js( $ad_layer ) {
-		// Get the ad setup and ensure it's valid
-		$ad_setup = $this->get_setting( 'ad_setup' );
+		// Ensure breakpoints are set
+		$ad_setup = $this->get_settings();
 		if ( empty( $ad_setup ) ) {
 			return;
 		}
@@ -281,7 +313,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			return;
 		}
 				
-		// Loop through the sizes available for each breakpoint
+		// Loop through the breakpoints and add the desired units
 		$mapping_by_unit = array();
 		$default_by_unit = array();
 		$oop_units = array();
@@ -449,7 +481,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 */
 	public function get_ad_units() {
 		$ad_units = array();
-		$ad_setup = $this->get_setting( 'ad_setup' );
+		$ad_setup = $this->get_settings;
 		if ( ! empty( $ad_setup ) ) {
 			foreach ( $ad_setup as $breakpoint ) {
 				if ( ! empty( $breakpoint['ad_units'] ) ) {
@@ -668,10 +700,11 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	}
 	
 	/**
-	 * Render the content of the "Formatting Tags" help tab.
-	 *
+	 * Render the content of the help tab.
 	 * The tab displays a table of each available formatting tab and any
 	 * provided description.
+	 *
+	 * @access public
 	 */
 	public function formatting_tags_help_tab() {
 		if ( ! empty( $this->formatting_tags ) ) :
@@ -689,6 +722,88 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			</aside>
 			<?php
 		endif;
+	}
+	
+	/**
+	 * Gets the current DFP-specific settings required to build the setup code.
+	 * These are cached from the main Ad_Layers_Ad_Server settings on update for efficiency.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function get_settings() {
+		$settings = get_option( $this->cache_key );
+		
+		// If these settings are empty and this plugin in use, this is *very* likely a caching error.
+		// Let's at least try to regenerate these and if it fails, accept our fate.
+		if ( empty( $settings ) ) {
+			$settings = $this->cache_settings( $this->option_name, null, get_option( $this->option_name ), true );
+		}
+		
+		// Return what we have at this point
+		return $settings;
+	}
+	
+	/**
+	 * Cache the settings in a format more conducive to generating tags.
+	 * The default Fieldmanager format currently used is great for the user interface
+	 * but not as well suited to how the DFP setup code is actually generated.
+	 *
+	 * @access public
+	 * @param string $option
+	 * @param mixed $old_value
+	 * @param mixed $value
+	 * @param boolean $return
+	 * @return mixed
+	 */
+	public function cache_settings( $option, $old_value, $value, $return = false ) {
+		// Make sure this is saving ad server settings
+		if ( $option !== $this->option_name ) {
+			return;
+		}
+	
+		$cached_setup = array();
+
+		// Don't bother if no breakpoints or no ad units are set
+		if ( empty( $value['breakpoints'] ) || empty( $value['ad_units'] ) ) {
+			return;
+		}
+		
+		foreach ( $value['breakpoints'] as &$breakpoint ) {
+			// Add ad units to the breakpoint data
+			$breakpoint['ad_units'] = array();
+			
+			// Get all ad units for this breakpoint and add their data to the breakpoint
+			if ( ! empty( $value['ad_units'] ) ) {
+				foreach ( $value['ad_units'] as $ad_unit ) {
+					// Iterate over the sizes and find ones used by this breakpoint
+					if ( ! empty( $ad_unit['sizes'] ) ) {
+						foreach ( $ad_unit['sizes'] as $i => &$size ) {
+							// If this ad unit isn't used by the breakpoint, drop it
+							if ( ! in_array( $breakpoint['title'], $size['breakpoints'] ) ) {
+								unset( $ad_unit['sizes'][ $i ] );
+							} else {
+								// Leave it alone, but drop the breakpoint info since the cache won't need it
+								unset( $size['breakpoints'] );
+							}
+						}
+				
+						// If there are any ad unit sizes left, add to the breakpoint
+						if ( ! empty( $ad_unit['sizes'] ) ) {
+							$breakpoint['ad_units'][] = $ad_unit;
+						}
+					}
+				}
+			}
+		}
+		
+		// Store the cached data
+		update_option( $this->cache_key, $value['breakpoints'] );
+		
+		// The action hook doesn't need a return value, but other usage of this plugin might
+		if ( true === $return ) {
+			return $value['breakpoints'];
+		}
 	}
 }
 
