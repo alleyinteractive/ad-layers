@@ -379,6 +379,11 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 					json_encode( array( absint( $breakpoint['min_width'] ), absint( $breakpoint['min_height'] ) ) ),
 					json_encode( $sizes )
 				);
+				
+				// Check for any global or ad layer specific (latter is TODO) targeting
+				if ( ! empty( $ad_unit['custom_targeting'] ) ) {
+					$mapping_by_unit[ $unit_key ][] = $this->get_targeting_from_array( $ad_unit['custom_targeting'] );
+				}
 			}
 		}
 		
