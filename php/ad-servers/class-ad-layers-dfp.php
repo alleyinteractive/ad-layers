@@ -506,21 +506,9 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * @return array
 	 */
 	public function get_ad_units() {
-		$ad_units = array();
-		$ad_setup = $this->get_settings();
-		if ( ! empty( $ad_setup ) ) {
-			foreach ( $ad_setup as $breakpoint ) {
-				if ( ! empty( $breakpoint['ad_units'] ) ) {
-					foreach ( $breakpoint['ad_units'] as $ad_unit ) {
-						if ( ! empty( $ad_unit['code'] ) ) {	
-							$ad_units[] = $ad_unit['code'];
-						}
-					}
-				}
-			}
-			$ad_units = array_unique( $ad_units );
-			sort( $ad_units );
-		}
+		$ad_unit_setup = $this->get_setting( 'ad_units' );
+		$ad_units = wp_list_pluck( $ad_unit_setup, 'code' );
+		sort( $ad_units );
 		return $ad_units;
 	}
 	
