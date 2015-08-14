@@ -209,6 +209,8 @@ ad_layers_dfp_path
 
 ad_layers_dfp_get_settings_fields
 
+ad_layers_dfp_custom_targeting_field_args
+
 *Ad_Layers_Meta_Boxes*
 
 ad_layers_post_types

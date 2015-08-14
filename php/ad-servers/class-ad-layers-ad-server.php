@@ -273,11 +273,12 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * Gets the args used to define a custom targeting field.
 	 *
 	 * @access public
+	 * @param string $name
 	 * @return array
 	 */
-	public function get_custom_targeting_args() {
+	public function get_custom_targeting_args( $name = 'ad_layers_custom_targeting_args' ) {
 		return apply_filters( 'ad_layers_custom_targeting_args', array(
-			'name' => 'ad_layer_custom_targeting',
+			'name' => $name,
 			'collapsible' => true,
 			'collapsed' => false,
 			'limit' => 0,

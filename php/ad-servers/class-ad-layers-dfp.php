@@ -166,6 +166,39 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * @return array
 	 */
 	public function get_settings_fields() {
+		// Ad unit args may differ if custom targeting variables are present
+		$ad_unit_args = array(
+			'collapsible' => true,
+			'collapsed' => true,
+			'limit' => 0,
+			'extra_elements' => 0,
+			'label' => __( 'Ad Units', 'ad-layers' ),
+			'label_macro' => array( __( 'Ad Unit: %s', 'ad-layers' ), 'code' ),
+			'add_more_label' => __( 'Add Ad Unit', 'ad-layers' ),
+			'children' => array(
+				'code' => new Fieldmanager_Textfield(
+					array(
+						'label' => __( 'Code', 'ad-layers' ),
+					)
+				),
+				'sizes' => new Fieldmanager_Group( array(
+					'limit' => 0,
+					'extra_elements' => 0,
+					'one_label_per_item' => false,
+					'label' => __( 'Sizes', 'ad-layers' ),
+					'add_more_label' => __( 'Add Size', 'ad-layers' ),
+					'children' => $this->get_size_options(),
+				) ),
+			)
+		);
+		
+		$targeting_args = $this->get_custom_targeting_args( 'custom_targeting' );
+		if ( ! empty( $targeting_args ) ) {
+			$targeting_args['label'] = __( 'Custom Targeting', 'ad-layers' );
+			$targeting_args['one_label_per_item'] = false;
+			$ad_unit_args['children']['custom_targeting'] = new Fieldmanager_Group( apply_filters( 'ad_layers_dfp_custom_targeting_field_args', $targeting_args ) );
+		}
+	
 		return apply_filters( 'ad_layers_dfp_get_settings_fields', array(
 			'account_id' => new Fieldmanager_Textfield(
 				array(
@@ -221,30 +254,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 					),
 				),
 			) ),
-			'ad_units' => new Fieldmanager_Group( array(
-				'collapsible' => true,
-				'collapsed' => true,
-				'limit' => 0,
-				'extra_elements' => 0,
-				'label' => __( 'Ad Units', 'ad-layers' ),
-				'label_macro' => array( __( 'Ad Unit: %s', 'ad-layers' ), 'code' ),
-				'add_more_label' => __( 'Add Ad Unit', 'ad-layers' ),
-				'children' => array(
-					'code' => new Fieldmanager_Textfield(
-						array(
-							'label' => __( 'Code', 'ad-layers' ),
-						)
-					),
-					'sizes' => new Fieldmanager_Group( array(
-						'limit' => 0,
-						'extra_elements' => 0,
-						'one_label_per_item' => false,
-						'label' => __( 'Sizes', 'ad-layers' ),
-						'add_more_label' => __( 'Add Size', 'ad-layers' ),
-						'children' => $this->get_size_options(),
-					) ),
-				)
-			) )
+			'ad_units' => new Fieldmanager_Group( $ad_unit_args )
 		) );
 	}
 	
