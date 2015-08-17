@@ -179,7 +179,9 @@ ad_layers_dfp_async_rendering
 
 ad_layers_dfp_collapse_empty_divs
 
-ad_layers_ad_unit_sizes
+ad_layers_dfp_ad_unit_sizes
+
+ad_layers_dfp_targeting_values_by_unit
 
 ad_layers_dfp_mapping_by_unit
 
@@ -230,6 +232,8 @@ ad_layers_save_post
 ad_layers_delete_post
 
 ad_layers_ad_units_field_args
+
+ad_layers_custom_targeting_ad_unit_args
 
 ad_layers_page_types_field_args
 

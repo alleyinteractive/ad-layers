@@ -276,7 +276,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * @param string $name
 	 * @return array
 	 */
-	public function get_custom_targeting_args( $name = 'ad_layers_custom_targeting_args' ) {
+	public function get_custom_targeting_args( $name = 'ad_layer_custom_targeting' ) {
 		return apply_filters( 'ad_layers_custom_targeting_args', array(
 			'name' => $name,
 			'collapsible' => true,

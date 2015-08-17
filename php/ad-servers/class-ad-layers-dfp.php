@@ -320,7 +320,9 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		
 		// Get the units included in this ad layer
 		$this->ad_units = get_post_meta( $ad_layer['post_id'], 'ad_layer_ad_units', true );
-		if ( empty( $this->ad_units ) ) {
+		if ( ! empty( $this->ad_units ) ) {
+			$this->ad_units = wp_list_pluck( $this->ad_units, 'custom_targeting', 'ad_unit' );
+		} else {
 			return;
 		}
 				
@@ -338,7 +340,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			// Loop through the sizes and add them to the mapping
 			foreach ( $breakpoint['ad_units'] as $ad_unit ) {
 				// Skip this unit if invalid or not included in the layer
-				if ( empty( $ad_unit['code'] ) || empty( $ad_unit['sizes'] ) || ! in_array( $ad_unit['code'], $this->ad_units ) ) {
+				if ( empty( $ad_unit['code'] ) || empty( $ad_unit['sizes'] ) || ! array_key_exists( $ad_unit['code'], $this->ad_units ) ) {
 					continue;
 				}
 				
@@ -361,7 +363,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 						}
 					}
 				}
-				$sizes = apply_filters( 'ad_layers_ad_unit_sizes', $sizes, $ad_unit, $breakpoint );
+				$sizes = apply_filters( 'ad_layers_dfp_ad_unit_sizes', $sizes, $ad_unit, $breakpoint );
 				
 				// Generate the mapping JS and store it with the unit
 				$unit_key = $this->get_key( $ad_unit['code'] );
@@ -380,9 +382,16 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 					json_encode( $sizes )
 				);
 				
-				// Check for any global or ad layer specific (latter is TODO) targeting
-				if ( ! empty( $ad_unit['custom_targeting'] ) ) {
-					$mapping_by_unit[ $unit_key ][] = $this->get_targeting_from_array( $ad_unit['custom_targeting'] );
+				// Check for any global or ad layer specific targeting
+				$custom_targeting = null;
+				if ( ! empty( $this->ad_units[ $unit_key ] ) ) {
+					$custom_targeting = $this->ad_units[ $unit_key ];
+				} else if ( empty( $this->ad_units[ $unit_key ] ) && ! empty( $ad_unit['custom_targeting'] ) ) {
+					$custom_targeting = $ad_unit['custom_targeting'];
+				}
+				
+				if ( $custom_targeting ) {
+					$targeting_by_unit[ $unit_key ] = $this->get_targeting_js_from_array( apply_filters( 'ad_layers_dfp_targeting_values_by_unit', $custom_targeting, $unit_key ) );
 				}
 			}
 		}
@@ -407,15 +416,11 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			
 		// Add the units
 		$ad_unit_num = 0;
-		foreach ( $this->ad_units as $ad_unit ) {
+		foreach ( $this->ad_units as $ad_unit => $custom_targeting ) {
 			// If no default size is defined, skip it
 			if ( empty( $default_by_unit[ $ad_unit ] ) ) {
 				continue;
 			}
-			
-			// See if there is any slot level targeting defined.
-			// Build the appropriate targeting code if so.
-			$targeting = ( ! empty( $targeting_by_unit[ $ad_unit ] ) ) ? $this->get_ : '';
 			
 			// Finalize output for this unit and add it to the final return value
 			// Add units are also saved to an array based on ad type so they can be refreshed if the page size changes
@@ -427,7 +432,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 				json_encode( $default_by_unit[ $ad_unit ] ),
 				esc_js( $this->get_ad_unit_id( $ad_unit ) ),
 				( ! empty( $mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $oop_units ) ) ? '.defineSizeMapping(mapping' . esc_js( $this->get_key( $ad_unit ) ) . ')' : '',
-				$targeting // This is escaped above as it is built
+				( ! empty( $targeting_by_unit[ $ad_unit ] ) ) ? $targeting_by_unit[ $ad_unit ] : '' // This is escaped above as it is built
 			);
 		
 			$ad_unit_num++;
@@ -447,35 +452,32 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			return;
 		}
 		
-		$targeting_values = array();
-		foreach ( $custom_targeting as $custom_target ) {
-			$values = ( isset( $custom_target['values'] ) ) ? $custom_target['values'] : null;
-			$targeting_value = $this->get_targeting_value( $custom_target['custom_variable'], $custom_target['source'], $values );
-			if ( ! empty( $targeting_value ) ) {
-				$targeting_values = array_merge( $targeting_values, $targeting_value );
-			}
-		}
-		$targeting_values = apply_filters( 'ad_layers_dfp_page_level_targeting', $targeting_values );
+		$targeting_values = apply_filters( 'ad_layers_dfp_page_level_targeting', $this->get_targeting_js_from_array( $custom_targeting ) );
 		
 		// Add the JS
 		if ( ! empty( $targeting_values ) ) {
-			echo 'googletag.pubads()' . $this->get_targeting_from_array( $targeting_values ) . ";\n";
+			echo 'googletag.pubads()' . $targeting_values . ";\n";
 		}
 	}
 	
 	/**
-	 * Gets the DFP targeting JS for an array of value
+	 * Creates the DFP targeting Javascript from an array of custom values.
 	 *
 	 * @access private
-	 * @param array $targeting_values
+	 * @param array $custom_targeting
 	 * @return string
 	 */
-	private function get_targeting_from_array( $targeting_values ) {
-		$targeting_js = '';
-		foreach ( $targeting_values as $key => $value ) {
-			$targeting_js .= $this->get_targeting_value_js( $key, $value );
+	private function get_targeting_js_from_array( $custom_targeting ) {
+		$targeting_values = '';
+		foreach ( $custom_targeting as $custom_target ) {
+			$values = ( isset( $custom_target['values'] ) ) ? $custom_target['values'] : null;
+			$targeting_value = $this->get_targeting_value( $custom_target['custom_variable'], $custom_target['source'], $values );
+			if ( ! empty( $targeting_value ) ) {
+				$targeting_values .= $this->get_targeting_value_js( $custom_target['custom_variable'], $targeting_value );
+			}
 		}
-		return $targeting_js;
+		
+		return $targeting_values;
 	}
 	
 	/**
@@ -504,27 +506,27 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * @return array
 	 */
 	public function get_targeting_value( $key, $source, $values = null ) {
-		$targeting_values = array();
+		$targeting_value = null;
 		$queried_object = get_queried_object();
 		
 		switch ( $source ) {
 			case 'other':
 				if ( null !== $values ) {
-					$targeting_values[ $key ] = $values;
+					$targeting_value = $values;
 				}
 				break;
 			case 'author':
 				if ( is_singular() ) {
-					$targeting_values[ $key ] = get_the_author_meta( apply_filters( 'ad_layers_dfp_author_targeting_field', 'display_name' ), $queried_object->post_author );
+					$targeting_value = get_the_author_meta( apply_filters( 'ad_layers_dfp_author_targeting_field', 'display_name' ), $queried_object->post_author );
 				} else if ( is_author() ) {
-					$targeting_values[ $key ] = $queried_object->display_name;
+					$targeting_value = $queried_object->display_name;
 				}
 				break;
 			case 'post_type':
 				if ( is_singular() ) {
-					$targeting_values[ $key ] = get_post_type();
+					$targeting_value = get_post_type();
 				} else if ( is_post_type_archive() ) {
-					$targeting_values[ $key ] = $queried_object->name;
+					$targeting_value = $queried_object->name;
 				}
 				break;
 			default:
@@ -536,15 +538,15 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 						} else {
 							$value = array();
 						}
-						$targeting_values[ $key ] = $value;
+						$targeting_value = $value;
 					} else if ( is_tax() ) {
-						$targeting_values[ $key ] = $queried_object->slug;
+						$targeting_value = $queried_object->slug;
 					}
 				}
 				break;
 		}
 		
-		return apply_filters( 'ad_layers_dfp_custom_targeting_value', $targeting_values, $key, $source, $values );
+		return apply_filters( 'ad_layers_dfp_custom_targeting_value', $targeting_value, $key, $source, $values );
 	}
 	
 	/**

@@ -143,18 +143,30 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 	 */
 	public function add_meta_boxes() {
 		// Add ad units
-		$fm_ad_units = new Fieldmanager_Select(
-			apply_filters( 'ad_layers_ad_units_field_args', array(
-				'name' => 'ad_layer_ad_units',
-				'limit' => 0,
-				'extra_elements' => 0,
-				'one_label_per_item' => false,
-				'sortable' => true,
-				'label' => __( 'Select one or more ad units.', 'ad-layers' ),
-				'add_more_label' =>  __( 'Add an ad unit', 'ad-layers' ),
-				'options' => Ad_Layers_Ad_Server::instance()->get_ad_units(),
-			) )
+		$ad_unit_args = array(
+			'name' => 'ad_layer_ad_units',
+			'limit' => 0,
+			'extra_elements' => 0,
+			'one_label_per_item' => false,
+			'sortable' => true,
+			'label' => __( 'Select one or more ad units.', 'ad-layers' ),
+			'add_more_label' =>  __( 'Add an ad unit', 'ad-layers' ),
+			'children' => array(
+				'ad_unit' => new Fieldmanager_Select(
+					array(
+						'label' => __( 'Ad Unit', 'ad-layers' ),
+						'options' => Ad_Layers_Ad_Server::instance()->get_ad_units(),
+					)
+				),
+			)
 		);
+		
+		$targeting_args = Ad_Layers_Ad_Server::instance()->get_custom_targeting_args( 'custom_targeting' );
+		if ( ! empty( $targeting_args ) ) {
+			$ad_unit_args['children']['custom_targeting'] = new Fieldmanager_Group( apply_filters( 'ad_layers_custom_targeting_ad_unit_args', $targeting_args ) );
+		}
+		
+		$fm_ad_units = new Fieldmanager_Group( apply_filters( 'ad_layers_ad_units_field_args', $ad_unit_args ) );
 		$fm_ad_units->add_meta_box( __( 'Ad Units', 'ad-layers' ), $this->post_type, 'normal', 'high' );
 		
 		// Add page types
