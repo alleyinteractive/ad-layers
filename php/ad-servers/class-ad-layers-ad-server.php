@@ -52,6 +52,22 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * @var mixed
 	 */
 	public $display_label;
+	
+	/**
+	 * Javascript API class name
+	 *
+	 * @access public
+	 * @var string
+	 */
+	public $js_api_class = 'AdLayersAPI';
+	
+	/**
+	 * Handle used for scripts
+	 *
+	 * @access public
+	 * @var string
+	 */
+	public $handle = 'ad-layers';
 
 	/**
 	 * Setup the singleton.
@@ -68,6 +84,9 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		
 		// Handle rendering units
 		add_action( 'ad_layers_render_ad_unit', array( $this, 'get_ad_unit' ) );
+		
+		// Load the Javascript API early
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 5 );
 		
 		// Load current settings
 		self::$settings = apply_filters( 'ad_layers_ad_server_settings', get_option( $this->option_name, array() ) );
@@ -91,6 +110,38 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 			$ad_server = new self::$settings['ad_server'];
 			$this->ad_server = $ad_server::instance();
 		}
+	}
+	
+	/**
+	 * Load scripts.
+	 *
+	 * @access public
+	 */
+	public function enqueue_scripts() {
+		// Set the base dependencies
+		$dependencies = array( 'jquery' );
+	
+		// Load scripts specific to the enabled ad server
+		if ( ! empty( $this->ad_server ) ) {
+			$this->ad_server->enqueue_scripts();
+			$js_api_class = $this->ad_server->js_api_class;
+			$dependencies[] = $this->ad_server->handle;
+		} else {
+			$js_api_class = $this->js_api_class;
+		}
+	
+		// Load the base Javascript library
+		wp_enqueue_script( $this->handle, AD_LAYERS_ASSETS_DIR . 'js/ad-layers.js', $dependencies, AD_LAYERS_GLOBAL_ASSET_VERSION, false );
+		
+		// Load the CSS. Mostly used in debug mode.
+		wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
+		
+		
+		
+		// Localize the base API with the class name
+		wp_localize_script( 'ad-layers', 'adLayersAdServer', array(
+			'jsAPIClass' => $js_api_class,
+		) );
 	}
 	
 	/**

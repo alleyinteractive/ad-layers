@@ -61,6 +61,22 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	public $cache_key = 'ad_layers_dfp_settings';
 	
 	/**
+	 * Javascript API class name
+	 *
+	 * @access public
+	 * @var string
+	 */
+	public $js_api_class = 'AdLayersDFPAPI';
+	
+	/**
+	 * Handle used for scripts
+	 *
+	 * @access public
+	 * @var string
+	 */
+	public $handle = 'ad-layers-dfp';
+	
+	/**
 	 * Setup the singleton.
 	 */
 	public function setup() {
@@ -75,6 +91,19 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		
 		// Handle caching
 		add_action( 'update_option', array( $this, 'cache_settings' ), 10, 3 );
+	}
+	
+	/**
+	 * Load scripts.
+	 *
+	 * @access public
+	 */
+	public function enqueue_scripts() {
+		// Load the base Javascript library
+		wp_enqueue_script( $this->handle, AD_LAYERS_ASSETS_DIR . 'js/ad-layers-dfp.js', array( 'jquery' ), AD_LAYERS_GLOBAL_ASSET_VERSION, false );
+		
+		// Load the CSS. Mostly used in debug mode.
+		wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers-dfp.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
 	}
 	
 	/**
@@ -122,7 +151,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		do_action( 'ad_layers_dfp_before_setup' ); ?>
 		?>
 		<script type='text/javascript'>
-		var dfp_ad_units = [];
+		var dfpAdUnits = [];
 		var googletag = googletag || {};
 		googletag.cmd = googletag.cmd || [];
 		(function() {
@@ -423,7 +452,6 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		$page_type = Ad_Layers::instance()->get_current_page_type();
 			
 		// Add the units
-		$ad_unit_num = 0;
 		foreach ( $this->ad_units as $ad_unit => $custom_targeting ) {
 			// If no default size is defined, skip it
 			if ( empty( $default_by_unit[ $ad_unit ] ) ) {
@@ -433,8 +461,8 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			// Finalize output for this unit and add it to the final return value
 			// Add units are also saved to an array based on ad type so they can be refreshed if the page size changes
 			echo sprintf(
-				"dfp_ad_units[%s] = googletag.%s('%s',%s,'%s')%s%s.addService(googletag.pubads());\n",
-				esc_js( $ad_unit_num ),
+				"dfpAdUnits['%s'] = googletag.%s('%s',%s,'%s')%s%s.addService(googletag.pubads());\n",
+				esc_js( $ad_unit ),
 				( in_array( $ad_unit, $oop_units ) ) ? 'defineOutOfPageSlot' : 'defineSlot',
 				esc_js( $this->get_path( $page_type, $ad_unit ) ),
 				json_encode( $default_by_unit[ $ad_unit ] ),
@@ -442,8 +470,6 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 				( ! empty( $mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $oop_units ) ) ? '.defineSizeMapping(mapping' . esc_js( $this->get_key( $ad_unit ) ) . ')' : '',
 				( ! empty( $targeting_by_unit[ $ad_unit ] ) ) ? $targeting_by_unit[ $ad_unit ] : '' // This is escaped above as it is built
 			);
-		
-			$ad_unit_num++;
 		}
 	}
 	
