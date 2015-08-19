@@ -169,6 +169,10 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * @access public
 	 */
 	public function add_settings_page( $args = array() ) {
+		if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			return;
+		}
+	
 		// Provide basic ad server selection.
 		$args = array(
 			'name' => $this->option_name,
@@ -277,6 +281,10 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * @return array
 	 */
 	public function get_custom_targeting_args( $name = 'ad_layer_custom_targeting' ) {
+		if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			return array();
+		}
+	
 		return apply_filters( 'ad_layers_custom_targeting_args', array(
 			'name' => $name,
 			'collapsible' => true,

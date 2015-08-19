@@ -166,6 +166,10 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * @return array
 	 */
 	public function get_settings_fields() {
+		if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			return array();
+		}
+	
 		// Ad unit args may differ if custom targeting variables are present
 		$ad_unit_args = array(
 			'collapsible' => true,
@@ -266,6 +270,10 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * @return array
 	 */
 	public function get_size_options() {
+		if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			return array();
+		}
+	
 		$args = array(
 			'width' => new Fieldmanager_Textfield(
 				array(

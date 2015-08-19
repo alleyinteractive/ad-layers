@@ -128,6 +128,10 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 	 * @param string $priority
 	 */
 	public function add_meta_boxes() {
+		if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			return;
+		}
+	
 		// Add ad units
 		$ad_unit_args = array(
 			'name' => 'ad_layer_ad_units',
