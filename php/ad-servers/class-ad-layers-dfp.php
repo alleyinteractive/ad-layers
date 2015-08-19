@@ -573,7 +573,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 */
 	public function get_ad_unit( $ad_unit, $echo = true ) {
 		// Make sure this is in the current ad layer and an ad layer is defined
-		if ( empty( $this->ad_units ) || ! in_array( $ad_unit, $this->ad_units ) ) {
+		if ( empty( $this->ad_units ) || ! array_key_exists( $ad_unit, $this->ad_units ) ) {
 			return;
 		}
 	
