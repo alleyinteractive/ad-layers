@@ -33,9 +33,6 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 		add_filter( 'manage_' . $this->post_type . '_posts_columns' , array( $this, 'manage_edit_columns' ), 15, 1 );
 		add_action( 'manage_' . $this->post_type . '_posts_custom_column' , array( $this, 'manage_custom_columns' ), 10, 2 );
 		
-		// Enqueue the Javascript required by the custom meta boxe;
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-		
 		// Add and remove data from the options list of available ad layers
 		add_action( 'save_post_' . $this->post_type, array( $this, 'save_post' ), 99, 3 );
 		add_action( 'delete_post', array( $this, 'delete_post' ) );
@@ -68,18 +65,7 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 			'taxonomies' => apply_filters( 'ad_layers_taxonomies', array( 'category', 'post_tag' ) ),
 		) );
 	}
-	
-	/**
-	 * Load scripts used by the admin interface only on the ad layer edit screen.
-	 */
-	public function enqueue_scripts() {
-		$screen = get_current_screen();
-		if ( 'edit' == $screen->parent_base && 'post' == $screen->base && ! empty( $screen->post_type ) && $this->post_type == $screen->post_type ) {
-			wp_enqueue_script( 'ad-layers-edit-js', AD_LAYERS_ASSETS_DIR . '/js/ad-layers-edit.js', array( 'jquery' ), AD_LAYERS_GLOBAL_ASSET_VERSION, false );
-			wp_enqueue_style( 'ad-layers-edit-css', AD_LAYERS_ASSETS_DIR . '/css/ad-layers-edit.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
-		}
-	}
-	
+
 	/**
 	 * Manage available columns on the edit posts table
 	 *
