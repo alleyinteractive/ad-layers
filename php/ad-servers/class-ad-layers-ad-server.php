@@ -150,7 +150,6 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		$options = array();
 
 		if ( ! empty( $this->ad_servers ) ) {
-			var_d
 			foreach ( array_keys( $this->ad_servers ) as $ad_server ) {
 				if ( class_exists( $ad_server ) ) {
 					$options[ $ad_server ] = $ad_server::instance()->get_display_label();
