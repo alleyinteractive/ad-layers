@@ -87,15 +87,6 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 
 		// Load the Javascript API early
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 5 );
-
-		// Load current settings
-		self::$settings = apply_filters( 'ad_layers_ad_server_settings', get_option( $this->option_name, array() ) );
-
-		// Set the current ad server class, if defined.
-		if ( ! empty( self::$settings['ad_server'] ) && class_exists( self::$settings['ad_server'] ) ) {
-			$ad_server = new self::$settings['ad_server'];
-			$this->ad_server = $ad_server::instance();
-		}
 	}
 
 	/**
@@ -121,8 +112,6 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 
 		// Load the CSS. Mostly used in debug mode.
 		wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
-
-
 
 		// Localize the base API with the class name
 		wp_localize_script( 'ad-layers', 'adLayersAdServer', array(
@@ -210,6 +199,9 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 			return;
 		}
 
+		// Load current settings
+		self::$settings = apply_filters( 'ad_layers_ad_server_settings', get_option( $this->option_name, array() ) );
+
 		// Allow additional ad servers to be loaded via filter within a theme
 		$this->ad_servers = apply_filters( 'ad_layers_ad_servers', array(
 			'Ad_Layers_DFP' => AD_LAYERS_BASE_DIR . '/php/ad-servers/class-ad-layers-dfp.php',
@@ -221,6 +213,12 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 					require_once( $ad_server );
 				}
 			}
+		}
+
+		// Set the current ad server class, if defined.
+		if ( ! empty( self::$settings['ad_server'] ) && class_exists( self::$settings['ad_server'] ) ) {
+			$ad_server = new self::$settings['ad_server'];
+			$this->ad_server = $ad_server::instance();
 		}
 
 		// Provide basic ad server selection.
