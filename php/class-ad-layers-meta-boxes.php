@@ -37,6 +37,10 @@ class Ad_Layers_Meta_Boxes extends Ad_Layers_Singleton {
 	 * @access public
 	 */
 	public function add_meta_boxes() {
+		if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			return;
+		}
+	
 		// Get the post type name
 		$post_type = str_replace( 'fm_post_', '', current_filter() );
 	

@@ -37,12 +37,12 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	public $formatting_tag_pattern = '/#[a-zA-Z\_]+#/';
 	
 	/**
-	 * Ad slot prefix.
+	 * Ad unit prefix.
 	 *
 	 * @access public
 	 * @var string
 	 */
-	public $ad_slot_prefix = 'div-gpt-ad-';
+	public $ad_unit_prefix = 'div-gpt-ad-';
 	
 	/**
 	 * Available ad units on the page.
@@ -53,17 +53,57 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	public $ad_units;
 	
 	/**
+	 * Cache key
+	 *
+	 * @access public
+	 * @var string
+	 */
+	public $cache_key = 'ad_layers_dfp_settings';
+	
+	/**
+	 * Javascript API class name
+	 *
+	 * @access public
+	 * @var string
+	 */
+	public $js_api_class = 'AdLayersDFPAPI';
+	
+	/**
+	 * Handle used for scripts
+	 *
+	 * @access public
+	 * @var string
+	 */
+	public $handle = 'ad-layers-dfp';
+	
+	/**
 	 * Setup the singleton.
 	 */
 	public function setup() {
 		// Define the available formatting tags
 		$this->formatting_tags = apply_filters( 'ad_layers_dfp_formatting_tags', $this->set_formatting_tags() );
 		
-		// Allow filtering of the ad slot prefix
-		$this->ad_slot_prefix = apply_filters( 'ad_layers_dfp_ad_slot_prefix', $this->ad_slot_prefix );
+		// Allow filtering of the ad unit prefix
+		$this->ad_unit_prefix = apply_filters( 'ad_layers_dfp_ad_unit_prefix', $this->ad_unit_prefix );
 		
 		// Add a help tab
 		add_action( 'load-' . Ad_Layers_Post_Type::instance()->get_post_type() . '_page_' . $this->option_name, array( $this, 'add_help_tab' ) );
+		
+		// Handle caching
+		add_action( 'update_option', array( $this, 'cache_settings' ), 10, 3 );
+	}
+	
+	/**
+	 * Load scripts.
+	 *
+	 * @access public
+	 */
+	public function enqueue_scripts() {
+		// Load the base Javascript library
+		wp_enqueue_script( $this->handle, AD_LAYERS_ASSETS_DIR . 'js/ad-layers-dfp.js', array( 'jquery' ), AD_LAYERS_GLOBAL_ASSET_VERSION, false );
+		
+		// Load the CSS. Mostly used in debug mode.
+		wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers-dfp.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
 	}
 	
 	/**
@@ -111,7 +151,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		do_action( 'ad_layers_dfp_before_setup' ); ?>
 		?>
 		<script type='text/javascript'>
-		var dfp_ad_slots = [];
+		var dfpAdUnits = [];
 		var googletag = googletag || {};
 		googletag.cmd = googletag.cmd || [];
 		(function() {
@@ -129,8 +169,8 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		<script type="text/javascript">
 		googletag.cmd.push(function() {
 			<?php
-				// Add the ad slots
-				$this->ad_slot_js( $ad_layer );
+				// Add the ad units
+				$this->ad_unit_js( $ad_layer );
 				
 				// Add custom targeting
 				$this->targeting_js( $ad_layer );
@@ -142,7 +182,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			?>
 			googletag.enableServices();
 		});
-		<?php do_action( 'ad_layers_dfp_after_ad_slots' ); ?>
+		<?php do_action( 'ad_layers_dfp_after_ad_units' ); ?>
 		</script>
 		<?php
 	}
@@ -155,7 +195,45 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * @return array
 	 */
 	public function get_settings_fields() {
-		return array(
+		if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			return array();
+		}
+	
+		// Ad unit args may differ if custom targeting variables are present
+		$ad_unit_args = array(
+			'collapsible' => true,
+			'collapsed' => true,
+			'limit' => 0,
+			'extra_elements' => 0,
+			'label' => __( 'Ad Units', 'ad-layers' ),
+			'label_macro' => array( __( 'Ad Unit: %s', 'ad-layers' ), 'code' ),
+			'add_more_label' => __( 'Add Ad Unit', 'ad-layers' ),
+			'children' => array(
+				'code' => new Fieldmanager_Textfield(
+					array(
+						'label' => __( 'Code', 'ad-layers' ),
+					)
+				),
+				'sizes' => new Fieldmanager_Group( array(
+					'limit' => 0,
+					'extra_elements' => 0,
+					'one_label_per_item' => false,
+					'label' => __( 'Sizes', 'ad-layers' ),
+					'add_more_label' => __( 'Add Size', 'ad-layers' ),
+					'children' => $this->get_size_options(),
+				) ),
+			)
+		);
+		
+		// Verify if targeting args should be added
+		$targeting_args = $this->get_custom_targeting_args( 'custom_targeting' );
+		if ( ! empty( $targeting_args ) ) {
+			$targeting_args['label'] = __( 'Custom Targeting', 'ad-layers' );
+			$targeting_args['one_label_per_item'] = false;
+			$ad_unit_args['children']['custom_targeting'] = new Fieldmanager_Group( apply_filters( 'ad_layers_dfp_custom_targeting_field_args', $targeting_args ) );
+		}
+	
+		return apply_filters( 'ad_layers_dfp_get_settings_fields', array(
 			'account_id' => new Fieldmanager_Textfield(
 				array(
 					'label' => __( 'DFP Account ID', 'ad-layers' ),
@@ -184,7 +262,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 					),
 				),
 			) ),
-			'ad_setup' => new Fieldmanager_Group( array(
+			'breakpoints' => new Fieldmanager_Group( array(
 				'collapsible' => true,
 				'collapsed' => true,
 				'limit' => 0,
@@ -208,82 +286,87 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 							'label' => __( 'Minimum Height', 'ad-layers' ),
 						)
 					),
-					'ad_units' => new Fieldmanager_Group( array(
-						'limit' => 0,
-						'extra_elements' => 0,
-						'label' => __( 'Ad Slots', 'ad-layers' ),
-						'label_macro' => array( __( 'Ad Slot: %s', 'ad-layers' ), 'code' ),
-						'add_more_label' => __( 'Add Ad Slot', 'ad-layers' ),
-						'collapsible' => true,
-						'collapsed' => true,
-						'children' => array(
-							'code' => new Fieldmanager_Textfield(
-								array(
-									'label' => __( 'Code', 'ad-layers' ),
-								)
-							),
-							'sizes' => new Fieldmanager_Group( array(
-								'limit' => 0,
-								'extra_elements' => 0,
-								'one_label_per_item' => false,
-								'label' => __( 'Sizes', 'ad-layers' ),
-								'add_more_label' => __( 'Add Size', 'ad-layers' ),
-								'children' => array(
-									'width' => new Fieldmanager_Textfield(
-										array(
-											'label' => __( 'Width', 'ad-layers' ),
-											'sanitize' => 'absint',
-										)
-									),
-									'height' => new Fieldmanager_Textfield(
-										array(
-											'label' => __( 'Height', 'ad-layers' ),
-											'sanitize' => 'absint',
-										)
-									),
-									'out_of_page' => new Fieldmanager_Checkbox(
-										array(
-											'label' => __( 'Out of Page', 'ad-layers' ),
-											'checked_value' => 'oop',
-										)
-									),
-									'default_size' => new Fieldmanager_Checkbox(
-										array(
-											'label' => __( 'Default Size', 'ad-layers' ),
-											'checked_value' => 'default',
-										)
-									),
-								)
-							) )
-						)
-					) )
-				)
-			) )
-		);
+				),
+			) ),
+			'ad_units' => new Fieldmanager_Group( $ad_unit_args )
+		) );
 	}
 	
 	/**
-	 * Creates the ad slot Javascript.
+	 * Returns the available size options for ad configuration.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function get_size_options() {
+		if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			return array();
+		}
+	
+		$args = array(
+			'width' => new Fieldmanager_Textfield(
+				array(
+					'label' => __( 'Width', 'ad-layers' ),
+					'sanitize' => 'absint',
+				)
+			),
+			'height' => new Fieldmanager_Textfield(
+				array(
+					'label' => __( 'Height', 'ad-layers' ),
+					'sanitize' => 'absint',
+				)
+			),
+			'out_of_page' => new Fieldmanager_Checkbox(
+				array(
+					'label' => __( 'Out of Page', 'ad-layers' ),
+					'checked_value' => 'oop',
+				)
+			),
+			'default_size' => new Fieldmanager_Checkbox(
+				array(
+					'label' => __( 'Default Size', 'ad-layers' ),
+					'checked_value' => 'default',
+				)
+			),
+		);
+		
+		// Add any defined breakpoints
+		$breakpoints = $this->get_setting( 'breakpoints' );
+		if ( ! empty( $breakpoints ) ) {
+			$args['breakpoints'] = new Fieldmanager_Checkboxes( array(
+				'label' => __( 'Breakpoints', 'ad-layers' ),
+				'options' => wp_list_pluck( $breakpoints, 'title' ),
+			) );
+		}
+		
+		return $args;
+	}
+	
+	/**
+	 * Creates the ad unit Javascript.
 	 *
 	 * @access private
 	 * @param array $ad_layer
 	 */
-	private function ad_slot_js( $ad_layer ) {
-		// Get the ad setup and ensure it's valid
-		$ad_setup = $this->get_setting( 'ad_setup' );
+	private function ad_unit_js( $ad_layer ) {
+		// Ensure breakpoints are set
+		$ad_setup = $this->get_settings();
 		if ( empty( $ad_setup ) ) {
 			return;
 		}
 		
 		// Get the units included in this ad layer
-		$this->ad_units = get_post_meta( $ad_layer['post_id'], 'ad_layer_ad_slots', true );
-		if ( empty( $this->ad_units ) ) {
+		$this->ad_units = get_post_meta( $ad_layer['post_id'], 'ad_layer_ad_units', true );
+		if ( ! empty( $this->ad_units ) ) {
+			$this->ad_units = wp_list_pluck( $this->ad_units, 'custom_targeting', 'ad_unit' );
+		} else {
 			return;
 		}
 				
-		// Loop through the sizes available for each breakpoint
+		// Loop through the breakpoints and add the desired units
 		$mapping_by_unit = array();
 		$default_by_unit = array();
+		$targeting_by_unit = array();
 		$oop_units = array();
 		foreach ( $ad_setup as $i => $breakpoint ) {
 			// Ensure this breakpoint is valid or else skip it
@@ -294,7 +377,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			// Loop through the sizes and add them to the mapping
 			foreach ( $breakpoint['ad_units'] as $ad_unit ) {
 				// Skip this unit if invalid or not included in the layer
-				if ( empty( $ad_unit['code'] ) || empty( $ad_unit['sizes'] ) || ! in_array( $ad_unit['code'], $this->ad_units ) ) {
+				if ( empty( $ad_unit['code'] ) || empty( $ad_unit['sizes'] ) || ! array_key_exists( $ad_unit['code'], $this->ad_units ) ) {
 					continue;
 				}
 				
@@ -317,7 +400,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 						}
 					}
 				}
-				$sizes = apply_filters( 'ad_layers_ad_unit_sizes', $sizes, $ad_unit, $breakpoint );
+				$sizes = apply_filters( 'ad_layers_dfp_ad_unit_sizes', $sizes, $ad_unit, $breakpoint );
 				
 				// Generate the mapping JS and store it with the unit
 				$unit_key = $this->get_key( $ad_unit['code'] );
@@ -335,11 +418,25 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 					json_encode( array( absint( $breakpoint['min_width'] ), absint( $breakpoint['min_height'] ) ) ),
 					json_encode( $sizes )
 				);
+				
+				// Check for any global or ad layer specific targeting
+				$custom_targeting = null;
+				if ( ! empty( $this->ad_units[ $unit_key ] ) ) {
+					$custom_targeting = $this->ad_units[ $unit_key ];
+				} else if ( empty( $this->ad_units[ $unit_key ] ) && ! empty( $ad_unit['custom_targeting'] ) ) {
+					$custom_targeting = $ad_unit['custom_targeting'];
+				}
+				
+				if ( $custom_targeting ) {
+					$targeting_by_unit[ $unit_key ] = $this->get_targeting_js_from_array( apply_filters( 'ad_layers_dfp_targeting_values_by_unit', $custom_targeting, $unit_key ) );
+				}
 			}
 		}
 		
 		// Apply filters
-		$default_by_unit = apply_filters( 'ad_layers_dfp_default_by_unit', $default_by_unit );
+		$mapping_by_unit = apply_filters( 'ad_layers_dfp_mapping_by_unit', $mapping_by_unit, $ad_layer );
+		$default_by_unit = apply_filters( 'ad_layers_dfp_default_by_unit', $default_by_unit, $ad_layer );
+		$targeting_by_unit = apply_filters( 'ad_layers_dfp_targeting_by_unit', $targeting_by_unit, $ad_layer );
 		$oop_units = apply_filters( 'ad_layers_dfp_oop_units', $oop_units );
 		
 		// Echo the final mappings by ad unit
@@ -354,27 +451,25 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		// Get the page type
 		$page_type = Ad_Layers::instance()->get_current_page_type();
 			
-		// Add the slots
-		$ad_slot_num = 0;
-		foreach ( $this->ad_units as $ad_unit ) {
+		// Add the units
+		foreach ( $this->ad_units as $ad_unit => $custom_targeting ) {
 			// If no default size is defined, skip it
 			if ( empty( $default_by_unit[ $ad_unit ] ) ) {
 				continue;
 			}
-		
-			// Finalize output for this slot and add it to the final return value
-			// Add slots are also saved to an array based on ad type so they can be refreshed if the page size changes
+			
+			// Finalize output for this unit and add it to the final return value
+			// Add units are also saved to an array based on ad type so they can be refreshed if the page size changes
 			echo sprintf(
-				"dfp_ad_slots[%s] = googletag.%s('%s',%s,'%s')%s.addService(googletag.pubads());\n",
-				esc_js( $ad_slot_num ),
+				"dfpAdUnits['%s'] = googletag.%s('%s',%s,'%s')%s%s.addService(googletag.pubads());\n",
+				esc_js( $ad_unit ),
 				( in_array( $ad_unit, $oop_units ) ) ? 'defineOutOfPageSlot' : 'defineSlot',
 				esc_js( $this->get_path( $page_type, $ad_unit ) ),
 				json_encode( $default_by_unit[ $ad_unit ] ),
 				esc_js( $this->get_ad_unit_id( $ad_unit ) ),
-				( ! empty( $mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $oop_units ) ) ? '.defineSizeMapping(mapping' . esc_js( $this->get_key( $ad_unit ) ) . ')' : ''
+				( ! empty( $mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $oop_units ) ) ? '.defineSizeMapping(mapping' . esc_js( $this->get_key( $ad_unit ) ) . ')' : '',
+				( ! empty( $targeting_by_unit[ $ad_unit ] ) ) ? $targeting_by_unit[ $ad_unit ] : '' // This is escaped above as it is built
 			);
-		
-			$ad_slot_num++;
 		}
 	}
 	
@@ -382,102 +477,137 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * Creates the DFP targeting Javascript.
 	 *
 	 * @access private
+	 * @param array $ad_layer
 	 */
 	private function targeting_js( $ad_layer ) {
-		// Handle any additional custom targeting specified for this ad layer.
+		// Handle any page level custom targeting specified for this ad layer.
 		$custom_targeting = get_post_meta( $ad_layer['post_id'], 'ad_layer_custom_targeting', true );
 		if ( empty( $custom_targeting ) ) {
 			return;
 		}
 		
-		$queried_object = get_queried_object();
-		$targeting_values = array();
-		foreach ( $custom_targeting as $custom_target ) {
-			switch ( $custom_target['value'] ) {
-				case 'other':
-					if ( isset( $custom_target['text'] ) ) {
-						$targeting_values[ $custom_target['custom_variable'] ] = $custom_target['text'];
-					}
-					break;
-				case 'author':
-					if ( is_singular() ) {
-						$targeting_values[ $custom_target['custom_variable'] ] = get_the_author_meta( 'display_name', $post->post_author );
-					} else if ( is_author() ) {
-						$targeting_values[ $custom_target['custom_variable'] ] = $queried_object->display_name;
-					}
-					break;
-				case 'post_type':
-					if ( is_singular() ) {
-						$targeting_values[ $custom_target['custom_variable'] ] = get_post_type();
-					} else if ( is_post_type_archive() ) {
-						$targeting_values[ $custom_target['custom_variable'] ] = $queried_object->name;
-					}
-					break;
-				default:
-					if ( taxonomy_exists( $custom_target['value'] ) ) {
-						if ( is_singular() ) {
-							$targeting_values[ $custom_target['custom_variable'] ] = get_the_terms( get_the_ID(), $custom_target['value'] );
-						} else if ( is_tax() ) {
-							$targeting_values[ $custom_target['custom_variable'] ] = $queried_object->slug;
-						}
-					}
-					break;
-			}
-			
-			$targeting_values[ $custom_target['custom_variable'] ] = apply_filters( 'ad_layers_dfp_custom_target', $targeting_values[ $custom_target['custom_variable'] ], $custom_target );
-		}
+		$targeting_values = apply_filters( 'ad_layers_dfp_page_level_targeting', $this->get_targeting_js_from_array( $custom_targeting ) );
 		
 		// Add the JS
 		if ( ! empty( $targeting_values ) ) {
-			echo 'googletag.pubads()';
-			foreach ( $targeting_values as $key => $value ) {
-				echo sprintf(
-					".setTargeting('%s',%s)",
-					esc_js( $key ),
-					json_encode( $value )
-				);
-			}
-			echo ";\n";
+			echo 'googletag.pubads()' . $targeting_values . ";\n";
 		}
 	}
 	
 	/**
-	 * Gets available ad slots.
+	 * Creates the DFP targeting Javascript from an array of custom values.
+	 *
+	 * @access private
+	 * @param array $custom_targeting
+	 * @return string
+	 */
+	private function get_targeting_js_from_array( $custom_targeting ) {
+		$targeting_values = '';
+		foreach ( $custom_targeting as $custom_target ) {
+			$values = ( isset( $custom_target['values'] ) ) ? $custom_target['values'] : null;
+			$targeting_value = $this->get_targeting_value( $custom_target['custom_variable'], $custom_target['source'], $values );
+			if ( ! empty( $targeting_value ) ) {
+				$targeting_values .= $this->get_targeting_value_js( $custom_target['custom_variable'], $targeting_value );
+			}
+		}
+		
+		return $targeting_values;
+	}
+	
+	/**
+	 * Gets the DFP targeting JS for a single key/value pair.
+	 *
+	 * @access private
+	 * @param string $key
+	 * @param mixed $value
+	 * @return string
+	 */
+	private function get_targeting_value_js( $key, $value ) {
+		return sprintf(
+			".setTargeting('%s',%s)",
+			esc_js( $key ),
+			json_encode( $value )
+		);
+	}
+	
+	/**
+	 * Creates the DFP targeting key/value pair for a single targeting variable.
+	 *
+	 * @access public
+	 * @param string $key
+	 * @param string $source
+	 * @param array $values
+	 * @return array
+	 */
+	public function get_targeting_value( $key, $source, $values = null ) {
+		$targeting_value = null;
+		$queried_object = get_queried_object();
+		
+		switch ( $source ) {
+			case 'other':
+				if ( null !== $values ) {
+					$targeting_value = $values;
+				}
+				break;
+			case 'author':
+				if ( is_singular() ) {
+					$targeting_value = get_the_author_meta( apply_filters( 'ad_layers_dfp_author_targeting_field', 'display_name' ), $queried_object->post_author );
+				} else if ( is_author() ) {
+					$targeting_value = $queried_object->display_name;
+				}
+				break;
+			case 'post_type':
+				if ( is_singular() ) {
+					$targeting_value = get_post_type();
+				} else if ( is_post_type_archive() ) {
+					$targeting_value = $queried_object->name;
+				}
+				break;
+			default:
+				if ( taxonomy_exists( $source ) ) {
+					if ( is_singular() ) {
+						$terms = get_the_terms( get_the_ID(), $source );
+						if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+							$value = wp_list_pluck( $terms, apply_filters( 'ad_layers_dfp_term_targeting_field', 'slug' ) );
+						} else {
+							$value = array();
+						}
+						$targeting_value = $value;
+					} else if ( is_tax() ) {
+						$targeting_value = $queried_object->slug;
+					}
+				}
+				break;
+		}
+		
+		return apply_filters( 'ad_layers_dfp_custom_targeting_value', $targeting_value, $key, $source, $values );
+	}
+	
+	/**
+	 * Gets available ad units.
 	 *
 	 * @access public
 	 * @return array
 	 */
-	public function get_ad_slots() {
-		$ad_slots = array();
-		$ad_setup = $this->get_setting( 'ad_setup' );
-		if ( ! empty( $ad_setup ) ) {
-			foreach ( $ad_setup as $breakpoint ) {
-				if ( ! empty( $breakpoint['ad_units'] ) ) {
-					foreach ( $breakpoint['ad_units'] as $ad_unit ) {
-						if ( ! empty( $ad_unit['code'] ) ) {	
-							$ad_slots[] = $ad_unit['code'];
-						}
-					}
-				}
-			}
-			$ad_slots = array_unique( $ad_slots );
-			sort( $ad_slots );
-		}
-		return $ad_slots;
+	public function get_ad_units() {
+		$ad_unit_setup = $this->get_setting( 'ad_units' );
+		$ad_units = wp_list_pluck( $ad_unit_setup, 'code' );
+		sort( $ad_units );
+		return $ad_units;
 	}
 	
 	/**
 	 * Generate the code for a single ad unit.
-	 * The terminology of the plugin uses slots but we use unit here to be consistent with DFP.
+	 * The terminology of the plugin uses units but we use unit here to be consistent with DFP.
 	 *
 	 * @access public
-	 * @param string $slot
+	 * @param string $ad_unit
 	 * @param boolean $echo
 	 * @return string
 	 */
-	public function get_ad_slot( $ad_unit, $echo = true ) {
+	public function get_ad_unit( $ad_unit, $echo = true ) {
 		// Make sure this is in the current ad layer and an ad layer is defined
-		if ( empty( $this->ad_units ) || ! in_array( $ad_unit, $this->ad_units ) ) {
+		if ( empty( $this->ad_units ) || ! array_key_exists( $ad_unit, $this->ad_units ) ) {
 			return;
 		}
 	
@@ -492,7 +622,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		$output .= "\t</script>\n";
 		$output .= "</div>\n";
 		
-		$output = apply_filters( 'ad_layers_dfp_ad_slot_html', $output, $ad_unit );
+		$output = apply_filters( 'ad_layers_dfp_ad_unit_html', $output, $ad_unit );
 		
 		if ( $echo ) {
 			echo $output;
@@ -520,7 +650,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	 * @return string
 	 */
 	public function get_ad_unit_id( $ad_unit ) {
-		return apply_filters( 'ad_layers_dfp_ad_unit_id', $this->ad_slot_prefix . $ad_unit, $ad_unit );
+		return apply_filters( 'ad_layers_dfp_ad_unit_id', $this->ad_unit_prefix . $ad_unit, $ad_unit );
 	}
 	
 	/**
@@ -668,10 +798,11 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	}
 	
 	/**
-	 * Render the content of the "Formatting Tags" help tab.
-	 *
+	 * Render the content of the help tab.
 	 * The tab displays a table of each available formatting tab and any
 	 * provided description.
+	 *
+	 * @access public
 	 */
 	public function formatting_tags_help_tab() {
 		if ( ! empty( $this->formatting_tags ) ) :
@@ -689,6 +820,88 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			</aside>
 			<?php
 		endif;
+	}
+	
+	/**
+	 * Gets the current DFP-specific settings required to build the setup code.
+	 * These are cached from the main Ad_Layers_Ad_Server settings on update for efficiency.
+	 *
+	 * @access public
+	 * @return array
+	 */
+	public function get_settings() {
+		$settings = get_option( $this->cache_key );
+		
+		// If these settings are empty and this plugin in use, this is *very* likely a caching error.
+		// Let's at least try to regenerate these and if it fails, accept our fate.
+		if ( empty( $settings ) ) {
+			$settings = $this->cache_settings( $this->option_name, null, get_option( $this->option_name ), true );
+		}
+		
+		// Return what we have at this point
+		return $settings;
+	}
+	
+	/**
+	 * Cache the settings in a format more conducive to generating tags.
+	 * The default Fieldmanager format currently used is great for the user interface
+	 * but not as well suited to how the DFP setup code is actually generated.
+	 *
+	 * @access public
+	 * @param string $option
+	 * @param mixed $old_value
+	 * @param mixed $value
+	 * @param boolean $return
+	 * @return mixed
+	 */
+	public function cache_settings( $option, $old_value, $value, $return = false ) {
+		// Make sure this is saving ad server settings
+		if ( $option !== $this->option_name ) {
+			return;
+		}
+	
+		$cached_setup = array();
+
+		// Don't bother if no breakpoints or no ad units are set
+		if ( empty( $value['breakpoints'] ) || empty( $value['ad_units'] ) ) {
+			return;
+		}
+		
+		foreach ( $value['breakpoints'] as &$breakpoint ) {
+			// Add ad units to the breakpoint data
+			$breakpoint['ad_units'] = array();
+			
+			// Get all ad units for this breakpoint and add their data to the breakpoint
+			if ( ! empty( $value['ad_units'] ) ) {
+				foreach ( $value['ad_units'] as $ad_unit ) {
+					// Iterate over the sizes and find ones used by this breakpoint
+					if ( ! empty( $ad_unit['sizes'] ) ) {
+						foreach ( $ad_unit['sizes'] as $i => &$size ) {
+							// If this ad unit isn't used by the breakpoint, drop it
+							if ( ! in_array( $breakpoint['title'], $size['breakpoints'] ) ) {
+								unset( $ad_unit['sizes'][ $i ] );
+							} else {
+								// Leave it alone, but drop the breakpoint info since the cache won't need it
+								unset( $size['breakpoints'] );
+							}
+						}
+				
+						// If there are any ad unit sizes left, add to the breakpoint
+						if ( ! empty( $ad_unit['sizes'] ) ) {
+							$breakpoint['ad_units'][] = $ad_unit;
+						}
+					}
+				}
+			}
+		}
+		
+		// Store the cached data
+		update_option( $this->cache_key, $value['breakpoints'] );
+		
+		// The action hook doesn't need a return value, but other usage of this plugin might
+		if ( true === $return ) {
+			return $value['breakpoints'];
+		}
 	}
 }
 

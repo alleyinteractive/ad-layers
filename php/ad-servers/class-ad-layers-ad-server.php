@@ -52,9 +52,26 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * @var mixed
 	 */
 	public $display_label;
+	
+	/**
+	 * Javascript API class name
+	 *
+	 * @access public
+	 * @var string
+	 */
+	public $js_api_class = 'AdLayersAPI';
+	
+	/**
+	 * Handle used for scripts
+	 *
+	 * @access public
+	 * @var string
+	 */
+	public $handle = 'ad-layers';
 
 	/**
 	 * Setup the singleton.
+	 *
 	 * @access public
 	 */
 	public function setup() {
@@ -65,8 +82,11 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		add_action( 'wp_head', array( $this, 'header_setup' ) );
 		add_action( 'wp_footer', array( $this, 'footer_setup' ) );
 		
-		// Handle rendering slots
-		add_action( 'ad_layers_render_slot', array( $this, 'get_ad_slot' ) );
+		// Handle rendering units
+		add_action( 'ad_layers_render_ad_unit', array( $this, 'get_ad_unit' ) );
+		
+		// Load the Javascript API early
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 5 );
 		
 		// Load current settings
 		self::$settings = apply_filters( 'ad_layers_ad_server_settings', get_option( $this->option_name, array() ) );
@@ -93,7 +113,40 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	}
 	
 	/**
+	 * Load scripts.
+	 *
+	 * @access public
+	 */
+	public function enqueue_scripts() {
+		// Set the base dependencies
+		$dependencies = array( 'jquery' );
+	
+		// Load scripts specific to the enabled ad server
+		if ( ! empty( $this->ad_server ) ) {
+			$this->ad_server->enqueue_scripts();
+			$js_api_class = $this->ad_server->js_api_class;
+			$dependencies[] = $this->ad_server->handle;
+		} else {
+			$js_api_class = $this->js_api_class;
+		}
+	
+		// Load the base Javascript library
+		wp_enqueue_script( $this->handle, AD_LAYERS_ASSETS_DIR . 'js/ad-layers.js', $dependencies, AD_LAYERS_GLOBAL_ASSET_VERSION, false );
+		
+		// Load the CSS. Mostly used in debug mode.
+		wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
+		
+		
+		
+		// Localize the base API with the class name
+		wp_localize_script( 'ad-layers', 'adLayersAdServer', array(
+			'jsAPIClass' => $js_api_class,
+		) );
+	}
+	
+	/**
 	 * Get current available ad servers.
+	 *
 	 * @access public
 	 * @return array
 	 */
@@ -103,6 +156,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	
 	/**
 	 * Get current available ad servers for use in an option list.
+	 *
 	 * @access public
 	 * @return array
 	 */
@@ -121,31 +175,34 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	}
 	
 	/**
-	 * Gets available ad slots.
+	 * Gets available ad units.
+	 *
 	 * @access public
 	 * @return array
 	 */
-	public function get_ad_slots() {
+	public function get_ad_units() {
 		if ( ! empty( $this->ad_server ) ) {
-			return $this->ad_server->get_ad_slots( $ad_slot );
+			return $this->ad_server->get_ad_units();
 		}
 	}
 	
 	/**
-	 * Get the code for a specific ad slot.
+	 * Get the code for a specific ad unit.
 	 * Should be implemented by all child classes.
 	 * Since $ad_server will be empty for child classes,
 	 * this will automatically do nothing if they choose not to implement it.
+	 *
 	 * @access public
 	 */
-	public function get_ad_slot( $ad_slot ) {
+	public function get_ad_unit( $ad_unit ) {
 		if ( ! empty( $this->ad_server ) ) {
-			$this->ad_server->get_ad_slot( $ad_slot );
+			$this->ad_server->get_ad_unit( $ad_unit );
 		}
 	}
 	
 	/**
 	 * Gets a particular ad server setting or all settings if none is specified.
+	 *
 	 * @access public
 	 * @return mixed
 	 */
@@ -159,9 +216,14 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	
 	/**
 	 * Add the ad server settings page.
+	 *
 	 * @access public
 	 */
 	public function add_settings_page( $args = array() ) {
+		if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			return;
+		}
+	
 		// Provide basic ad server selection.
 		$args = array(
 			'name' => $this->option_name,
@@ -189,6 +251,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * Should be implemented by all child classes, if needed.
 	 * Since $ad_server will be empty for child classes,
 	 * this will automatically do nothing if they choose not to implement it.
+	 *
 	 * @access public
 	 */
 	public function header_setup() {
@@ -202,6 +265,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * Should be implemented by all child classes, if needed.
 	 * Since $ad_server will be empty for child classes,
 	 * this will automatically do nothing if they choose not to implement it.
+	 *
 	 * @access public
 	 */
 	public function footer_setup() {
@@ -215,6 +279,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * Should be implemented by all child classes, if needed.
 	 * Since $ad_server will be empty for child classes,
 	 * this will automatically do nothing if they choose not to implement it.
+	 *
 	 * @access public
 	 */
 	public function add_help_tab() {
@@ -226,6 +291,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	/**
 	 * Returns the ad server display label.
 	 * Should be implemented by all child classes.
+	 *
 	 * @access public
 	 * @return string
 	 */
@@ -236,6 +302,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	/**
 	 * Returns the ad server settings fields to merge into the ad settings page.
 	 * Should be implemented by all child classes.
+	 *
 	 * @access public
 	 * @return array
 	 */
@@ -246,6 +313,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	/**
 	 * Gets the domain of the current site.
 	 * Useful for virtually any ad server.
+	 *
 	 * @access public
 	 * @return string
 	 */
@@ -254,6 +322,77 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 			'ad_layers_ad_server_get_domain', 
 			preg_replace( '#^https?://#', '', trim( get_site_url() ) )
 		);
+	}
+	
+	/**
+	 * Gets the args used to define a custom targeting field.
+	 *
+	 * @access public
+	 * @param string $name
+	 * @return array
+	 */
+	public function get_custom_targeting_args( $name = 'ad_layer_custom_targeting' ) {
+		if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			return array();
+		}
+	
+		return apply_filters( 'ad_layers_custom_targeting_args', array(
+			'name' => $name,
+			'collapsible' => true,
+			'collapsed' => false,
+			'limit' => 0,
+			'extra_elements' => 0,
+			'add_more_label' =>  __( 'Add custom targeting', 'ad-layers' ),
+			'label_macro' => array( __( '%s', 'ad-layers' ), 'title' ),
+			'children' => array(
+				'custom_variable' => new Fieldmanager_Select(
+					array(
+						'label' => __( 'Custom Variable', 'ad-layers' ),
+						'options' => Ad_Layers::instance()->get_custom_variables(),	
+					)
+				),
+				'source' => new Fieldmanager_Select(
+					array(
+						'label' => __( 'Source', 'ad-layers' ),
+						'options' => $this->get_custom_targeting_sources(),
+					)
+				),
+				'values' => new Fieldmanager_Textfield(
+					array(
+						'add_more_label' =>  __( 'Add value', 'ad-layers' ),
+						'one_label_per_item' => false,
+						'limit' => 0,
+						'extra_elements' => 0,
+						'display_if' => array(
+							'src' => 'source',
+							'value' => 'other',
+						),
+					)
+				),
+			)
+		) );
+	}
+	
+	/**
+	 * Gets all available custom targeting sources.
+	 *
+	 * @access private
+	 * @return array
+	 */
+	private function get_custom_targeting_sources() {
+		$options = array();
+
+		// Add all taxonomies available to ad layers
+		$options = array_merge( $options, Ad_Layers::instance()->get_taxonomies() );
+		
+		// Add additional options
+		$options = array_merge( $options, array(
+			'post_type' => __( 'Post Type', 'ad-layers' ),
+			'author' => __( 'Author', 'ad-layers' ),
+			'other' => __( 'Other', 'ad-layers' ),
+		) );
+		
+		return apply_filters( 'ad_layers_custom_targeting_sources', $options );
 	}
 }
 

@@ -57,24 +57,8 @@ class Ad_Layers extends Ad_Layers_Singleton {
 		$this->ad_layers = apply_filters( 'ad_layers', get_option( 'ad_layers' ) );
 		$this->custom_variables = apply_filters( 'ad_layers_custom_variables', get_option( 'ad_layers_custom_variables' ) );
 		
-		// Load the base Javascript library early
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 5 );
-		
 		// Set the active ad layer before anything else.
 		add_action( 'wp_head', array( $this, 'set_active_ad_layer' ), 1 );
-	}
-	
-	/**
-	 * Load scripts.
-	 *
-	 * @access public
-	 */
-	public function enqueue_scripts() {
-		// Load the base Javascript library
-		wp_enqueue_script( 'ad-layers-js', AD_LAYERS_ASSETS_DIR . '/js/ad-layers.js', array( 'jquery' ), AD_LAYERS_GLOBAL_ASSET_VERSION, false );
-		
-		// Load the CSS. Mostly used in debug mode.
-		wp_enqueue_style( 'ad-layers-css', AD_LAYERS_ASSETS_DIR . '/css/ad-layers.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
 	}
 	
 	/**

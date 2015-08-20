@@ -33,9 +33,6 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 		add_filter( 'manage_' . $this->post_type . '_posts_columns' , array( $this, 'manage_edit_columns' ), 15, 1 );
 		add_action( 'manage_' . $this->post_type . '_posts_custom_column' , array( $this, 'manage_custom_columns' ), 10, 2 );
 		
-		// Enqueue the Javascript required by the custom meta boxe;
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-		
 		// Add and remove data from the options list of available ad layers
 		add_action( 'save_post_' . $this->post_type, array( $this, 'save_post' ), 99, 3 );
 		add_action( 'delete_post', array( $this, 'delete_post' ) );
@@ -68,18 +65,7 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 			'taxonomies' => apply_filters( 'ad_layers_taxonomies', array( 'category', 'post_tag' ) ),
 		) );
 	}
-	
-	/**
-	 * Load scripts used by the admin interface only on the ad layer edit screen.
-	 */
-	public function enqueue_scripts() {
-		$screen = get_current_screen();
-		if ( 'edit' == $screen->parent_base && 'post' == $screen->base && ! empty( $screen->post_type ) && $this->post_type == $screen->post_type ) {
-			wp_enqueue_script( 'ad-layers-edit-js', AD_LAYERS_ASSETS_DIR . '/js/ad-layers-edit.js', array( 'jquery' ), AD_LAYERS_GLOBAL_ASSET_VERSION, false );
-			wp_enqueue_style( 'ad-layers-edit-css', AD_LAYERS_ASSETS_DIR . '/css/ad-layers-edit.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
-		}
-	}
-	
+
 	/**
 	 * Manage available columns on the edit posts table
 	 *
@@ -92,7 +78,7 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
   		$columns['ad_layer_page_types'] = __( 'Page Type', 'ad-layers' );
   		$columns['ad_layer_post_types'] = __( 'Post Types', 'ad-layers' );
   		$columns['ad_layer_taxonomies'] = __( 'Taxonomies', 'ad-layers' );
-  		$columns['ad_layer_ad_slots'] = __( 'Ad Slots', 'ad-layers' );
+  		$columns['ad_layer_ad_units'] = __( 'Ad Units', 'ad-layers' );
   		$columns['ad_layer_priority'] = __( 'Priority', 'ad-layers' );
   		
   		// Move date back to the end
@@ -114,7 +100,7 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 			case 'ad_layer_page_types':
 			case 'ad_layer_post_types':
 			case 'ad_layer_taxonomies':
-			case 'ad_layer_ad_slots':
+			case 'ad_layer_ad_units':
 				$value = get_post_meta( $post_id, $column, true );
 				if ( ! empty( $value ) ) {
 					if ( is_array( $value ) ) {
@@ -142,23 +128,40 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 	 * @param string $priority
 	 */
 	public function add_meta_boxes() {
-		// Add ad slots
-		$fm_ad_slots = new Fieldmanager_Select(
-			array(
-				'name' => 'ad_layer_ad_slots',
-				'limit' => 0,
-				'extra_elements' => 0,
-				'one_label_per_item' => false,
-				'label' => __( 'Select one or more ad slots.', 'ad-layers' ),
-				'add_more_label' =>  __( 'Add an ad slot', 'ad-layers' ),
-				'options' => Ad_Layers_Ad_Server::instance()->get_ad_slots(),
+		if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			return;
+		}
+	
+		// Add ad units
+		$ad_unit_args = array(
+			'name' => 'ad_layer_ad_units',
+			'limit' => 0,
+			'extra_elements' => 0,
+			'one_label_per_item' => false,
+			'sortable' => true,
+			'label' => __( 'Select one or more ad units.', 'ad-layers' ),
+			'add_more_label' =>  __( 'Add an ad unit', 'ad-layers' ),
+			'children' => array(
+				'ad_unit' => new Fieldmanager_Select(
+					array(
+						'label' => __( 'Ad Unit', 'ad-layers' ),
+						'options' => Ad_Layers_Ad_Server::instance()->get_ad_units(),
+					)
+				),
 			)
 		);
-		$fm_ad_slots->add_meta_box( __( 'Ad Slots', 'ad-layers' ), $this->post_type, 'normal', 'high' );
+		
+		$targeting_args = Ad_Layers_Ad_Server::instance()->get_custom_targeting_args( 'custom_targeting' );
+		if ( ! empty( $targeting_args ) ) {
+			$ad_unit_args['children']['custom_targeting'] = new Fieldmanager_Group( apply_filters( 'ad_layers_custom_targeting_ad_unit_args', $targeting_args ) );
+		}
+		
+		$fm_ad_units = new Fieldmanager_Group( apply_filters( 'ad_layers_ad_units_field_args', $ad_unit_args ) );
+		$fm_ad_units->add_meta_box( __( 'Ad Units', 'ad-layers' ), $this->post_type, 'normal', 'high' );
 		
 		// Add page types
 		$fm_page_types = new Fieldmanager_Select(
-			array(
+			apply_filters( 'ad_layers_page_types_field_args', array(
 				'name' => 'ad_layer_page_types',
 				'limit' => 0,
 				'extra_elements' => 0,
@@ -166,13 +169,13 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 				'label' => __( 'Select one or more page types to be targeted with this ad layer.', 'ad-layers' ),
 				'add_more_label' =>  __( 'Add a page type', 'ad-layers' ),
 				'options' => Ad_Layers::instance()->get_page_types(),
-			)
+			) )
 		);
 		$fm_page_types->add_meta_box( __( 'Page Types', 'ad-layers' ), $this->post_type, 'normal', 'high' );
 		
 		// Add taxonomies
 		$fm_taxonomies = new Fieldmanager_Select(
-			array(
+			apply_filters( 'ad_layers_taxonomies_field_args', array(
 				'name' => 'ad_layer_taxonomies',
 				'limit' => 0,
 				'extra_elements' => 0,
@@ -180,13 +183,13 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 				'label' => __( 'Select one or more optional taxonomies for targeting. Posts with any term in these taxonomies will get the ad layer.', 'ad-layers' ),
 				'add_more_label' =>  __( 'Add a taxonomy', 'ad-layers' ),
 				'options' => Ad_Layers::instance()->get_taxonomies(),
-			)
+			) )
 		);
 		$fm_taxonomies->add_meta_box( __( 'Taxonomies', 'ad-layers' ), $this->post_type, 'normal', 'high' );
 		
 		// Add post types
 		$fm_post_types = new Fieldmanager_Select(
-			array(
+			apply_filters( 'ad_layers_post_types_field_args', array(
 				'name' => 'ad_layer_post_types',
 				'limit' => 0,
 				'extra_elements' => 0,
@@ -194,66 +197,16 @@ class Ad_Layers_Post_Type extends Ad_Layers_Singleton {
 				'label' => __( 'Select one or more optional post types for targeting. Any post of this type will get the ad layer.', 'ad-layers' ),
 				'add_more_label' =>  __( 'Add a post type', 'ad-layers' ),
 				'options' => Ad_Layers::instance()->get_post_types(),
-			)
+			) )
 		);
 		$fm_post_types->add_meta_box( __( 'Post Types', 'ad-layers' ), $this->post_type, 'normal', 'high' );
 		
 		// Custom targeting variables
-		$fm_custom = new Fieldmanager_Group( array(
-			'name' => 'ad_layer_custom_targeting',
-			'collapsible' => true,
-			'collapsed' => false,
-			'limit' => 0,
-			'extra_elements' => 0,
-			'label' => __( 'Custom Targeting', 'ad-layers' ),
-			'add_more_label' =>  __( 'Add custom targeting', 'ad-layers' ),
-			'label_macro' => array( __( '%s', 'ad-layers' ), 'title' ),
-			'children' => array(
-				'custom_variable' => new Fieldmanager_Select(
-					array(
-						'label' => __( 'Custom Variable', 'ad-layers' ),
-						'options' => Ad_Layers::instance()->get_custom_variables(),	
-					)
-				),
-				'value' => new Fieldmanager_Select(
-					array(
-						'label' => __( 'Value', 'ad-layers' ),
-						'options' => $this->get_custom_targeting_options(),
-					)
-				),
-				'text' => new Fieldmanager_Textfield(
-					array(
-						'display_if' => array(
-							'src' => 'value',
-							'value' => 'other',
-						),
-					)
-				),
-			)
-		) );
-		$fm_custom->add_meta_box( __( 'Custom Targeting', 'ad-layers' ), $this->post_type, 'normal', 'low' );
-	}
-	
-	/**
-	 * Gets all available custom targeting options.
-	 *
-	 * @access private
-	 * @return array
-	 */
-	private function get_custom_targeting_options() {
-		$options = array();
-
-		// Add all taxonomies available to ad layers
-		$options = array_merge( $options, Ad_Layers::instance()->get_taxonomies() );
-		
-		// Add additional options
-		$options = array_merge( $options, array(
-			'post_type' => __( 'Post Type', 'ad-layers' ),
-			'author' => __( 'Author', 'ad-layers' ),
-			'other' => __( 'Other', 'ad-layers' ),
-		) );
-		
-		return apply_filters( 'ad_layers_custom_targeting_options', $options );
+		$targeting_args = Ad_Layers_Ad_Server::instance()->get_custom_targeting_args();
+		if ( ! empty( $targeting_args ) ) {
+			$fm_custom = new Fieldmanager_Group( apply_filters( 'ad_layers_custom_targeting_field_args', $targeting_args ) );
+			$fm_custom->add_meta_box( __( 'Page Level Custom Targeting', 'ad-layers' ), $this->post_type, 'normal', 'low' );	
+		}
 	}
 	
 	/**

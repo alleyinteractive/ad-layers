@@ -42,6 +42,10 @@ class Ad_Layers_Admin extends Ad_Layers_Singleton {
 	 * @access public
 	 */
 	public function add_settings_pages() {
+		if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			return;
+		}
+	
 		$fm_priority = new Fieldmanager_Group( array(
 			'name' => 'ad_layers',
 			'sortable' => true,

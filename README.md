@@ -17,8 +17,8 @@ This allows you to create a new ad layer. This is set up as a WordPress custom p
 ### Title
 The standard WordPress title field acts as a label to reference this ad layer.
 
-### Ad Slots
-Click "Add an ad unit" to add one or more ad slots that are part of this ad layer.
+### Ad Units
+Click "Add an ad unit" to add one or more ad units that are part of this ad layer.
 
 ### Page Types
 Click "Add a page type" to add one or more pages on which this layer can appear. 
@@ -69,7 +69,7 @@ This sets the DFP account ID which is used throughout the DFP header code.
 
 *Path Template*
 
-This allows the creation of one or more templates to define the path for DFP ad slots. Under the help tab in the upper right, there are multiple template tags to make these dynamic. They include:
+This allows the creation of one or more templates to define the path for DFP ad units. Under the help tab in the upper right, there are multiple template tags to make these dynamic. They include:
 
 ```
 #account_id#
@@ -106,7 +106,9 @@ Maximum Width: The maximum width at which this breakpoint is displayed.
 
 The above two fields correspond to how DFP handles responsive ad serving. Depending on how your ad units are configured, these might not correspond exactly to your design breakpoints.
 
-You can then click "Add Ad Unit" to add one or more ad units for this breakpoint. For each you can add:
+*Ad Units*
+
+You can then click "Add Ad Unit" to add one or more ad units. For each you can add:
 
 Code: This the DFP Ad Unit code. It is preferable to the name since it acts a key without 
 
@@ -115,22 +117,23 @@ Width: Width of the ad
 Height: Height of the ad
 Default Size: Check this if this is the default size for this ad unit across all breakpoints. This value is required for responsive ad serving. If not checked for at least one size, the ad will not be displayed.
 Out of Page: Indicates this size is an Out of Page unit for DFP.
+Breakpoints: Check off all breakpoints where this size should be displayed.
 
 ## Adding ad units to a template
 
 There are three ways to add an ad unit to a template. The first is to use the built-in action hook directly in a template file:
 
 ```
-<?php do_action( 'ad_layers_render_slot', 'slotname' ) ?>
+<?php do_action( 'ad_layers_render_ad_unit', 'unitname' ) ?>
 ```
 
-There is also an Ad Layers Ad Widget that allows for selection of a slot from a dropdown and can be placed into a sidebar.
+There is also an Ad Layers Ad Widget that allows for selection of an ad unit from a dropdown and can be placed into a sidebar.
 
 Finally, a shortcode is available for all posts in the format:
 ```
-[ad-slot slot=slotname]
+[ad-unit unit=unitname]
 ```
-In all cases, if the slot isn't defined for the current ad layer or is invalid, it will simply be skipped and generate no markup.
+In all cases, if the ad unit isn't defined for the current ad layer or is invalid, it will simply be skipped and generate no markup.
 
 ## Hooks and Filters
 
@@ -146,7 +149,7 @@ ad_layers_dfp_after_setup
 
 ad_layers_dfp_custom_targeting
 
-ad_layers_dfp_after_ad_slots
+ad_layers_dfp_after_ad_units
 
 ### Filter Hooks by Class
 
@@ -160,11 +163,15 @@ ad_layer_ad_server_setting
 
 ad_layers_ad_server_get_domain
 
+ad_layers_custom_targeting_args
+
+ad_layers_custom_targeting_sources
+
 *Ad_Layers_DFP*
 
 ad_layers_dfp_formatting_tags
 
-ad_layers_dfp_ad_slot_prefix
+ad_layers_dfp_ad_unit_prefix
 
 ad_layers_dfp_formatting_tags
 
@@ -172,17 +179,29 @@ ad_layers_dfp_async_rendering
 
 ad_layers_dfp_collapse_empty_divs
 
-ad_layers_ad_unit_sizes
+ad_layers_dfp_ad_unit_sizes
+
+ad_layers_dfp_targeting_values_by_unit
+
+ad_layers_dfp_mapping_by_unit
 
 ad_layers_dfp_default_by_unit
 
+ad_layers_dfp_targeting_by_unit
+
 ad_layers_dfp_oop_units
 
-ad_layers_dfp_custom_target
+ad_layers_dfp_page_level_targeting
+
+ad_layers_dfp_custom_targeting_value
+
+ad_layers_dfp_author_targeting_field
+
+ad_layers_dfp_term_targeting_field
 
 ad_layers_dfp_ad_unit_class
 
-ad_layers_dfp_ad_slot_html
+ad_layers_dfp_ad_unit_html
 
 ad_layers_dfp_breakpoint_key
 
@@ -194,6 +213,10 @@ ad_layers_dfp_formatting_tag_value
 
 ad_layers_dfp_path
 
+ad_layers_dfp_get_settings_fields
+
+ad_layers_dfp_custom_targeting_field_args
+
 *Ad_Layers_Meta_Boxes*
 
 ad_layers_post_types
@@ -203,12 +226,22 @@ ad_layers_post_types
 ad_layers_taxonomies
 
 ad_layers_edit_columns
-
-ad_layers_custom_targeting_options
-
+s
 ad_layers_save_post
 
 ad_layers_delete_post
+
+ad_layers_ad_units_field_args
+
+ad_layers_custom_targeting_ad_unit_args
+
+ad_layers_page_types_field_args
+
+ad_layers_taxonomies_field_args
+
+ad_layers_post_types_field_args
+
+ad_layers_custom_targeting_field_args
 
 *Ad_Layers*
 
