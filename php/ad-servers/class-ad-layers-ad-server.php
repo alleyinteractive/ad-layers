@@ -19,7 +19,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * @var array
 	 */
 	public $ad_servers;
-	
+
 	/**
 	 * Current ad server settings
 	 *
@@ -28,7 +28,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * @var array
 	 */
 	public static $settings;
-	
+
 	/**
 	 * Option name for ad settings
 	 *
@@ -36,7 +36,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * @var array
 	 */
 	public $option_name = 'ad_layers_ad_server_settings';
-	
+
 	/**
 	 * Instance of the current ad server class
 	 *
@@ -44,7 +44,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * @var mixed
 	 */
 	public $ad_server;
-	
+
 	/**
 	 * Display label. Used by child classes.
 	 *
@@ -52,7 +52,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * @var mixed
 	 */
 	public $display_label;
-	
+
 	/**
 	 * Javascript API class name
 	 *
@@ -60,7 +60,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 * @var string
 	 */
 	public $js_api_class = 'AdLayersAPI';
-	
+
 	/**
 	 * Handle used for scripts
 	 *
@@ -77,41 +77,27 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	public function setup() {
 		// Register the ad server settings page
 		add_action( 'init', array( $this, 'add_settings_page' ) );
-		
+
 		// Add the required header and footer setup. May differ for each server.
 		add_action( 'wp_head', array( $this, 'header_setup' ) );
 		add_action( 'wp_footer', array( $this, 'footer_setup' ) );
-		
+
 		// Handle rendering units
 		add_action( 'ad_layers_render_ad_unit', array( $this, 'get_ad_unit' ) );
-		
+
 		// Load the Javascript API early
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ), 5 );
-		
+
 		// Load current settings
 		self::$settings = apply_filters( 'ad_layers_ad_server_settings', get_option( $this->option_name, array() ) );
-		
-		// Allow additional ad servers to be loaded via filter within a theme
-		$this->ad_servers = apply_filters( 'ad_layers_ad_servers', array(
-			'Ad_Layers_DFP' => AD_LAYERS_BASE_DIR . '/php/ad-servers/class-ad-layers-dfp.php',
-		) );
-		
-		// Load ad server classes
-		if ( ! empty( $this->ad_servers ) && is_array( $this->ad_servers ) ) {
-			foreach ( $this->ad_servers as $ad_server ) {
-				if ( file_exists( $ad_server ) ) {
-					require_once( $ad_server );
-				}
-			}
-		}
-		
+
 		// Set the current ad server class, if defined.
 		if ( ! empty( self::$settings['ad_server'] ) && class_exists( self::$settings['ad_server'] ) ) {
 			$ad_server = new self::$settings['ad_server'];
 			$this->ad_server = $ad_server::instance();
 		}
 	}
-	
+
 	/**
 	 * Load scripts.
 	 *
@@ -120,7 +106,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	public function enqueue_scripts() {
 		// Set the base dependencies
 		$dependencies = array( 'jquery' );
-	
+
 		// Load scripts specific to the enabled ad server
 		if ( ! empty( $this->ad_server ) ) {
 			$this->ad_server->enqueue_scripts();
@@ -129,21 +115,21 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		} else {
 			$js_api_class = $this->js_api_class;
 		}
-	
+
 		// Load the base Javascript library
 		wp_enqueue_script( $this->handle, AD_LAYERS_ASSETS_DIR . 'js/ad-layers.js', $dependencies, AD_LAYERS_GLOBAL_ASSET_VERSION, false );
-		
+
 		// Load the CSS. Mostly used in debug mode.
 		wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
-		
-		
-		
+
+
+
 		// Localize the base API with the class name
 		wp_localize_script( 'ad-layers', 'adLayersAdServer', array(
 			'jsAPIClass' => $js_api_class,
 		) );
 	}
-	
+
 	/**
 	 * Get current available ad servers.
 	 *
@@ -153,7 +139,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	public function get_ad_servers() {
 		return $this->ad_servers;
 	}
-	
+
 	/**
 	 * Get current available ad servers for use in an option list.
 	 *
@@ -162,18 +148,19 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 */
 	public function get_ad_server_options() {
 		$options = array();
-		
+
 		if ( ! empty( $this->ad_servers ) ) {
+			var_d
 			foreach ( array_keys( $this->ad_servers ) as $ad_server ) {
 				if ( class_exists( $ad_server ) ) {
 					$options[ $ad_server ] = $ad_server::instance()->get_display_label();
 				}
 			}
 		}
-		
+
 		return $options;
 	}
-	
+
 	/**
 	 * Gets available ad units.
 	 *
@@ -185,7 +172,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 			return $this->ad_server->get_ad_units();
 		}
 	}
-	
+
 	/**
 	 * Get the code for a specific ad unit.
 	 * Should be implemented by all child classes.
@@ -199,7 +186,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 			$this->ad_server->get_ad_unit( $ad_unit );
 		}
 	}
-	
+
 	/**
 	 * Gets a particular ad server setting or all settings if none is specified.
 	 *
@@ -210,10 +197,10 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		if ( empty( $key ) ) {
 			return self::$settings;
 		}
-		
+
 		return ( ! empty( self::$settings[ $key ] ) ) ? apply_filters( 'ad_layer_ad_server_setting', self::$settings[ $key ], $key ) : null;
 	}
-	
+
 	/**
 	 * Add the ad server settings page.
 	 *
@@ -223,7 +210,20 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		if ( ! class_exists( 'Fieldmanager_Field' ) ) {
 			return;
 		}
-	
+
+		// Allow additional ad servers to be loaded via filter within a theme
+		$this->ad_servers = apply_filters( 'ad_layers_ad_servers', array(
+			'Ad_Layers_DFP' => AD_LAYERS_BASE_DIR . '/php/ad-servers/class-ad-layers-dfp.php',
+		) );
+		// Load ad server classes
+		if ( ! empty( $this->ad_servers ) && is_array( $this->ad_servers ) ) {
+			foreach ( $this->ad_servers as $ad_server ) {
+				if ( file_exists( $ad_server ) ) {
+					require_once( $ad_server );
+				}
+			}
+		}
+
 		// Provide basic ad server selection.
 		$args = array(
 			'name' => $this->option_name,
@@ -238,14 +238,14 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 				),
 			)
 		);
-		
+
 		// Child classes can add additional functionality.
 		$args['children'] = array_merge( $args['children'], $this->get_settings_fields() );
-		
+
 		$fm_ad_servers = new Fieldmanager_Group( $args );
 		$fm_ad_servers->add_submenu_page( Ad_Layers::instance()->get_edit_link(), __( 'Ad Server Settings', 'ad-layers' ) );
 	}
-	
+
 	/**
 	 * Handle ad server header setup code.
 	 * Should be implemented by all child classes, if needed.
@@ -259,7 +259,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 			$this->ad_server->header_setup();
 		}
 	}
-	
+
 	/**
 	 * Handle ad server header setup code.
 	 * Should be implemented by all child classes, if needed.
@@ -273,7 +273,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 			$this->ad_server->footer_setup();
 		}
 	}
-	
+
 	/**
 	 * Handle adding a help tab for the current ad server.
 	 * Should be implemented by all child classes, if needed.
@@ -287,7 +287,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 			$this->ad_server->add_help_tab();
 		}
 	}
-	
+
 	/**
 	 * Returns the ad server display label.
 	 * Should be implemented by all child classes.
@@ -298,7 +298,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	public function get_display_label() {
 		return $this->display_label;
 	}
-	
+
 	/**
 	 * Returns the ad server settings fields to merge into the ad settings page.
 	 * Should be implemented by all child classes.
@@ -309,7 +309,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	public function get_settings_fields() {
 		return ( ! empty( $this->ad_server ) ) ? $this->ad_server->get_settings_fields() : array();
 	}
-	
+
 	/**
 	 * Gets the domain of the current site.
 	 * Useful for virtually any ad server.
@@ -319,11 +319,11 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 	 */
 	public function get_domain() {
 		return apply_filters(
-			'ad_layers_ad_server_get_domain', 
+			'ad_layers_ad_server_get_domain',
 			preg_replace( '#^https?://#', '', trim( get_site_url() ) )
 		);
 	}
-	
+
 	/**
 	 * Gets the args used to define a custom targeting field.
 	 *
@@ -335,7 +335,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 		if ( ! class_exists( 'Fieldmanager_Field' ) ) {
 			return array();
 		}
-	
+
 		return apply_filters( 'ad_layers_custom_targeting_args', array(
 			'name' => $name,
 			'collapsible' => true,
@@ -348,7 +348,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 				'custom_variable' => new Fieldmanager_Select(
 					array(
 						'label' => __( 'Custom Variable', 'ad-layers' ),
-						'options' => Ad_Layers::instance()->get_custom_variables(),	
+						'options' => Ad_Layers::instance()->get_custom_variables(),
 					)
 				),
 				'source' => new Fieldmanager_Select(
@@ -372,7 +372,7 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 			)
 		) );
 	}
-	
+
 	/**
 	 * Gets all available custom targeting sources.
 	 *
@@ -384,14 +384,14 @@ class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
 
 		// Add all taxonomies available to ad layers
 		$options = array_merge( $options, Ad_Layers::instance()->get_taxonomies() );
-		
+
 		// Add additional options
 		$options = array_merge( $options, array(
 			'post_type' => __( 'Post Type', 'ad-layers' ),
 			'author' => __( 'Author', 'ad-layers' ),
 			'other' => __( 'Other', 'ad-layers' ),
 		) );
-		
+
 		return apply_filters( 'ad_layers_custom_targeting_sources', $options );
 	}
 }
