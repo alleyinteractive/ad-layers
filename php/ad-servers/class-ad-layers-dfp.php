@@ -201,6 +201,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	
 		// Ad unit args may differ if custom targeting variables are present
 		$ad_unit_args = array(
+			'sortable' => true,
 			'collapsible' => true,
 			'collapsed' => true,
 			'limit' => 0,
