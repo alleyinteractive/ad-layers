@@ -482,12 +482,14 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 	private function targeting_js( $ad_layer ) {
 		// Handle any page level custom targeting specified for this ad layer.
 		$custom_targeting = get_post_meta( $ad_layer['post_id'], 'ad_layer_custom_targeting', true );
+		$custom_targeting = apply_filters( 'ad_layers_dfp_page_level_targeting', $custom_targeting );
+
 		if ( empty( $custom_targeting ) ) {
 			return;
 		}
-		
-		$targeting_values = apply_filters( 'ad_layers_dfp_page_level_targeting', $this->get_targeting_js_from_array( $custom_targeting ) );
-		
+
+		$targeting_values = $this->get_targeting_js_from_array( $custom_targeting );
+
 		// Add the JS
 		if ( ! empty( $targeting_values ) ) {
 			echo 'googletag.pubads()' . $targeting_values . ";\n";
