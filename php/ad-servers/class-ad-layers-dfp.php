@@ -358,7 +358,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		// Get the units included in this ad layer
 		$this->ad_units = get_post_meta( $ad_layer['post_id'], 'ad_layer_ad_units', true );
 		if ( ! empty( $this->ad_units ) ) {
-			$this->ad_units = wp_list_pluck( $this->ad_units, 'custom_targeting', 'ad_unit' );
+			$this->ad_units = apply_filters( 'ad_layers_dfp_ad_units', wp_list_pluck( $this->ad_units, 'custom_targeting', 'ad_unit' ) );
 		} else {
 			return;
 		}
