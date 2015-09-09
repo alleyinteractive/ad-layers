@@ -62,9 +62,9 @@ if ( ! class_exists( 'Ad_Layers_Widget' ) ) :
 			$ad_unit = ( isset( $instance['ad_unit'] ) ) ? $instance['ad_unit'] : '';
 			?>
 			<p>
-				<label for="<?php echo $this->get_field_id( 'ad_unit' ) ?>"><?php esc_html_e( 'Ad Unit', 'ad-layers' ) ?></label>
+				<label for="<?php echo esc_attr( $this->get_field_id( 'ad_unit' ) ) ?>"><?php esc_html_e( 'Ad Unit', 'ad-layers' ) ?></label>
 				<br />
-				<?php echo $this->ad_unit_select_field( $ad_unit ) ?>
+				<?php echo $this->ad_unit_select_field_html( $ad_unit ) ?>
 				<br /><i><?php esc_html_e( 'Select an ad unit to display in this widget. The widget will be automatically hidden if the unit is not present in the current ad layer.', 'ad-layers' ); ?></i>
 			</p>
 			<?php
@@ -97,7 +97,7 @@ if ( ! class_exists( 'Ad_Layers_Widget' ) ) :
 		 * @param string $selected_value The currently selected value
 		 * @return string HTML for the field
 		 */
-		protected function ad_unit_select_field( $selected_value ) {
+		protected function ad_unit_select_field_html( $selected_value ) {
 			// Get all ad units in the system.
 			// If none exist, display a message.
 			// This will also prevent the widget from being saved due to the validation rules in update().

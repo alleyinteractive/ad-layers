@@ -23,10 +23,6 @@ if ( ! class_exists( 'Ad_Layers_Singleton' ) ) :
 			/* Don't do anything, needs to be initialized via instance() method */
 		}
 
-		public function __clone() { wp_die( __( "Please don't __clone ", 'ad-layers' ) . __CLASS__ ); }
-
-		public function __wakeup() { wp_die( __( "Please don't __wakeup ", 'ad-layers' ) . __CLASS__ ); }
-
 		/**
 		 * Get an instance of the class.
 		 *

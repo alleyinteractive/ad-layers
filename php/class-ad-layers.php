@@ -365,7 +365,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 				// Add some other templates at the bottom
 				$page_types = array_merge( $page_types, array(
 					'author' => __( 'Author Archive', 'ad-layers' ),
-					'date' => __ ( 'Date Archive', 'ad-layers' ),
+					'date' => __( 'Date Archive', 'ad-layers' ),
 					'notfound' => __( '404 Page', 'ad-layers' ),
 					'search' => __( 'Search Results', 'ad-layers' ),
 					'default' => __( 'Default', 'ad-layers' ),

@@ -141,15 +141,13 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 				'one_label_per_item' => false,
 				'sortable' => true,
 				'label' => __( 'Select one or more ad units.', 'ad-layers' ),
-				'add_more_label' =>  __( 'Add an ad unit', 'ad-layers' ),
+				'add_more_label' => __( 'Add an ad unit', 'ad-layers' ),
 				'children' => array(
-					'ad_unit' => new Fieldmanager_Select(
-						array(
-							'label' => __( 'Ad Unit', 'ad-layers' ),
-							'options' => Ad_Layers_Ad_Server::instance()->get_ad_units(),
-						)
-					),
-				)
+					'ad_unit' => new Fieldmanager_Select( array(
+						'label' => __( 'Ad Unit', 'ad-layers' ),
+						'options' => Ad_Layers_Ad_Server::instance()->get_ad_units(),
+					) ),
+				),
 			);
 
 			$targeting_args = Ad_Layers_Ad_Server::instance()->get_custom_targeting_args( 'custom_targeting' );
@@ -168,7 +166,7 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 					'extra_elements' => 0,
 					'one_label_per_item' => false,
 					'label' => __( 'Select one or more page types to be targeted with this ad layer.', 'ad-layers' ),
-					'add_more_label' =>  __( 'Add a page type', 'ad-layers' ),
+					'add_more_label' => __( 'Add a page type', 'ad-layers' ),
 					'options' => Ad_Layers::instance()->get_page_types(),
 				) )
 			);
@@ -182,7 +180,7 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 					'extra_elements' => 0,
 					'one_label_per_item' => false,
 					'label' => __( 'Select one or more optional taxonomies for targeting. Posts with any term in these taxonomies will get the ad layer.', 'ad-layers' ),
-					'add_more_label' =>  __( 'Add a taxonomy', 'ad-layers' ),
+					'add_more_label' => __( 'Add a taxonomy', 'ad-layers' ),
 					'options' => Ad_Layers::instance()->get_taxonomies(),
 				) )
 			);
@@ -196,7 +194,7 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 					'extra_elements' => 0,
 					'one_label_per_item' => false,
 					'label' => __( 'Select one or more optional post types for targeting. Any post of this type will get the ad layer.', 'ad-layers' ),
-					'add_more_label' =>  __( 'Add a post type', 'ad-layers' ),
+					'add_more_label' => __( 'Add a post type', 'ad-layers' ),
 					'options' => Ad_Layers::instance()->get_post_types(),
 				) )
 			);

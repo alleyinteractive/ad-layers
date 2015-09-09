@@ -169,16 +169,20 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			<script type="text/javascript">
 			googletag.cmd.push(function() {
 				<?php
-					// Add the ad units
-					$this->ad_unit_js( $ad_layer );
+				// Add the ad units
+				$this->ad_unit_js( $ad_layer );
 
-					// Add custom targeting
-					$this->targeting_js( $ad_layer );
+				// Add custom targeting
+				$this->targeting_js( $ad_layer );
 
-					echo apply_filters( 'ad_layers_dfp_async_rendering', "googletag.pubads().enableAsyncRendering();\n" );
-					echo apply_filters( 'ad_layers_dfp_collapse_empty_divs', "googletag.pubads().collapseEmptyDivs();\n" );
+				if ( apply_filters( 'ad_layers_dfp_enable_async_rendering', true, $this ) ) {
+					echo "googletag.pubads().enableAsyncRendering();\n";
+				}
+				if ( apply_filters( 'ad_layers_dfp_collapse_empty_divs', true, $this ) ) {
+					echo "googletag.pubads().collapseEmptyDivs();\n";
+				}
 
-					do_action( 'ad_layers_dfp_custom_targeting' );
+				do_action( 'ad_layers_dfp_custom_targeting' );
 				?>
 				googletag.enableServices();
 			});
@@ -209,11 +213,9 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				'label_macro' => array( __( 'Ad Unit: %s', 'ad-layers' ), 'code' ),
 				'add_more_label' => __( 'Add Ad Unit', 'ad-layers' ),
 				'children' => array(
-					'code' => new Fieldmanager_Textfield(
-						array(
-							'label' => __( 'Code', 'ad-layers' ),
-						)
-					),
+					'code' => new Fieldmanager_Textfield( array(
+						'label' => __( 'Code', 'ad-layers' ),
+					) ),
 					'sizes' => new Fieldmanager_Group( array(
 						'limit' => 0,
 						'extra_elements' => 0,
@@ -222,7 +224,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 						'add_more_label' => __( 'Add Size', 'ad-layers' ),
 						'children' => $this->get_size_options(),
 					) ),
-				)
+				),
 			);
 
 			// Verify if targeting args should be added
@@ -288,7 +290,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 						),
 					),
 				) ),
-				'ad_units' => new Fieldmanager_Group( $ad_unit_args )
+				'ad_units' => new Fieldmanager_Group( $ad_unit_args ),
 			) );
 		}
 
@@ -414,9 +416,9 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					}
 
 					$mapping_by_unit[ $unit_key ][] = sprintf(
-						".addSize(%s,%s)",
-						json_encode( array( absint( $breakpoint['min_width'] ), absint( $breakpoint['min_height'] ) ) ),
-						json_encode( $sizes )
+						'.addSize(%s,%s)',
+						wp_json_encode( array( absint( $breakpoint['min_width'] ), absint( $breakpoint['min_height'] ) ) ),
+						wp_json_encode( $sizes )
 					);
 
 					// Check for any global or ad layer specific targeting
@@ -443,7 +445,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			foreach ( $mapping_by_unit as $ad_unit => $mappings ) {
 				echo sprintf(
 					"var mapping%s = googletag.sizeMapping()%s.build();\n",
-					esc_js( $ad_unit ),
+					$this->sanitize_key( $ad_unit ),
 					implode( '', $mappings )
 				);
 			}
@@ -460,14 +462,14 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 
 				// Finalize output for this unit and add it to the final return value
 				// Add units are also saved to an array based on ad type so they can be refreshed if the page size changes
-				echo sprintf(
-					"dfpAdUnits['%s'] = googletag.%s('%s',%s,'%s')%s%s.addService(googletag.pubads());\n",
-					esc_js( $ad_unit ),
+				printf(
+					"dfpAdUnits[%s] = googletag.%s(%s,%s,%s)%s%s.addService(googletag.pubads());\n",
+					wp_json_encode( $ad_unit ),
 					( in_array( $ad_unit, $oop_units ) ) ? 'defineOutOfPageSlot' : 'defineSlot',
-					esc_js( $this->get_path( $page_type, $ad_unit ) ),
-					json_encode( $default_by_unit[ $ad_unit ] ),
-					esc_js( $this->get_ad_unit_id( $ad_unit ) ),
-					( ! empty( $mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $oop_units ) ) ? '.defineSizeMapping(mapping' . esc_js( $this->get_key( $ad_unit ) ) . ')' : '',
+					wp_json_encode( $this->get_path( $page_type, $ad_unit ) ),
+					wp_json_encode( $default_by_unit[ $ad_unit ] ),
+					wp_json_encode( $this->get_ad_unit_id( $ad_unit ) ),
+					( ! empty( $mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $oop_units ) ) ? '.defineSizeMapping(mapping' . $this->sanitize_key( $ad_unit ) . ')' : '',
 					( ! empty( $targeting_by_unit[ $ad_unit ] ) ) ? $targeting_by_unit[ $ad_unit ] : '' // This is escaped above as it is built
 				);
 			}
@@ -488,11 +490,9 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				return;
 			}
 
-			$targeting_values = $this->get_targeting_js_from_array( $custom_targeting );
-
 			// Add the JS
 			if ( ! empty( $targeting_values ) ) {
-				echo 'googletag.pubads()' . $targeting_values . ";\n";
+				echo 'googletag.pubads()' . $this->get_targeting_js_from_array( $custom_targeting ) . ";\n";
 			}
 		}
 
@@ -526,9 +526,9 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		 */
 		private function get_targeting_value_js( $key, $value ) {
 			return sprintf(
-				".setTargeting('%s',%s)",
-				esc_js( $key ),
-				json_encode( $value )
+				'.setTargeting(%s,%s)',
+				wp_json_encode( $key ),
+				wp_json_encode( $value )
 			);
 		}
 
@@ -614,22 +614,25 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			$ad_unit_id = $this->get_ad_unit_id( $ad_unit );
-			$ad_unit_class = apply_filters( 'ad_layers_dfp_ad_unit_class', sanitize_html_class( 'dfp-' . $ad_unit ), $ad_unit );
-			$output = '';
-			$output = "<div id='" . esc_attr( $ad_unit_id ) . "' class='dfp-ad " . esc_attr( $ad_unit_class ) . "'>\n";
-			$output .= "\t<script type='text/javascript'>\n";
-			$output .= "\t\tif ( typeof googletag != 'undefined' ) {\n";
-			$output .= "\t\tgoogletag.cmd.push(function() { googletag.display('" . esc_js( $ad_unit_id ) . "'); });\n";
-			$output .= "\t\t}\n";
-			$output .= "\t</script>\n";
-			$output .= "</div>\n";
+			$output_html = sprintf(
+				'<div id="%1$s" class="dfp-ad %2$s">
+					<script type="text/javascript">
+						if ( "undefined" !== typeof googletag ) {
+							googletag.cmd.push( function() { googletag.display(%3$s); } );
+						}
+					</script>
+				</div>',
+				esc_attr( $ad_unit_id ),
+				sanitize_html_class( apply_filters( 'ad_layers_dfp_ad_unit_class', 'dfp-' . $ad_unit, $ad_unit ) ),
+				wp_json_encode( $ad_unit_id )
+			);
 
-			$output = apply_filters( 'ad_layers_dfp_ad_unit_html', $output, $ad_unit );
+			$output_html = apply_filters( 'ad_layers_dfp_ad_unit_output_html', $output_html, $ad_unit );
 
 			if ( $echo ) {
-				echo $output;
+				echo $output_html;
 			} else {
-				return $output;
+				return $output_html;
 			}
 		}
 
@@ -640,8 +643,8 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		 * @param string $value
 		 * @return string
 		 */
-		public function get_key( $value ) {
-			return apply_filters( 'ad_layers_dfp_breakpoint_key', preg_replace( '/[^a-zA-Z0-9]+/', '', sanitize_key( $value ) ) );
+		public function sanitize_key( $value ) {
+			return preg_replace( '/[^a-z0-9]+/i', '', apply_filters( 'ad_layers_dfp_breakpoint_key', $value ) );
 		}
 
 		/**
@@ -812,7 +815,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				<aside>
 					<h2><?php esc_html_e( 'The following formatting tags are available for the path template:', 'wp-seo' ); ?></h2>
 					<dl class="formatting-tags">
-						<?php foreach( $this->formatting_tags as $tag => $description ) : ?>
+						<?php foreach ( $this->formatting_tags as $tag => $description ) : ?>
 							<div class="formatting-tag-wrapper">
 								<dt class="formatting-tag-name"><?php echo esc_html( $tag ); ?></dt>
 								<dd class="formatting-tag-description"><?php echo esc_html( $description ); ?></dd>

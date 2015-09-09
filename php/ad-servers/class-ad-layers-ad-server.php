@@ -136,8 +136,6 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 			// Load the CSS. Mostly used in debug mode.
 			wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
 
-
-
 			// Localize the base API with the class name
 			wp_localize_script( 'ad-layers', 'adLayersAdServer', array(
 				'jsAPIClass' => $js_api_class,
@@ -229,14 +227,12 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 				'name' => $this->option_name,
 				'label' => __( 'Ad Server Settings', 'ad-layers' ),
 				'children' => array(
-					'ad_server' => new Fieldmanager_Select(
-						array(
-							'label' => __( 'Ad Server', 'ad-layers' ),
-							'options' => $this->get_ad_server_options(),
-							'first_empty' => true,
-						)
-					),
-				)
+					'ad_server' => new Fieldmanager_Select( array(
+						'label' => __( 'Ad Server', 'ad-layers' ),
+						'options' => $this->get_ad_server_options(),
+						'first_empty' => true,
+					) ),
+				),
 			);
 
 			// Child classes can add additional functionality.
@@ -342,34 +338,28 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 				'collapsed' => false,
 				'limit' => 0,
 				'extra_elements' => 0,
-				'add_more_label' =>  __( 'Add custom targeting', 'ad-layers' ),
+				'add_more_label' => __( 'Add custom targeting', 'ad-layers' ),
 				'label_macro' => array( __( '%s', 'ad-layers' ), 'title' ),
 				'children' => array(
-					'custom_variable' => new Fieldmanager_Select(
-						array(
-							'label' => __( 'Custom Variable', 'ad-layers' ),
-							'options' => Ad_Layers::instance()->get_custom_variables(),
-						)
-					),
-					'source' => new Fieldmanager_Select(
-						array(
-							'label' => __( 'Source', 'ad-layers' ),
-							'options' => $this->get_custom_targeting_sources(),
-						)
-					),
-					'values' => new Fieldmanager_Textfield(
-						array(
-							'add_more_label' =>  __( 'Add value', 'ad-layers' ),
-							'one_label_per_item' => false,
-							'limit' => 0,
-							'extra_elements' => 0,
-							'display_if' => array(
-								'src' => 'source',
-								'value' => 'other',
-							),
-						)
-					),
-				)
+					'custom_variable' => new Fieldmanager_Select( array(
+						'label' => __( 'Custom Variable', 'ad-layers' ),
+						'options' => Ad_Layers::instance()->get_custom_variables(),
+					) ),
+					'source' => new Fieldmanager_Select( array(
+						'label' => __( 'Source', 'ad-layers' ),
+						'options' => $this->get_custom_targeting_sources(),
+					) ),
+					'values' => new Fieldmanager_Textfield( array(
+						'add_more_label' => __( 'Add value', 'ad-layers' ),
+						'one_label_per_item' => false,
+						'limit' => 0,
+						'extra_elements' => 0,
+						'display_if' => array(
+							'src' => 'source',
+							'value' => 'other',
+						),
+					) ),
+				),
 			) );
 		}
 

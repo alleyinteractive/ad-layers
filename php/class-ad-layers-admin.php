@@ -57,15 +57,13 @@ if ( ! class_exists( 'Ad_Layers_Admin' ) ) :
 				'label_macro' => array( __( '%s', 'ad-layers' ), 'title' ),
 				'children' => array(
 					'post_id' => new Fieldmanager_Hidden(),
-					'title' => new Fieldmanager_Textfield(
-						array(
-							'label' => __( 'Title', 'ad-layers' ),
-							'attributes' => array(
-								'readonly' => 'readonly',
-							),
-						)
-					),
-				)
+					'title' => new Fieldmanager_Textfield( array(
+						'label' => __( 'Title', 'ad-layers' ),
+						'attributes' => array(
+							'readonly' => 'readonly',
+						),
+					) ),
+				),
 			) );
 			$fm_priority->add_submenu_page( Ad_Layers::instance()->get_edit_link(), __( 'Layer Priority', 'ad-layers' ) );
 
@@ -75,7 +73,7 @@ if ( ! class_exists( 'Ad_Layers_Admin' ) ) :
 				'extra_elements' => 0,
 				'one_label_per_item' => false,
 				'label' => __( 'Add one or more custom variables for targeting.', 'ad-layers' ),
-				'add_more_label' =>  __( 'Add a custom variable', 'ad-layers' ),
+				'add_more_label' => __( 'Add a custom variable', 'ad-layers' ),
 			) );
 			$fm_custom->add_submenu_page( Ad_Layers::instance()->get_edit_link(), __( 'Custom Variables', 'ad-layers' ) );
 		}
