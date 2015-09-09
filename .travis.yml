@@ -55,7 +55,7 @@ script:
     # -n flag: Do not print warnings (shortcut for --warning-severity=0)
     # --standard: Use WordPress as the standard.
     # --extensions: Only sniff PHP files.
-    - if [[ "$WP_VERSION" == "master" && "$WP_MULTISITE" == "0" ]]; then php-codesniffer/scripts/phpcs -p -s -v -n . --standard=./codesniffer.ruleset.xml --extensions=php
+    - if [[ "$WP_VERSION" == "master" && "$WP_MULTISITE" == "0" ]]; then $WP_DEVELOP_DIR/php-codesniffer/scripts/phpcs -p -s -v -n . --standard=./codesniffer.ruleset.xml --extensions=php; fi;
 
     # Finally, run PHPUnit
     - phpunit
