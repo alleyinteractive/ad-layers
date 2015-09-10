@@ -292,6 +292,10 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 			// Get the current global list
 			$ad_layers = get_option( 'ad_layers' );
 
+			if ( empty( $ad_layers ) ) {
+				return;
+			}
+
 			// Find and remove the layer
 			foreach ( $ad_layers as $i => $layer ) {
 				if ( $layer['post_id'] == $post_id ) {

@@ -17,9 +17,6 @@
             <group>ajax</group>
         </exclude>
     </groups>
-    <logging>
-        <log type="junit" target="build/logs/junit.xml" logIncompleteSkipped="false"/>
-    </logging>
 	<filter>
 		<whitelist processUncoveredFilesFromWhitelist="true">
 			<directory suffix=".php">php</directory>
