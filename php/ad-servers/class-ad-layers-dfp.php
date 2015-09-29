@@ -151,7 +151,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 		do_action( 'ad_layers_dfp_before_setup' ); ?>
 		?>
 		<script type='text/javascript'>
-		var dfpAdUnits = [];
+		var dfpAdUnits = {};
 		var googletag = googletag || {};
 		googletag.cmd = googletag.cmd || [];
 		(function() {
