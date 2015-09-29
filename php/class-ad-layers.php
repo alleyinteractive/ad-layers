@@ -317,6 +317,20 @@ class Ad_Layers extends Ad_Layers_Singleton {
 				&& ( empty( $page_types ) || in_array( 'search', $page_types ) ) ) {
 				$this->ad_layer = $ad_layer;
 				break;
+			} else if ( is_tag()
+				&& empty( $taxonomies ) 
+				&& empty( $taxonomy_terms )
+				&& empty( $post_types )
+				&& ( empty( $page_types ) || in_array( 'post_tag', $page_types ) ) ) {
+				$this->ad_layer = $ad_layer;
+				break;
+			} else if ( is_category()
+				&& empty( $taxonomies ) 
+				&& empty( $taxonomy_terms )
+				&& empty( $post_types )
+				&& ( empty( $page_types ) || in_array( 'post_category', $page_types ) ) ) {
+				$this->ad_layer = $ad_layer;
+				break;
 			}
 		}
 	}
