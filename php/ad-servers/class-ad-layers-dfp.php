@@ -402,7 +402,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					$sizes = apply_filters( 'ad_layers_dfp_ad_unit_sizes', $sizes, $ad_unit, $breakpoint );
 
 					// Generate the mapping JS and store it with the unit
-					$unit_key = $this->get_key( $ad_unit['code'] );
+					$unit_key = $this->sanitize_key( $ad_unit['code'] );
 					if ( empty( $unit_key ) ) {
 						continue;
 					}
