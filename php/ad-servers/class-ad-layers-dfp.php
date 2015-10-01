@@ -149,7 +149,6 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			do_action( 'ad_layers_dfp_before_setup' ); ?>
-			?>
 			<script type='text/javascript'>
 			var dfpAdUnits = [];
 			var googletag = googletag || {};
@@ -358,10 +357,8 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			// Get the units included in this ad layer
-			$this->ad_units = get_post_meta( $ad_layer['post_id'], 'ad_layer_ad_units', true );
-			if ( ! empty( $this->ad_units ) ) {
-				$this->ad_units = wp_list_pluck( $this->ad_units, 'custom_targeting', 'ad_unit' );
-			} else {
+			$this->ad_units = $this->load_ad_units( $ad_layer['post_id'] );
+			if ( empty( $this->ad_units ) ) {
 				return;
 			}
 
@@ -473,6 +470,26 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					( ! empty( $targeting_by_unit[ $ad_unit ] ) ) ? $targeting_by_unit[ $ad_unit ] : '' // This is escaped above as it is built
 				);
 			}
+		}
+
+		/**
+		 * Load the ad units from the ad layer.
+		 *
+		 * @param  int $ad_layer_id ad-layer post ID.
+		 * @return array
+		 */
+		protected function load_ad_units( $ad_layer_id ) {
+			$ad_units = array();
+			$temp_ad_units = get_post_meta( $ad_layer_id, 'ad_layer_ad_units', true );
+			if ( ! empty( $temp_ad_units ) ) {
+				foreach ( $temp_ad_units as $ad_unit ) {
+					if ( ! empty( $ad_unit['ad_unit'] ) && ! empty( $ad_unit['custom_targeting'] ) ) {
+						$ad_units[ $ad_unit['ad_unit'] ] = $ad_unit['custom_targeting'];
+					}
+				}
+			}
+
+			return $ad_units;
 		}
 
 		/**
