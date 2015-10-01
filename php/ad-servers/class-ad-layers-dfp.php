@@ -901,13 +901,17 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					foreach ( $value['ad_units'] as $ad_unit ) {
 						// Iterate over the sizes and find ones used by this breakpoint
 						if ( ! empty( $ad_unit['sizes'] ) ) {
-							foreach ( $ad_unit['sizes'] as $i => &$size ) {
+							foreach ( $ad_unit['sizes'] as $i => $size ) {
+								if ( ! isset( $size['breakpoints'] ) ) {
+									continue;
+								}
+
 								// If this ad unit isn't used by the breakpoint, drop it
 								if ( ! in_array( $breakpoint['title'], $size['breakpoints'] ) ) {
 									unset( $ad_unit['sizes'][ $i ] );
 								} else {
 									// Leave it alone, but drop the breakpoint info since the cache won't need it
-									unset( $size['breakpoints'] );
+									unset( $ad_unit['sizes'][ $i ]['breakpoints'] );
 								}
 							}
 
