@@ -357,7 +357,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			// Get the units included in this ad layer
-			$this->ad_units = $this->load_ad_units( $ad_layer['post_id'] );
+			$this->ad_units = $this->get_ad_units_for_layer( $ad_layer['post_id'] );
 			if ( empty( $this->ad_units ) ) {
 				return;
 			}
@@ -422,7 +422,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					$custom_targeting = null;
 					if ( ! empty( $this->ad_units[ $unit_key ] ) ) {
 						$custom_targeting = $this->ad_units[ $unit_key ];
-					} else if ( empty( $this->ad_units[ $unit_key ] ) && ! empty( $ad_unit['custom_targeting'] ) ) {
+					} elseif ( empty( $this->ad_units[ $unit_key ] ) && ! empty( $ad_unit['custom_targeting'] ) ) {
 						$custom_targeting = $ad_unit['custom_targeting'];
 					}
 
@@ -473,17 +473,20 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		}
 
 		/**
-		 * Load the ad units from the ad layer.
+		 * Get the ad units for the given ad layer id.
 		 *
 		 * @param  int $ad_layer_id ad-layer post ID.
 		 * @return array
 		 */
-		protected function load_ad_units( $ad_layer_id ) {
+		protected function get_ad_units_for_layer( $ad_layer_id ) {
 			$ad_units = array();
 			$temp_ad_units = get_post_meta( $ad_layer_id, 'ad_layer_ad_units', true );
 			if ( ! empty( $temp_ad_units ) ) {
 				foreach ( $temp_ad_units as $ad_unit ) {
-					if ( ! empty( $ad_unit['ad_unit'] ) && ! empty( $ad_unit['custom_targeting'] ) ) {
+					if ( ! empty( $ad_unit['ad_unit'] ) ) {
+						if ( ! isset( $ad_unit['custom_targeting'] ) ) {
+							$ad_unit['custom_targeting'] = array();
+						}
 						$ad_units[ $ad_unit['ad_unit'] ] = $ad_unit['custom_targeting'];
 					}
 				}
