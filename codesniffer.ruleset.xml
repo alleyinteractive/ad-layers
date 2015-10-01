@@ -10,7 +10,7 @@
 		<!-- These may need to be excluded if they throw too many false positives -->
 		<!-- <exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect" /> -->
 		<!-- <exclude name="Generic.WhiteSpace.ScopeIndent.IncorrectExact" /> -->
-		<!-- <exclude name="PEAR.Functions.FunctionCallSignature.Indent" /> -->
+		<exclude name="PEAR.Functions.FunctionCallSignature.Indent" />
 	</rule>
 
 	<!-- Tweak the VIP rules -->
