@@ -51,7 +51,7 @@ if ( ! class_exists( 'Ad_Layers_Meta_Boxes' ) ) :
 					'description' => __( 'Select a specific custom ad layer to use with this post.', 'ad-layers' ),
 					'datasource' => new Fieldmanager_Datasource_Post( array(
 						'query_args' => array(
-							'post_type' => array( Ad_Layers_Post_Type::get_post_type() ),
+							'post_type' => array( Ad_Layers_Post_Type::instance()->get_post_type() ),
 							'post_status' => 'publish',
 							'order_by' => 'title',
 						),
