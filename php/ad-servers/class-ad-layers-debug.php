@@ -141,7 +141,6 @@ if ( ! class_exists( 'Ad_Layers_Debug' ) ) :
 				return $output_html;
 			}
 		}
-
 	}
 
 	Ad_Layers_Debug::instance();
