@@ -232,6 +232,40 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					if ( ! empty( $page_types ) && ! in_array( $queried_object->post_type, $page_types ) ) {
 						continue;
 					}
+<<<<<<< HEAD
+				}
+				
+				// If we made it here, there's a match.
+				$this->ad_layer = $ad_layer;
+				break;
+			} if ( is_home() 
+				&& empty( $post_types ) 
+				&& empty( $taxonomies ) 
+				&& empty( $taxonomy_terms )
+				&& ( empty( $page_types ) || in_array( 'home', $page_types ) ) ) {
+				$this->ad_layer = $ad_layer;
+				break;
+			} else if ( ( is_tax() || is_tag() || is_category() )
+				&& empty( $post_types ) 
+				&& ( empty( $page_types ) || in_array( $queried_object->taxonomy, $page_types ) ) ) {
+				
+				// Check if there is taxonomy data
+				if ( ! empty( $taxonomy_terms ) ) {
+					// Check if this taxonomy matches
+					if ( array_key_exists( $queried_object->taxonomy, $taxonomy_terms )
+						&& (
+							empty( $taxonomy_terms[ $queried_object->taxonomy ] ) 
+							|| in_array( $queried_object->term_id, $taxonomy_terms[ $queried_object->taxonomy ] )
+						)
+					) {
+						$this->ad_layer = $ad_layer;
+						break;
+					}
+				} else if ( in_array( 'category', $page_types ) ) {
+					$this->ad_layer = $ad_layer;
+					break;
+				} else if ( in_array( 'post_tag', $page_types ) ) {
+=======
 
 					// Check the post type
 					if ( ! empty( $post_types ) && ! in_array( $queried_object->post_type, $post_types ) ) {
@@ -315,6 +349,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					&& empty( $taxonomy_terms )
 					&& empty( $post_types )
 					&& ( empty( $page_types ) || in_array( 'search', $page_types ) ) ) {
+>>>>>>> alleyinteractive/master
 					$this->ad_layer = $ad_layer;
 					break;
 				}
