@@ -457,14 +457,19 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					continue;
 				}
 
-				// Finalize output for this unit and add it to the final return value
-				// Add units are also saved to an array based on ad type so they can be refreshed if the page size changes
+				$is_oop = in_array( $ad_unit, $oop_units );
+
+				// Finalize output for this unit and add it to the final return value.
+				// Ad units are also saved to an array based on ad type so they can
+				// be refreshed if the page size changes.
 				printf(
-					"dfpAdUnits[%s] = googletag.%s(%s,%s,%s)%s%s.addService(googletag.pubads());\n",
+					"dfpAdUnits[%s] = googletag.%s(%s%s,%s)%s%s.addService(googletag.pubads());\n",
 					wp_json_encode( $ad_unit ),
-					( in_array( $ad_unit, $oop_units ) ) ? 'defineOutOfPageSlot' : 'defineSlot',
+					$is_oop ? 'defineOutOfPageSlot' : 'defineSlot',
 					wp_json_encode( $this->get_path( $page_type, $ad_unit ) ),
-					wp_json_encode( $default_by_unit[ $ad_unit ] ),
+					// if this is not oop, this is an additional arg to the
+					// method call, and is prefixed with a comma:
+					$is_oop ? '' : ',' . wp_json_encode( $default_by_unit[ $ad_unit ] ),
 					wp_json_encode( $this->get_ad_unit_id( $ad_unit ) ),
 					( ! empty( $mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $oop_units ) ) ? '.defineSizeMapping(mapping' . $this->sanitize_key( $ad_unit ) . ')' : '',
 					( ! empty( $targeting_by_unit[ $ad_unit ] ) ) ? $targeting_by_unit[ $ad_unit ] : '' // This is escaped above as it is built
