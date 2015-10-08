@@ -105,30 +105,6 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			// Load the CSS. Mostly used in debug mode.
 			wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers-dfp.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
 		}
-<<<<<<< HEAD
-	
-		do_action( 'ad_layers_dfp_before_setup' ); ?>
-		?>
-		<script type='text/javascript'>
-		var dfpAdUnits = {};
-		var googletag = googletag || {};
-		googletag.cmd = googletag.cmd || [];
-		(function() {
-		var gads = document.createElement('script');
-		gads.async = true;
-		gads.type = 'text/javascript';
-		var useSSL = 'https:' == document.location.protocol;
-		gads.src = (useSSL ? 'https:' : 'http:') + 
-		'//www.googletagservices.com/tag/js/gpt.js';
-		var node = document.getElementsByTagName('script')[0];
-		node.parentNode.insertBefore(gads, node);
-		})();
-		</script>
-		<?php do_action( 'ad_layers_dfp_after_setup' ); ?>
-		<script type="text/javascript">
-		googletag.cmd.push(function() {
-			<?php
-=======
 
 		/**
 		 * Set the available formatting tags.
@@ -192,7 +168,6 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			<script type="text/javascript">
 			googletag.cmd.push(function() {
 				<?php
->>>>>>> alleyinteractive/master
 				// Add the ad units
 				$this->ad_unit_js( $ad_layer );
 
