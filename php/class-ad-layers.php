@@ -262,22 +262,26 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					&& ( empty( $page_types ) || in_array( 'home', $page_types ) ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
-				} else if ( is_tax()
-					&& empty( $post_types )
-					&& ( empty( $page_types ) || in_array( $queried_object->taxonomy, $page_types ) ) ) {
+				} else if ( ( is_tax() || is_tag() || is_category() ) && empty( $post_types ) ) {
 
 					// Check if there is taxonomy data
-					if ( ! empty( $taxonomy_terms ) ) {
+					if ( ! empty( $taxonomy_terms ) && ( empty( $page_types ) || in_array( $queried_object->taxonomy, $page_types ) ) ) {
 						// Check if this taxonomy matches
 						if ( array_key_exists( $queried_object->taxonomy, $taxonomy_terms )
 							&& (
-								empty( $taxonomy_terms[ $queried_object->taxonomy ] )
+								empty( $taxonomy_terms[ $queried_object->taxonomy ] ) 
 								|| in_array( $queried_object->term_id, $taxonomy_terms[ $queried_object->taxonomy ] )
 							)
 						) {
 							$this->ad_layer = $ad_layer;
 							break;
 						}
+					} else if ( in_array( 'category', $page_types ) ) {
+						$this->ad_layer = $ad_layer;
+						break;
+					} else if ( in_array( 'post_tag', $page_types ) ) {
+						$this->ad_layer = $ad_layer;
+						break;
 					}
 				} else if ( is_post_type_archive()
 					&& empty( $taxonomies )
