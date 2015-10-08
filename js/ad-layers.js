@@ -37,6 +37,11 @@
 		}
 	}
 
+	// Determines if debug mode has been specified
+	AdLayersAPI.prototype.isDebug = function() {
+		return ( -1 != window.location.href.indexOf( '?adlayers_debug' ) );
+	}
+
 	// Determines if the enabled ad server has implemented a function
 	AdLayersAPI.prototype.functionExists = function( name ) {
 		return ( null !== this.adServer && name in this.adServer );
@@ -44,7 +49,8 @@
 
 	// Automatically enable debug mode if the URL parameter is present
 	$( document ).ready(function() {
-		if ( -1 != window.location.href.indexOf( '?adlayers_debug' ) ) {
+		var adLayers = new AdLayersAPI();
+		if ( adLayers.isDebug() ) {
 			var adLayers = new AdLayersAPI();
 			adLayers.debug();
 		}

@@ -215,7 +215,11 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 
 				do_action( 'ad_layers_dfp_custom_targeting' );
 				?>
-				googletag.enableServices();
+
+				var dfpAdLayers = new AdLayersAPI();
+				if ( ! dfpAdLayers.isDebug() ) {
+					googletag.enableServices();
+				}
 			});
 			<?php do_action( 'ad_layers_dfp_after_ad_units' ); ?>
 			var dfpSizeMapping = <?php echo wp_json_encode( $this->mapping_by_unit ) ?>;
