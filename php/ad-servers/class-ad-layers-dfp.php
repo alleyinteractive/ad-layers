@@ -50,7 +50,39 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		 * @access public
 		 * @var array
 		 */
-		public $ad_units;
+		public $ad_units = array();
+
+		/**
+		 * Size mappings by unit.
+		 *
+		 * @access public
+		 * @var array
+		 */
+		public $mapping_by_unit = array();
+
+		/**
+		 * Default sizes by unit.
+		 *
+		 * @access public
+		 * @var array
+		 */
+		public $default_by_unit = array();
+
+		/**
+		 * Targeting by unit.
+		 *
+		 * @access public
+		 * @var array
+		 */
+		public $targeting_by_unit = array();
+
+		/**
+		 * Out of page units.
+		 *
+		 * @access public
+		 * @var array
+		 */
+		public $oop_units = array();
 
 		/**
 		 * Cache key
@@ -186,6 +218,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				googletag.enableServices();
 			});
 			<?php do_action( 'ad_layers_dfp_after_ad_units' ); ?>
+			var dfpSizeMapping = <?php echo wp_json_encode( $this->mapping_by_unit ) ?>;
 			</script>
 			<?php
 		}
@@ -363,10 +396,6 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			// Loop through the breakpoints and add the desired units
-			$mapping_by_unit = array();
-			$default_by_unit = array();
-			$targeting_by_unit = array();
-			$oop_units = array();
 			foreach ( $ad_setup as $i => $breakpoint ) {
 				// Ensure this breakpoint is valid or else skip it
 				if ( empty( $breakpoint['ad_units'] ) ) {
@@ -389,13 +418,13 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 							// If this is the default size, save it.
 							// If more than one size is accidentally marked as default, the last one will be used.
 							if ( ! empty( $size['default_size'] ) && 'default' == $size['default_size'] ) {
-								$default_by_unit[ $ad_unit['code'] ] = array( absint( $size['width'] ), absint( $size['height'] ) );
+								$this->default_by_unit[ $ad_unit['code'] ] = array( absint( $size['width'] ), absint( $size['height'] ) );
 							}
 
 							// If this is an oop unit, note it.
 							// If more than one size is accidentally marked as default, the last one will be used.
 							if ( ! empty( $size['out_of_page'] ) && 'oop' == $size['out_of_page'] ) {
-								$oop_units[] = $ad_unit['code'];
+								$this->oop_units[] = $ad_unit['code'];
 							}
 						}
 					}
@@ -408,14 +437,13 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					}
 
 					// Initialize as an array
-					if ( ! isset( $mapping_by_unit[ $unit_key ] ) ) {
-						$mapping_by_unit[ $unit_key ] = array();
+					if ( ! isset( $this->mapping_by_unit[ $unit_key ] ) ) {
+						$this->mapping_by_unit[ $unit_key ] = array();
 					}
 
-					$mapping_by_unit[ $unit_key ][] = sprintf(
-						'.addSize(%s,%s)',
-						wp_json_encode( array( absint( $breakpoint['min_width'] ), absint( $breakpoint['min_height'] ) ) ),
-						wp_json_encode( $sizes )
+					$this->mapping_by_unit[ $unit_key ][] = array(
+						array( absint( $breakpoint['min_width'] ), absint( $breakpoint['min_height'] ) ),
+						$sizes,
 					);
 
 					// Check for any global or ad layer specific targeting
@@ -427,23 +455,32 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					}
 
 					if ( $custom_targeting ) {
-						$targeting_by_unit[ $unit_key ] = $this->get_targeting_js_from_array( apply_filters( 'ad_layers_dfp_targeting_values_by_unit', $custom_targeting, $unit_key ) );
+						$this->targeting_by_unit[ $unit_key ] = $this->get_targeting_js_from_array( apply_filters( 'ad_layers_dfp_targeting_values_by_unit', $custom_targeting, $unit_key ) );
 					}
 				}
 			}
 
 			// Apply filters
-			$mapping_by_unit = apply_filters( 'ad_layers_dfp_mapping_by_unit', $mapping_by_unit, $ad_layer );
-			$default_by_unit = apply_filters( 'ad_layers_dfp_default_by_unit', $default_by_unit, $ad_layer );
-			$targeting_by_unit = apply_filters( 'ad_layers_dfp_targeting_by_unit', $targeting_by_unit, $ad_layer );
-			$oop_units = apply_filters( 'ad_layers_dfp_oop_units', $oop_units );
+			$this->mapping_by_unit = apply_filters( 'ad_layers_dfp_mapping_by_unit', $this->mapping_by_unit, $ad_layer );
+			$this->default_by_unit = apply_filters( 'ad_layers_dfp_default_by_unit', $this->default_by_unit, $ad_layer );
+			$this->targeting_by_unit = apply_filters( 'ad_layers_dfp_targeting_by_unit', $this->targeting_by_unit, $ad_layer );
+			$this->oop_units = apply_filters( 'ad_layers_dfp_oop_units', $this->oop_units );
 
 			// Echo the final mappings by ad unit
-			foreach ( $mapping_by_unit as $ad_unit => $mappings ) {
+			foreach ( $this->mapping_by_unit as $ad_unit => $mappings ) {
+				$mapping_js = '';
+				foreach ( $mappings as $mapping ) {
+					$mapping_js .= sprintf(
+						'.addSize(%s,%s)',
+						wp_json_encode( array_shift( $mapping ) ),
+						wp_json_encode( array_shift( $mapping ) )
+					);
+				}
+
 				echo sprintf(
 					"var mapping%s = googletag.sizeMapping()%s.build();\n",
 					$this->sanitize_key( $ad_unit ),
-					implode( '', $mappings )
+					$mapping_js
 				);
 			}
 
@@ -453,11 +490,11 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			// Add the units
 			foreach ( $this->ad_units as $ad_unit => $custom_targeting ) {
 				// If no default size is defined, skip it
-				if ( empty( $default_by_unit[ $ad_unit ] ) ) {
+				if ( empty( $this->default_by_unit[ $ad_unit ] ) ) {
 					continue;
 				}
 
-				$is_oop = in_array( $ad_unit, $oop_units );
+				$is_oop = in_array( $ad_unit, $this->oop_units );
 
 				// Finalize output for this unit and add it to the final return value.
 				// Ad units are also saved to an array based on ad type so they can
@@ -469,10 +506,10 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					wp_json_encode( $this->get_path( $page_type, $ad_unit ) ),
 					// if this is not oop, this is an additional arg to the
 					// method call, and is prefixed with a comma:
-					$is_oop ? '' : ',' . wp_json_encode( $default_by_unit[ $ad_unit ] ),
+					$is_oop ? '' : ',' . wp_json_encode( $this->default_by_unit[ $ad_unit ] ),
 					wp_json_encode( $this->get_ad_unit_id( $ad_unit ) ),
-					( ! empty( $mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $oop_units ) ) ? '.defineSizeMapping(mapping' . $this->sanitize_key( $ad_unit ) . ')' : '',
-					( ! empty( $targeting_by_unit[ $ad_unit ] ) ) ? $targeting_by_unit[ $ad_unit ] : '' // This is escaped above as it is built
+					( ! empty( $this->mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $this->oop_units ) ) ? '.defineSizeMapping(mapping' . $this->sanitize_key( $ad_unit ) . ')' : '',
+					( ! empty( $this->targeting_by_unit[ $ad_unit ] ) ) ? $this->targeting_by_unit[ $ad_unit ] : '' // This is escaped above as it is built
 				);
 			}
 		}

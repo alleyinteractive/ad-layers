@@ -11,7 +11,7 @@
 			googletag.pubads().refresh( [ dfpAdUnits[ ad_unit ] ] );
 		}
 	}
-	
+
 	// Refreshes all ad units
 	AdLayersDFPAPI.prototype.refreshAll = function() {
 		if ( false === $.isEmptyObject( dfpAdUnits ) ) {
@@ -22,5 +22,10 @@
 			}
 			googletag.pubads().refresh( unitsToRefresh );
 		}
+	}
+
+	// Enables debug mode
+	AdLayersDFPAPI.prototype.debug = function( ad_unit ) {
+		console.log( 'debug' );
 	}
 })( jQuery );

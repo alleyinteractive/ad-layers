@@ -9,7 +9,7 @@
 	AdLayersAPI = function() {
 		// Create an object for the active ad server
 		this.adServer = null;
-		
+
 		// Create an instance of the ad server class, if it exists
 		if ( 'string' === typeof adLayersAdServer.jsAPIClass && 'function' === typeof window[ adLayersAdServer.jsAPIClass ] ) {
 			this.adServer = new window[ adLayersAdServer.jsAPIClass ];
@@ -22,16 +22,31 @@
 			this.adServer.refresh( ad_unit );
 		}
 	}
-	
+
 	// Refreshes all ad units
 	AdLayersAPI.prototype.refreshAll = function() {
 		if ( this.functionExists( 'refreshAll' ) ) {
 			this.adServer.refreshAll();
 		}
 	}
-	
+
+	// Enables debug mode
+	AdLayersAPI.prototype.debug = function() {
+		if ( this.functionExists( 'debug' ) ) {
+			this.adServer.debug();
+		}
+	}
+
 	// Determines if the enabled ad server has implemented a function
 	AdLayersAPI.prototype.functionExists = function( name ) {
 		return ( null !== this.adServer && name in this.adServer );
 	}
+
+	// Automatically enable debug mode if the URL parameter is present
+	$( document ).ready(function() {
+		if ( -1 != window.location.href.indexOf( '?adlayers_debug' ) ) {
+			var adLayers = new AdLayersAPI();
+			adLayers.debug();
+		}
+	});
 })( jQuery );
