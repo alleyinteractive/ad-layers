@@ -216,8 +216,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				do_action( 'ad_layers_dfp_custom_targeting' );
 				?>
 
-				var dfpAdLayers = new AdLayersAPI();
-				if ( ! dfpAdLayers.isDebug() ) {
+				if ( ! AdLayersAPI.isDebug() ) {
 					googletag.enableServices();
 				}
 			});
@@ -465,7 +464,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			// Apply filters
-			$this->mapping_by_unit = apply_filters( 'ad_layers_dfp_mapping_by_unit', $this->mapping_by_unit, $ad_layer );
+			$this->mapping_by_unit = apply_filters( 'ad_layers_dfp_mapping_sizes', $this->mapping_by_unit, $ad_layer );
 			$this->default_by_unit = apply_filters( 'ad_layers_dfp_default_by_unit', $this->default_by_unit, $ad_layer );
 			$this->targeting_by_unit = apply_filters( 'ad_layers_dfp_targeting_by_unit', $this->targeting_by_unit, $ad_layer );
 			$this->oop_units = apply_filters( 'ad_layers_dfp_oop_units', $this->oop_units );
@@ -480,6 +479,8 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 						wp_json_encode( array_shift( $mapping ) )
 					);
 				}
+
+				$mapping_js = apply_filters( 'ad_layers_dfp_mapping_by_unit', $mapping_js, $ad_layer );
 
 				echo sprintf(
 					"var mapping%s = googletag.sizeMapping()%s.build();\n",
@@ -681,7 +682,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 
 			$ad_unit_id = $this->get_ad_unit_id( $ad_unit );
 			$output_html = sprintf(
-				'<div id="%1$s" class="dfp-ad %2$s">
+				'<div id="%1$s" class="dfp-ad %2$s" data-ad-unit="%4$s">
 					<script type="text/javascript">
 						if ( "undefined" !== typeof googletag ) {
 							googletag.cmd.push( function() { googletag.display(%3$s); } );
@@ -690,7 +691,8 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				</div>',
 				esc_attr( $ad_unit_id ),
 				sanitize_html_class( apply_filters( 'ad_layers_dfp_ad_unit_class', 'dfp-' . $ad_unit, $ad_unit ) ),
-				wp_json_encode( $ad_unit_id )
+				wp_json_encode( $ad_unit_id ),
+				esc_attr( $ad_unit )
 			);
 
 			$output_html = apply_filters( 'ad_layers_dfp_ad_unit_output_html', $output_html, $ad_unit );

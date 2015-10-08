@@ -21,13 +21,13 @@ The standard WordPress title field acts as a label to reference this ad layer.
 Click "Add an ad unit" to add one or more ad units that are part of this ad layer.
 
 ### Page Types
-Click "Add a page type" to add one or more pages on which this layer can appear. 
+Click "Add a page type" to add one or more pages on which this layer can appear.
 
 ### Taxonomies
 Click "Add a taxonomy" to add one or more taxonomies associated with this ad layer. Note this only works with taxonomy archives or single posts.
 
 ### Post Types
-Click "Add a post type" to add one or more post types associated with this ad layer. Note this only works with post type archives or single posts. 
+Click "Add a post type" to add one or more post types associated with this ad layer. Note this only works with post type archives or single posts.
 
 ### Terms
 All taxonomies that are associated with Ad Layers (category and post_tag by default) will display their standard term selection meta boxes. Choose one or more terms from each for targeting. Note that an "OR" condition is used for matching.
@@ -110,7 +110,7 @@ The above two fields correspond to how DFP handles responsive ad serving. Depend
 
 You can then click "Add Ad Unit" to add one or more ad units. For each you can add:
 
-Code: This the DFP Ad Unit code. It is preferable to the name since it acts a key without 
+Code: This the DFP Ad Unit code. It is preferable to the name since it acts a key without
 
 After that, add one or more sizes with following fields:
 Width: Width of the ad
@@ -182,6 +182,8 @@ ad_layers_dfp_collapse_empty_divs
 ad_layers_dfp_ad_unit_sizes
 
 ad_layers_dfp_targeting_values_by_unit
+
+ad_layers_dfp_mapping_sizes
 
 ad_layers_dfp_mapping_by_unit
 

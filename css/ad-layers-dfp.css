@@ -1,0 +1,31 @@
+.dfp-debug {
+	background-color: #CCCCCC;
+}
+
+.dfp-debug-size {
+	color: #0000EE;
+	text-decoration: underline;
+	padding-right: 10px;
+	font-size: 14px;
+}
+
+.dfp-debug-size:hover {
+	color: #0000EE;
+}
+
+.dfp-debug-size.selected {
+	font-weight: bold;
+	text-decoration: none;
+}
+
+.dfp-debug-unit {
+	color: #000000;
+	font-weight: bold;
+	font-size: 14px;
+}
+
+.dfp-debug-container {
+	margin: auto;
+	text-align: center;
+	position: relative;
+}

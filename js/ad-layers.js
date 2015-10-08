@@ -38,7 +38,7 @@
 	}
 
 	// Determines if debug mode has been specified
-	AdLayersAPI.prototype.isDebug = function() {
+	AdLayersAPI.isDebug = function() {
 		return ( -1 != window.location.href.indexOf( '?adlayers_debug' ) );
 	}
 
@@ -49,8 +49,7 @@
 
 	// Automatically enable debug mode if the URL parameter is present
 	$( document ).ready(function() {
-		var adLayers = new AdLayersAPI();
-		if ( adLayers.isDebug() ) {
+		if ( AdLayersAPI.isDebug() ) {
 			var adLayers = new AdLayersAPI();
 			adLayers.debug();
 		}
