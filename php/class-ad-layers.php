@@ -262,7 +262,7 @@ class Ad_Layers extends Ad_Layers_Singleton {
 				&& ( empty( $page_types ) || in_array( 'home', $page_types ) ) ) {
 				$this->ad_layer = $ad_layer;
 				break;
-			} else if ( is_tax() 
+			} else if ( ( is_tax() || is_tag() || is_category() )
 				&& empty( $post_types ) 
 				&& ( empty( $page_types ) || in_array( $queried_object->taxonomy, $page_types ) ) ) {
 				
@@ -278,6 +278,12 @@ class Ad_Layers extends Ad_Layers_Singleton {
 						$this->ad_layer = $ad_layer;
 						break;
 					}
+				} else if ( in_array( 'category', $page_types ) ) {
+					$this->ad_layer = $ad_layer;
+					break;
+				} else if ( in_array( 'post_tag', $page_types ) ) {
+					$this->ad_layer = $ad_layer;
+					break;
 				}
 			} else if ( is_post_type_archive() 
 				&& empty( $taxonomies ) 
@@ -315,20 +321,6 @@ class Ad_Layers extends Ad_Layers_Singleton {
 				&& empty( $taxonomy_terms )
 				&& empty( $post_types )
 				&& ( empty( $page_types ) || in_array( 'search', $page_types ) ) ) {
-				$this->ad_layer = $ad_layer;
-				break;
-			} else if ( is_tag()
-				&& empty( $taxonomies ) 
-				&& empty( $taxonomy_terms )
-				&& empty( $post_types )
-				&& ( empty( $page_types ) || in_array( 'post_tag', $page_types ) ) ) {
-				$this->ad_layer = $ad_layer;
-				break;
-			} else if ( is_category()
-				&& empty( $taxonomies ) 
-				&& empty( $taxonomy_terms )
-				&& empty( $post_types )
-				&& ( empty( $page_types ) || in_array( 'post_category', $page_types ) ) ) {
 				$this->ad_layer = $ad_layer;
 				break;
 			}
