@@ -150,7 +150,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 
 			do_action( 'ad_layers_dfp_before_setup' ); ?>
 			<script type='text/javascript'>
-			var dfpAdUnits = [];
+			var dfpAdUnits = {};
 			var googletag = googletag || {};
 			googletag.cmd = googletag.cmd || [];
 			(function() {
