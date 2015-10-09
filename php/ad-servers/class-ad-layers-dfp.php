@@ -136,6 +136,12 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 
 			// Load the CSS. Mostly used in debug mode.
 			wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers-dfp.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
+
+			// Localize the base API with static text strings so they can be translated
+			wp_localize_script( $this->handle, 'adLayersDFP', array(
+				'layerDebugLabel' => __( 'Current ad layer', 'ad-layers' ),
+				'consoleDebugLabel' => __( 'Switch to Google console', 'ad-layers' ),
+			) );
 		}
 
 		/**
@@ -222,6 +228,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			});
 			<?php do_action( 'ad_layers_dfp_after_ad_units' ); ?>
 			var dfpSizeMapping = <?php echo wp_json_encode( $this->mapping_by_unit ) ?>;
+			var dfpAdLayer = <?php echo wp_json_encode( Ad_Layers::instance()->get_ad_layer() ) ?>;
 			</script>
 			<?php
 		}

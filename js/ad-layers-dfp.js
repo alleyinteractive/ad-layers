@@ -98,9 +98,20 @@
 		});
 
 		// Add a debug bar with general layer information and a DFP console toggle
+		$layerTitle = $( '<div>' )
+				.addClass( 'dfp-ad-layer' )
+				.text( adLayersDFP.layerDebugLabel + ': ' + dfpAdLayer.title );
+
+		$googleConsole = $( '<a>' )
+				.addClass( 'dfp-console' )
+				.attr( 'href', window.location.href.replace( 'adlayers_debug', 'googfc' ) )
+				.text( adLayersDFP.consoleDebugLabel );
+
 		$debugBar = $( '<div>' )
 			.attr( 'id', 'dfp-debug-bar' )
-			.addClass( 'dfp-debug' );
+			.addClass( 'dfp-debug' )
+			.append( $layerTitle )
+			.append( $googleConsole );
 
 		$( 'body' ).append( $debugBar );
 
