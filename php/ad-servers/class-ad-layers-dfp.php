@@ -516,7 +516,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			// Add the JS
-			if ( ! empty( $targeting_values ) ) {
+			if ( ! empty( $custom_targeting ) ) {
 				echo 'googletag.pubads()' . $this->get_targeting_js_from_array( $custom_targeting ) . ";\n";
 			}
 		}
