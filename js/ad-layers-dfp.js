@@ -96,6 +96,18 @@
 				AdLayersDFPAPI.swapSizes( $adDiv.find( 'a' ).first() );
 			}
 		});
+
+		// Add a debug bar with general layer information and a DFP console toggle
+		$debugBar = $( '<div>' )
+			.attr( 'id', 'dfp-debug-bar' )
+			.addClass( 'dfp-debug' );
+
+		$( 'body' ).append( $debugBar );
+
+		// If the WordPress admin bar exists, push it down
+		if ( $( '#wpadminbar' ).length ) {
+			$( '#dfp-debug-bar' ).css( 'top', '32px' );
+		}
 	}
 
 	// Handle click actions for swapping ad unit sizes
