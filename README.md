@@ -275,8 +275,11 @@ ad_layers_page_types
 
 ad_layers_current_page_type
 
+## Debug Mode
+To enable debug mode, simply append ?adlayers_debug to any URL. This will add a toolbar that shows the current ad layer and placeholders for all visible ad units with links to toggle between sizes.
+
 ## Future Enhancements
 
 The next round of development on this plugin will include the following enhancements:
-- Frontend Javascript framework for ad refresh, lazy loading for ad viewability, and other features.
+- Lazy loading for ad viewability, and other features.
 - Additional caching
