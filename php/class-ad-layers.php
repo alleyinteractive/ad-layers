@@ -102,7 +102,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 		}
 
 		/**
-		 * Get the active ad layer.
+		 * Get the the priority of an ad layer.
 		 *
 		 * @access public
 		 * @param int $post_id
