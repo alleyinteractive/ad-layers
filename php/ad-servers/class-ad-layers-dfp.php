@@ -488,7 +488,7 @@ class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
 			return;
 		}
 
-		$targeting_values = apply_filters( 'ad_layers_dfp_page_level_targeting_as_string', $this->get_targeting_js_from_array( $custom_targeting ) );
+		$targeting_values = apply_filters( 'ad_layers_dfp_page_level_targeting_output_html', $this->get_targeting_js_from_array( $custom_targeting ) );
 
 		// Add the JS
 		if ( ! empty( $targeting_values ) ) {
