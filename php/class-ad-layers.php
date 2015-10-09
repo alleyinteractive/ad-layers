@@ -262,7 +262,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					&& ( empty( $page_types ) || in_array( 'home', $page_types ) ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
-				} else if ( is_tax()
+				} else if ( ( is_tax() || is_category() || is_tag() )
 					&& empty( $post_types )
 					&& ( empty( $page_types ) || in_array( $queried_object->taxonomy, $page_types ) ) ) {
 

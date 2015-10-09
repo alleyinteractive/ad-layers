@@ -188,7 +188,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 
 			do_action( 'ad_layers_dfp_before_setup' ); ?>
 			<script type='text/javascript'>
-			var dfpAdUnits = [];
+			var dfpAdUnits = {};
 			var googletag = googletag || {};
 			googletag.cmd = googletag.cmd || [];
 			(function() {
@@ -565,7 +565,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			// Add the JS
-			if ( ! empty( $targeting_values ) ) {
+			if ( ! empty( $custom_targeting ) ) {
 				echo 'googletag.pubads()' . $this->get_targeting_js_from_array( $custom_targeting ) . ";\n";
 			}
 		}
