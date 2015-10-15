@@ -406,7 +406,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			// Expose ad units for filtering
-			apply_filters( 'ad_layers_dfp_ad_units', $this->ad_units );
+			$this->ad_units = apply_filters( 'ad_layers_dfp_ad_units', $this->ad_units );
 
 			// Loop through the breakpoints and add the desired units
 			foreach ( $ad_setup as $i => $breakpoint ) {
@@ -569,9 +569,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 
 			// Add the JS
 			if ( ! empty( $custom_targeting ) ) {
-				$custom_targeting_output_html = 'googletag.pubads()' . $this->get_targeting_js_from_array( $custom_targeting );
-				$custom_targeting_output_html = apply_filters( 'ad_layers_dfp_page_level_targeting_output_html', $custom_targeting_output_html );
-				echo $custom_targeting_output_html . ";\n";
+				echo 'googletag.pubads()' . apply_filters( 'ad_layers_dfp_page_level_targeting_output_html', $this->get_targeting_js_from_array( $custom_targeting ) ) . ";\n";
 			}
 		}
 
