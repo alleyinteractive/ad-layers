@@ -406,7 +406,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			// Expose ad units for filtering
-			$this->ad_units = apply_filters( 'ad_layers_dfp_ad_units', $this->ad_units );
+			$this->ad_units = apply_filters( 'ad_layers_dfp_ad_units', $this->ad_units, $this );
 
 			// Loop through the breakpoints and add the desired units
 			foreach ( $ad_setup as $i => $breakpoint ) {
