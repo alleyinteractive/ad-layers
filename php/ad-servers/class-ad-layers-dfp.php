@@ -783,7 +783,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		 * @return string
 		 */
 		public function sanitize_key( $value ) {
-			return preg_replace( '/[^a-z0-9]+/i', '', apply_filters( 'ad_layers_dfp_breakpoint_key', $value ) );
+			return preg_replace( '/[^a-z0-9_]+/i', '', apply_filters( 'ad_layers_dfp_breakpoint_key', $value ) );
 		}
 
 		/**
@@ -856,7 +856,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 										// which would be handled later by the filter.
 										$taxonomy = str_replace( '#', '', $tag );
 										if ( taxonomy_exists( $taxonomy ) ) {
-											if ( is_tax() ) {
+											if ( is_tax() || is_category() || is_tag() ) {
 												$value = $this->get_term_path( get_queried_object()->term_id, $taxonomy );
 											} else if ( is_singular() ) {
 												$terms = get_the_terms( get_the_ID(), $taxonomy );
