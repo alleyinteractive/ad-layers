@@ -57,7 +57,7 @@ define( 'AD_LAYERS_ASSETS_DIR', plugin_dir_url( __FILE__ ) );
  *
  * @var int
  */
-define( 'AD_LAYERS_GLOBAL_ASSET_VERSION', '0.0.1' );
+define( 'AD_LAYERS_GLOBAL_ASSET_VERSION', '0.0.2' );
 
 /**
  * Load the plugin after the theme loads, to allow for customizations.

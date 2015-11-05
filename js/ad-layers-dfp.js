@@ -24,6 +24,44 @@
 		}
 	}
 
+	AdLayersDFPAPI.prototype.buildAd = function(slotName, path, sizes, targets) {
+		return googletag.cmd.push(function() {
+			var key, slot, value;
+			slot = googletag.defineSlot(path, sizes, slotName);
+			if (targets) {
+				for (key in targets) {
+					value = targets[key];
+					slot.setTargeting(key, value);
+				}
+			}
+			slot.addService(googletag.pubads());
+			googletag.display(slotName);
+			return googletag.pubads().refresh([slot]);
+		});
+	};
+
+	AdLayersDFPAPI.prototype.lazyLoadAd = function(args) {
+		if (!args.slotName) {
+			return;
+		}
+		if (args.format) {
+			if (!(dfpAdDetails && dfpAdDetails[args.format])) {
+				return;
+			}
+			if (!args.path) {
+				args.path = dfpAdDetails[args.format].path;
+			}
+			if (!args.sizes) {
+				args.sizes = dfpAdDetails[args.format].sizes;
+			}
+			if (!args.targeting) {
+				args.targeting = dfpAdDetails[args.format].targeting;
+			}
+		}
+		return this.buildAd(args.slotName, args.path, args.sizes, args.targeting);
+	};
+
+
 	// Switches sizes in debug mode
 	AdLayersDFPAPI.swapSizes = function( $size ) {
 		// Unselect all other sizes and set this one

@@ -69,6 +69,14 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		public $default_by_unit = array();
 
 		/**
+		 * Raw values for targeting by unit.
+		 *
+		 * @access public
+		 * @var array
+		 */
+		public $raw_targeting_by_unit = array();
+
+		/**
 		 * Targeting by unit.
 		 *
 		 * @access public
@@ -215,6 +223,9 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				if ( apply_filters( 'ad_layers_dfp_enable_async_rendering', true, $this ) ) {
 					echo "googletag.pubads().enableAsyncRendering();\n";
 				}
+				if ( apply_filters( 'ad_layers_dfp_single_request_mode', false, $this ) ) {
+					echo "googletag.pubads().enableSingleRequest();\n";
+				}
 				if ( apply_filters( 'ad_layers_dfp_collapse_empty_divs', true, $this ) ) {
 					echo "googletag.pubads().collapseEmptyDivs();\n";
 				}
@@ -229,6 +240,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			<?php do_action( 'ad_layers_dfp_after_ad_units' ); ?>
 			var dfpSizeMapping = <?php echo wp_json_encode( $this->mapping_by_unit ) ?>;
 			var dfpAdLayer = <?php echo wp_json_encode( Ad_Layers::instance()->get_ad_layer() ) ?>;
+			var dfpAdDetails = <?php echo wp_json_encode( $this->get_ad_details() ) ?>;
 			</script>
 			<?php
 		}
@@ -468,7 +480,9 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					}
 
 					if ( $custom_targeting ) {
-						$this->targeting_by_unit[ $unit_key ] = $this->get_targeting_js_from_array( apply_filters( 'ad_layers_dfp_targeting_values_by_unit', $custom_targeting, $unit_key ) );
+						$custom_targeting = apply_filters( 'ad_layers_dfp_targeting_values_by_unit', $custom_targeting, $unit_key );
+						$this->raw_targeting_by_unit[ $unit_key ] = $custom_targeting;
+						$this->targeting_by_unit[ $unit_key ] = $this->get_targeting_js_from_array( $custom_targeting );
 					}
 				}
 			}
@@ -574,6 +588,34 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		}
 
 		/**
+		 * Get the main details for all ads for use by the JS API.
+		 *
+		 * @return array
+		 */
+		protected function get_ad_details() {
+			$return = array();
+
+			// Get the page type
+			$page_type = Ad_Layers::instance()->get_current_page_type();
+
+			// Add the units
+			foreach ( $this->ad_units as $ad_unit => $custom_targeting ) {
+				// If no default size is defined, skip it
+				if ( empty( $this->default_by_unit[ $ad_unit ] ) ) {
+					continue;
+				}
+
+				$return[ $ad_unit ] = array(
+					'path' => $this->get_path( $page_type, $ad_unit ),
+					'sizes' => $this->default_by_unit[ $ad_unit ],
+					'targeting' => $this->get_targeting_array_from_custom_values( $this->raw_targeting_by_unit[ $ad_unit ] ),
+				);
+			}
+
+			return $return;
+		}
+
+		/**
 		 * Creates the DFP targeting Javascript from an array of custom values.
 		 *
 		 * @access private
@@ -582,11 +624,30 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		 */
 		private function get_targeting_js_from_array( $custom_targeting ) {
 			$targeting_values = '';
+			$targeting_array = $this->get_targeting_array_from_custom_values( $custom_targeting );
+
+			foreach ( $targeting_array as $key => $values ) {
+				$targeting_values .= $this->get_targeting_value_js( $key, $values );
+			}
+
+			return $targeting_values;
+		}
+
+		/**
+		 * Creates a key => value array of targeting variables from custom
+		 * values.
+		 *
+		 * @access private
+		 * @param array $custom_targeting
+		 * @return string
+		 */
+		private function get_targeting_array_from_custom_values( $custom_targeting ) {
+			$targeting_values = array();
 			foreach ( $custom_targeting as $custom_target ) {
 				$values = ( isset( $custom_target['values'] ) ) ? $custom_target['values'] : null;
 				$targeting_value = $this->get_targeting_value( $custom_target['custom_variable'], $custom_target['source'], $values );
 				if ( ! empty( $targeting_value ) ) {
-					$targeting_values .= $this->get_targeting_value_js( $custom_target['custom_variable'], $targeting_value );
+					$targeting_values[ $custom_target['custom_variable'] ] = $targeting_value;
 				}
 			}
 
