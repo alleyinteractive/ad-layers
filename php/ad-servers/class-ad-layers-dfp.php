@@ -117,6 +117,13 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		public $handle = 'ad-layers-dfp';
 
 		/**
+		 * List of ads for which to skip rendering.
+		 *
+		 * @var array
+		 */
+		public $do_not_render_ads = array();
+
+		/**
 		 * Setup the singleton.
 		 */
 		public function setup() {
@@ -412,7 +419,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			// Get the units included in this ad layer
-			$this->ad_units = $this->get_ad_units_for_layer( $ad_layer['post_id'] );
+			$this->get_ad_units_for_layer( $ad_layer['post_id'] );
 			if ( empty( $this->ad_units ) ) {
 				return;
 			}
@@ -523,6 +530,10 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					continue;
 				}
 
+				if ( ! empty( $this->do_not_render_ads[ $ad_unit ] ) ) {
+					continue;
+				}
+
 				$is_oop = in_array( $ad_unit, $this->oop_units );
 
 				// Finalize output for this unit and add it to the final return value.
@@ -550,7 +561,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		 * @return array
 		 */
 		protected function get_ad_units_for_layer( $ad_layer_id ) {
-			$ad_units = array();
+			$this->ad_units = array();
 			$temp_ad_units = get_post_meta( $ad_layer_id, 'ad_layer_ad_units', true );
 			if ( ! empty( $temp_ad_units ) ) {
 				foreach ( $temp_ad_units as $ad_unit ) {
@@ -558,12 +569,15 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 						if ( ! isset( $ad_unit['custom_targeting'] ) ) {
 							$ad_unit['custom_targeting'] = array();
 						}
-						$ad_units[ $ad_unit['ad_unit'] ] = $ad_unit['custom_targeting'];
+						$this->ad_units[ $ad_unit['ad_unit'] ] = $ad_unit['custom_targeting'];
+						if ( ! empty( $ad_unit['do_not_render'] ) ) {
+							$this->do_not_render_ads[ $ad_unit['ad_unit'] ] = true;
+						}
 					}
 				}
 			}
 
-			return $ad_units;
+			return $this->ad_units;
 		}
 
 		/**
