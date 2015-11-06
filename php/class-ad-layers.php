@@ -206,7 +206,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 				$taxonomy_terms = array();
 				if ( ! empty( $taxonomies ) ) {
 					foreach ( $taxonomies as $taxonomy ) {
-						$taxonomy_terms[ $taxonomy ] = '';
+						$taxonomy_terms[ $taxonomy ] = array();
 					}
 				}
 
