@@ -278,6 +278,9 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 							$this->ad_layer = $ad_layer;
 							break;
 						}
+					} else {
+						// if there is no taxonomy data, this is a page type match
+						$this->ad_layer = $ad_layer;
 					}
 				} else if ( is_post_type_archive()
 					&& empty( $taxonomies )
