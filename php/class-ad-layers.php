@@ -206,7 +206,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 				$taxonomy_terms = array();
 				if ( ! empty( $taxonomies ) ) {
 					foreach ( $taxonomies as $taxonomy ) {
-						$taxonomy_terms[ $taxonomy ] = '';
+						$taxonomy_terms[ $taxonomy ] = array();
 					}
 				}
 
@@ -278,6 +278,9 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 							$this->ad_layer = $ad_layer;
 							break;
 						}
+					} else {
+						// if there is no taxonomy data, this is a page type match
+						$this->ad_layer = $ad_layer;
 					}
 				} else if ( is_post_type_archive()
 					&& empty( $taxonomies )
@@ -391,6 +394,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 			foreach ( $page_types as $key => $label ) {
 				if (
 					( function_exists( 'is_' . $key ) && true === call_user_func( 'is_' . $key ) )
+					|| ( 'post_tag' == $key && is_tag() )
 					|| ( 'notfound' == $key && is_404() )
 					|| ( post_type_exists( $key ) && is_singular( $key ) )
 					|| ( taxonomy_exists( $key ) && is_tax( $key ) )
