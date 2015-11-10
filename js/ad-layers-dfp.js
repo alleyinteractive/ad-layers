@@ -26,20 +26,21 @@
 
 	AdLayersDFPAPI.prototype.buildAd = function(slotName, path, sizes, targets, sizeMapping) {
 		return googletag.cmd.push(function() {
-			var key, slot, value;
-			slot = googletag.defineSlot(path, sizes, slotName);
+			var key, value;
+			dfpAdUnits = dfpAdUnits || {};
+			dfpAdUnits[slotName] = googletag.defineSlot(path, sizes, slotName);
 			if (targets) {
 				for (key in targets) {
 					value = targets[key];
-					slot.setTargeting(key, value);
+					dfpAdUnits[slotName].setTargeting(key, value);
 				}
 			}
 			if (sizeMapping) {
-				slot.defineSizeMapping(sizeMapping);
+				dfpAdUnits[slotName].defineSizeMapping(sizeMapping);
 			}
-			slot.addService(googletag.pubads());
+			dfpAdUnits[slotName].addService(googletag.pubads());
 			googletag.display(slotName);
-			return googletag.pubads().refresh([slot]);
+			googletag.pubads().refresh([dfpAdUnits[slotName]]);
 		});
 	};
 
