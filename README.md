@@ -177,6 +177,8 @@ ad_layers_dfp_formatting_tags
 
 ad_layers_dfp_async_rendering
 
+ad_layers_dfp_single_request_mode
+
 ad_layers_dfp_collapse_empty_divs
 
 ad_layers_dfp_ad_unit_sizes

@@ -230,7 +230,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				if ( apply_filters( 'ad_layers_dfp_enable_async_rendering', true, $this ) ) {
 					echo "googletag.pubads().enableAsyncRendering();\n";
 				}
-				if ( apply_filters( 'ad_layers_dfp_single_request_mode', false, $this ) ) {
+				if ( apply_filters( 'ad_layers_dfp_single_request_mode', true, $this ) ) {
 					echo "googletag.pubads().enableSingleRequest();\n";
 				}
 				if ( apply_filters( 'ad_layers_dfp_collapse_empty_divs', true, $this ) ) {
