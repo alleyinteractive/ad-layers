@@ -657,7 +657,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		 */
 		private function get_targeting_array_from_custom_values( $custom_targeting ) {
 			$targeting_values = array();
-			foreach ( $custom_targeting as $custom_target ) {
+			foreach ( (array) $custom_targeting as $custom_target ) {
 				$values = ( isset( $custom_target['values'] ) ) ? $custom_target['values'] : null;
 				$targeting_value = $this->get_targeting_value( $custom_target['custom_variable'], $custom_target['source'], $values );
 				if ( ! empty( $targeting_value ) ) {
