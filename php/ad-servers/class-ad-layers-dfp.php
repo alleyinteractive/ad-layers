@@ -219,6 +219,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			</script>
 			<?php do_action( 'ad_layers_dfp_after_setup' ); ?>
 			<script type="text/javascript">
+			var dfpBuiltMappings = {}, dfpAdUnits = {};
 			googletag.cmd.push(function() {
 				<?php
 				// Add the ad units
@@ -513,9 +514,9 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 
 				$mapping_js = apply_filters( 'ad_layers_dfp_mapping_by_unit', $mapping_js, $ad_layer );
 
-				echo sprintf(
-					"var mapping%s = googletag.sizeMapping()%s.build();\n",
-					$this->sanitize_key( $ad_unit ),
+				printf(
+					"dfpBuiltMappings[%s] = googletag.sizeMapping()%s.build();\n",
+					wp_json_encode( $ad_unit ),
 					$mapping_js
 				);
 			}
@@ -548,7 +549,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					// method call, and is prefixed with a comma:
 					$is_oop ? '' : ',' . wp_json_encode( $this->default_by_unit[ $ad_unit ] ),
 					wp_json_encode( $this->get_ad_unit_id( $ad_unit ) ),
-					( ! empty( $this->mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $this->oop_units ) ) ? '.defineSizeMapping(mapping' . $this->sanitize_key( $ad_unit ) . ')' : '',
+					( ! empty( $this->mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $this->oop_units ) ) ? '.defineSizeMapping(dfpBuiltMappings[' . wp_json_encode( $ad_unit ) . '])' : '',
 					( ! empty( $this->targeting_by_unit[ $ad_unit ] ) ) ? $this->targeting_by_unit[ $ad_unit ] : '' // This is escaped above as it is built
 				);
 			}

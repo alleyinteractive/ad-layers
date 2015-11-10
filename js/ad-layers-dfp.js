@@ -24,7 +24,7 @@
 		}
 	}
 
-	AdLayersDFPAPI.prototype.buildAd = function(slotName, path, sizes, targets) {
+	AdLayersDFPAPI.prototype.buildAd = function(slotName, path, sizes, targets, sizeMapping) {
 		return googletag.cmd.push(function() {
 			var key, slot, value;
 			slot = googletag.defineSlot(path, sizes, slotName);
@@ -33,6 +33,9 @@
 					value = targets[key];
 					slot.setTargeting(key, value);
 				}
+			}
+			if (sizeMapping) {
+				slot.defineSizeMapping(sizeMapping);
 			}
 			slot.addService(googletag.pubads());
 			googletag.display(slotName);
@@ -57,8 +60,15 @@
 			if (!args.targeting) {
 				args.targeting = dfpAdDetails[args.format].targeting;
 			}
+			if (!args.sizeMapping) {
+				if (dfpBuiltMappings && dfpBuiltMappings[args.format]) {
+					args.sizeMapping = dfpBuiltMappings[args.format];
+				} else {
+					args.sizeMapping = null;
+				}
+			}
 		}
-		return this.buildAd(args.slotName, args.path, args.sizes, args.targeting);
+		return this.buildAd(args.slotName, args.path, args.sizes, args.targeting, args.sizeMapping);
 	};
 
 
