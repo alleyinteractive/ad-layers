@@ -156,6 +156,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			wp_localize_script( $this->handle, 'adLayersDFP', array(
 				'layerDebugLabel' => __( 'Current ad layer', 'ad-layers' ),
 				'consoleDebugLabel' => __( 'Switch to Google console', 'ad-layers' ),
+				'adUnitPrefix' => $this->ad_unit_prefix,
 			) );
 		}
 

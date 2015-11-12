@@ -48,6 +48,9 @@
 		if (!args.slotName) {
 			return;
 		}
+		// Prefix the slotname
+		args.slotName = adLayersDFP.adUnitPrefix + args.slotName;
+
 		if (args.format) {
 			if (!(dfpAdDetails && dfpAdDetails[args.format])) {
 				return;
