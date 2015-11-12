@@ -40,7 +40,6 @@
 				dfpAdUnits[slotName].defineSizeMapping(sizeMapping);
 			}
 			dfpAdUnits[slotName].addService(googletag.pubads());
-			googletag.pubads().refresh([dfpAdUnits[slotName]]);
 			googletag.display(divId);
 		});
 	};
