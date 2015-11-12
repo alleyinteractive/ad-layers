@@ -26,9 +26,10 @@
 
 	AdLayersDFPAPI.prototype.buildAd = function(slotName, path, sizes, targets, sizeMapping) {
 		return googletag.cmd.push(function() {
-			var key, value;
+			var key, value, divId;
+			divId = adLayersDFP.adUnitPrefix + slotName;
 			dfpAdUnits = dfpAdUnits || {};
-			dfpAdUnits[slotName] = googletag.defineSlot(path, sizes, slotName);
+			dfpAdUnits[slotName] = googletag.defineSlot(path, sizes, divId);
 			if (targets) {
 				for (key in targets) {
 					value = targets[key];
@@ -39,8 +40,8 @@
 				dfpAdUnits[slotName].defineSizeMapping(sizeMapping);
 			}
 			dfpAdUnits[slotName].addService(googletag.pubads());
-			googletag.display(slotName);
 			googletag.pubads().refresh([dfpAdUnits[slotName]]);
+			googletag.display(divId);
 		});
 	};
 
@@ -48,8 +49,6 @@
 		if (!args.slotName) {
 			return;
 		}
-		// Prefix the slotname
-		args.slotName = adLayersDFP.adUnitPrefix + args.slotName;
 
 		if (args.format) {
 			if (!(dfpAdDetails && dfpAdDetails[args.format])) {
