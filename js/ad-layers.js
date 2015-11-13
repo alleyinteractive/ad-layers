@@ -30,6 +30,13 @@
 		}
 	}
 
+	// Lazy load an ad
+	AdLayersAPI.prototype.lazyLoadAd = function( args ) {
+		if ( this.functionExists( 'lazyLoadAd' ) ) {
+			return this.adServer.lazyLoadAd( args );
+		}
+	};
+
 	// Enables debug mode
 	AdLayersAPI.prototype.debug = function() {
 		if ( this.functionExists( 'debug' ) ) {

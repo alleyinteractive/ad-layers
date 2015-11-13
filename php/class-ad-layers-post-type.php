@@ -148,6 +148,7 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 						'label' => __( 'Ad Unit', 'ad-layers' ),
 						'options' => Ad_Layers_Ad_Server::instance()->get_ad_units(),
 					) ),
+					'do_not_render' => new Fieldmanager_Checkbox( __( 'Do not render the ad on load', 'ad-layers' ) ),
 				),
 			);
 
