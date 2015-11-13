@@ -24,53 +24,53 @@
 		}
 	}
 
-	AdLayersDFPAPI.prototype.buildAd = function(slotName, path, sizes, targets, sizeMapping) {
-		return googletag.cmd.push(function() {
+	AdLayersDFPAPI.prototype.buildAd = function( slotName, path, sizes, targets, sizeMapping ) {
+		return googletag.cmd.push( function() {
 			var key, value, divId;
 			divId = adLayersDFP.adUnitPrefix + slotName;
 			dfpAdUnits = dfpAdUnits || {};
-			dfpAdUnits[slotName] = googletag.defineSlot(path, sizes, divId);
-			if (targets) {
-				for (key in targets) {
-					value = targets[key];
-					dfpAdUnits[slotName].setTargeting(key, value);
+			dfpAdUnits[ slotName ] = googletag.defineSlot( path, sizes, divId );
+			if ( targets ) {
+				for ( key in targets ) {
+					value = targets[ key ];
+					dfpAdUnits[ slotName ].setTargeting( key, value );
 				}
 			}
-			if (sizeMapping) {
-				dfpAdUnits[slotName].defineSizeMapping(sizeMapping);
+			if ( sizeMapping ) {
+				dfpAdUnits[ slotName ].defineSizeMapping( sizeMapping );
 			}
-			dfpAdUnits[slotName].addService(googletag.pubads());
-			googletag.display(divId);
-		});
+			dfpAdUnits[ slotName ].addService( googletag.pubads() );
+			googletag.display( divId );
+		} );
 	};
 
-	AdLayersDFPAPI.prototype.lazyLoadAd = function(args) {
-		if (!args.slotName) {
+	AdLayersDFPAPI.prototype.lazyLoadAd = function( args ) {
+		if ( ! args.slotName ) {
 			return;
 		}
 
-		if (args.format) {
-			if (!(dfpAdDetails && dfpAdDetails[args.format])) {
+		if ( args.format ) {
+			if ( ! ( dfpAdDetails && dfpAdDetails[ args.format ] ) ) {
 				return;
 			}
-			if (!args.path) {
-				args.path = dfpAdDetails[args.format].path;
+			if ( ! args.path ) {
+				args.path = dfpAdDetails[ args.format ].path;
 			}
-			if (!args.sizes) {
-				args.sizes = dfpAdDetails[args.format].sizes;
+			if ( ! args.sizes ) {
+				args.sizes = dfpAdDetails[ args.format ].sizes;
 			}
-			if (!args.targeting) {
-				args.targeting = dfpAdDetails[args.format].targeting;
+			if ( ! args.targeting ) {
+				args.targeting = dfpAdDetails[ args.format ].targeting;
 			}
-			if (!args.sizeMapping) {
-				if (dfpBuiltMappings && dfpBuiltMappings[args.format]) {
-					args.sizeMapping = dfpBuiltMappings[args.format];
+			if ( ! args.sizeMapping ) {
+				if ( dfpBuiltMappings && dfpBuiltMappings[ args.format ] ) {
+					args.sizeMapping = dfpBuiltMappings[ args.format ];
 				} else {
 					args.sizeMapping = null;
 				}
 			}
 		}
-		return this.buildAd(args.slotName, args.path, args.sizes, args.targeting, args.sizeMapping);
+		return this.buildAd( args.slotName, args.path, args.sizes, args.targeting, args.sizeMapping );
 	};
 
 
