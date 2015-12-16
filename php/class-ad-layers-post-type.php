@@ -106,7 +106,7 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 					$value = get_post_meta( $post_id, $column, true );
 					if ( ! empty( $value ) ) {
 						if ( is_array( $value ) ) {
-							$value = implode( ', ', $value );
+							$value = implode( ', ', array_map( function ( $value ) { return $value['ad_unit']; }, $value ));
 						}
 						echo esc_html( $value );
 					}
