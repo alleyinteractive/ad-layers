@@ -59,6 +59,9 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 
 			// Set the active ad layer before anything else.
 			add_action( 'wp_head', array( $this, 'set_active_ad_layer' ), 1 );
+
+			// Check for Ad Layer Post orphans before ad_layers option gets saved
+			add_filter( 'pre_update_option_ad_layers', array( $this, 'maybe_remove_ad_layer_orphans' ), 10, 3 );
 		}
 
 		/**
@@ -414,6 +417,28 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 			}
 
 			return apply_filters( 'ad_layers_current_page_type', $page_type );
+		}
+
+		/**
+		 * Finds and removes orphaned Ad Layers prior to the ad_layers WP option
+		 * being updated in the database.
+		 * 
+		 * @access public
+		 * @param array $ad_layers
+		 * @return array
+		 */
+		public function maybe_remove_ad_layer_orphans( $value, $old_value, $option ) {
+			$ad_layers = array();
+
+			if ( $option === 'ad_layers' ) {
+				foreach ( $value as $ad_layer ) {
+					if ( null !== get_post( $ad_layer['post_id'] ) ) {
+						$ad_layers[] = $ad_layer;
+					}
+				}
+			}
+
+			return count( $value ) === count( $ad_layers ) ? $value : $ad_layers;
 		}
 	}
 
