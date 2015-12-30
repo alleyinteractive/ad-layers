@@ -242,7 +242,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				do_action( 'ad_layers_dfp_custom_targeting' );
 				?>
 
-				if ( ! AdLayersAPI.isDebug() ) {
+				if ( typeof AdLayersAPI === 'undefined' || ! AdLayersAPI.isDebug() ) {
 					googletag.enableServices();
 				}
 			});
