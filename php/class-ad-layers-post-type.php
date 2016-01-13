@@ -20,6 +20,14 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 		public $post_type = 'ad-layer';
 
 		/**
+		 * Capability required to manage the ad layers. This is passed to the
+		 * "capability_type" arg in `register_post_type()`. Defaults to `post`.
+		 *
+		 * @var string
+		 */
+		public $ad_layers_capability = 'post';
+
+		/**
 		 * Setup the singleton.
 		 */
 		public function setup() {
@@ -42,7 +50,7 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 		 * Creates the post type.
 		 */
 		public function create_post_type() {
-			register_post_type( $this->post_type, array(
+			register_post_type( $this->post_type, apply_filters( 'ad_layers_post_type_args', array(
 				'labels' => array(
 					'name'               => __( 'Ad Layers', 'ad-layers' ),
 					'singular_name'      => __( 'Ad Layer', 'ad-layers' ),
@@ -65,7 +73,9 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 				'show_in_nav_menus' => false,
 				'supports' => array( 'title', 'revisions' ),
 				'taxonomies' => apply_filters( 'ad_layers_taxonomies', array( 'category', 'post_tag' ) ),
-			) );
+				'capability_type' => $this->ad_layers_capability,
+				'map_meta_cap' => true,
+			) ) );
 		}
 
 		/**

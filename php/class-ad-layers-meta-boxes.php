@@ -20,9 +20,30 @@ if ( ! class_exists( 'Ad_Layers_Meta_Boxes' ) ) :
 		public $post_types = array( 'post' );
 
 		/**
+		 * Capability required to assign ads to posts. Defaults to `edit_posts`.
+		 *
+		 * @var string
+		 */
+		public $assign_ads_to_posts_capability = 'edit_posts';
+
+		/**
 		 * Setup the singleton.
 		 */
 		public function setup() {
+			add_action( 'init', array( $this, 'hook_meta_boxes' ), 20 );
+		}
+
+		/**
+		 * Hook the meta boxes if the current user has the proper capabilites.
+		 *
+		 * If you want to modify this capability, you can do so by modifying the
+		 * singleton anywhere before init:20.
+		 */
+		public function hook_meta_boxes() {
+			if ( ! current_user_can( $this->assign_ads_to_posts_capability ) ) {
+				return;
+			}
+
 			// Set post types used by ad layers
 			$this->post_types = apply_filters( 'ad_layers_post_types', $this->post_types );
 
@@ -37,10 +58,6 @@ if ( ! class_exists( 'Ad_Layers_Meta_Boxes' ) ) :
 		 * @access public
 		 */
 		public function add_meta_boxes() {
-			if ( ! class_exists( 'Fieldmanager_Field' ) ) {
-				return;
-			}
-
 			// Get the post type name
 			$post_type = str_replace( 'fm_post_', '', current_filter() );
 
