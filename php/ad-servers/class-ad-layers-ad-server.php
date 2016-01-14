@@ -70,13 +70,32 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 		public $handle = 'ad-layers';
 
 		/**
+		 * Capability required to manage the ad server settings.
+		 *
+		 * @var string
+		 */
+		public $settings_capability;
+
+		/**
 		 * Setup the singleton.
 		 *
 		 * @access public
 		 */
 		public function setup() {
-			// Register the ad server settings page
-			add_action( 'init', array( $this, 'add_settings_page' ) );
+			/**
+			 * Filter the capability required to manage the ad server settings.
+			 *
+			 * @param string $capability. Defaults to `manage_options`.
+			 */
+			$this->settings_capability = apply_filters( 'ad_layers_settings_capability', 'manage_options' );
+
+			// Register the settings page
+			if ( function_exists( 'fm_register_submenu_page' ) && current_user_can( $this->settings_capability ) ) {
+				fm_register_submenu_page( $this->option_name, Ad_Layers::instance()->get_edit_link(), __( 'Ad Server Settings', 'ad-layers' ) );
+			}
+
+			// Hook the ad layer settings page onto Fieldmanager's action.
+			add_action( 'fm_submenu_' . $this->option_name, array( $this, 'add_settings_page' ) );
 
 			// Add the required header and footer setup. May differ for each server.
 			add_action( 'wp_head', array( $this, 'header_setup' ) );
@@ -218,10 +237,6 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 		 * @access public
 		 */
 		public function add_settings_page( $args = array() ) {
-			if ( ! class_exists( 'Fieldmanager_Field' ) ) {
-				return;
-			}
-
 			// Provide basic ad server selection.
 			$args = array(
 				'name' => $this->option_name,
@@ -239,7 +254,7 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 			$args['children'] = array_merge( $args['children'], $this->get_settings_fields() );
 
 			$fm_ad_servers = new Fieldmanager_Group( $args );
-			$fm_ad_servers->add_submenu_page( Ad_Layers::instance()->get_edit_link(), __( 'Ad Server Settings', 'ad-layers' ) );
+			$fm_ad_servers->activate_submenu_page();
 		}
 
 		/**
