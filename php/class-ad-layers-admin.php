@@ -13,43 +13,38 @@ if ( ! class_exists( 'Ad_Layers_Admin' ) ) :
 	class Ad_Layers_Admin extends Ad_Layers_Singleton {
 
 		/**
-		 * Capability required to manage the layer priority settings. Defaults
-		 * to `manage_options`.
+		 * Capability required to manage the layer priority settings.
 		 *
 		 * @var string
 		 */
-		public $layer_priority_capability = 'manage_options';
+		public $layer_priority_capability;
 
 		/**
-		 * Capability required to manage the custom variables settings. Defaults
-		 * to `manage_options`.
+		 * Capability required to manage the custom variables settings.
 		 *
 		 * @var string
 		 */
-		public $custom_variables_capability = 'manage_options';
+		public $custom_variables_capability;
 
 		/**
 		 * Setup the singleton.
 		 */
 		public function setup() {
+			/**
+			 * Filter the capability required to manage the layer priority settings.
+			 *
+			 * @param string $capability. Defaults to `manage_options`.
+			 */
+			$this->layer_priority_capability = apply_filters( 'ad_layers_layer_priority_capability', 'manage_options' );
+
+			/**
+			 * Filter the capability required to manage the custom variables settings.
+			 *
+			 * @param string $capability. Defaults to `manage_options`.
+			 */
+			$this->custom_variables_capability = apply_filters( 'ad_layers_custom_variables_capability', 'manage_options' );
+
 			// Register the settings pages
-			add_action( 'init', array( $this, 'register_settings_pages' ), 20 );
-
-			// Hook the ad layer settings pages onto Fieldmanager's actions
-			add_action( 'fm_submenu_ad_layers', array( $this, 'add_layer_priority_settings' ) );
-			add_action( 'fm_submenu_ad_layers_custom_variables', array( $this, 'add_custom_variables_settings' ) );
-
-			// Load admin-only JS and CSS
-			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-		}
-
-		/**
-		 * Register Fieldmanager settings pages if user has proper capabilities.
-		 *
-		 * If you want to modify these capabilities, you can do so by modifying
-		 * the singleton anywhere before init:20.
-		 */
-		public function register_settings_pages() {
 			if ( function_exists( 'fm_register_submenu_page' ) ) {
 				if ( current_user_can( $this->layer_priority_capability ) ) {
 					fm_register_submenu_page( 'ad_layers', Ad_Layers::instance()->get_edit_link(), __( 'Layer Priority', 'ad-layers' ) );
@@ -58,6 +53,13 @@ if ( ! class_exists( 'Ad_Layers_Admin' ) ) :
 					fm_register_submenu_page( 'ad_layers_custom_variables', Ad_Layers::instance()->get_edit_link(), __( 'Custom Variables', 'ad-layers' ) );
 				}
 			}
+
+			// Hook the ad layer settings pages onto Fieldmanager's actions
+			add_action( 'fm_submenu_ad_layers', array( $this, 'add_layer_priority_settings' ) );
+			add_action( 'fm_submenu_ad_layers_custom_variables', array( $this, 'add_custom_variables_settings' ) );
+
+			// Load admin-only JS and CSS
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		}
 
 		/**

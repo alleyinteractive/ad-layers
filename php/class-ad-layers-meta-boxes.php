@@ -20,26 +20,23 @@ if ( ! class_exists( 'Ad_Layers_Meta_Boxes' ) ) :
 		public $post_types = array( 'post' );
 
 		/**
-		 * Capability required to assign ads to posts. Defaults to `edit_posts`.
+		 * Capability required to assign ads to posts.
 		 *
 		 * @var string
 		 */
-		public $assign_ads_to_posts_capability = 'edit_posts';
+		public $assign_ads_to_posts_capability;
 
 		/**
 		 * Setup the singleton.
 		 */
 		public function setup() {
-			add_action( 'init', array( $this, 'hook_meta_boxes' ), 20 );
-		}
+			/**
+			 * Filter the capability required to assign ads to posts.
+			 *
+			 * @param string $capability. Defaults to `edit_posts`.
+			 */
+			$this->assign_ads_to_posts_capability = apply_filters( 'ad_layers_assign_ads_to_posts_capability', 'edit_posts' );
 
-		/**
-		 * Hook the meta boxes if the current user has the proper capabilites.
-		 *
-		 * If you want to modify this capability, you can do so by modifying the
-		 * singleton anywhere before init:20.
-		 */
-		public function hook_meta_boxes() {
 			if ( ! current_user_can( $this->assign_ads_to_posts_capability ) ) {
 				return;
 			}

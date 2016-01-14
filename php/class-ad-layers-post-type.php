@@ -20,17 +20,28 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 		public $post_type = 'ad-layer';
 
 		/**
-		 * Capability required to manage the ad layers. This is passed to the
-		 * "capability_type" arg in `register_post_type()`. Defaults to `post`.
+		 * Capability required to manage the ad layers post type. This is passed
+		 * to the "capability_type" arg in `register_post_type()`.
 		 *
 		 * @var string
 		 */
-		public $ad_layers_capability = 'post';
+		public $post_type_capability;
 
 		/**
 		 * Setup the singleton.
 		 */
 		public function setup() {
+			/**
+			 * Filter the capability required to manage the ad layers post type.
+			 *
+			 * This is passed to the "capability_type" arg in
+			 * `register_post_type()`, and becomes the base for all post-related
+			 * capabilities (e.g. edit_posts, create_posts, delete_post, etc.).
+			 *
+			 * @param string $capability_type. Defaults to `post`.
+			 */
+			$this->post_type_capability = apply_filters( 'ad_layers_post_type_capability', 'post' );
+
 			// Create the post type
 			add_action( 'init', array( $this, 'create_post_type' ) );
 
@@ -50,6 +61,12 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 		 * Creates the post type.
 		 */
 		public function create_post_type() {
+			/**
+			 * Filter the arguments passed to register_post_type for the
+			 * `ad-layers` post type.
+			 *
+			 * @param array $args See {@link https://codex.wordpress.org/Function_Reference/register_post_type}.
+			 */
 			register_post_type( $this->post_type, apply_filters( 'ad_layers_post_type_args', array(
 				'labels' => array(
 					'name'               => __( 'Ad Layers', 'ad-layers' ),
@@ -73,7 +90,7 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 				'show_in_nav_menus' => false,
 				'supports' => array( 'title', 'revisions' ),
 				'taxonomies' => apply_filters( 'ad_layers_taxonomies', array( 'category', 'post_tag' ) ),
-				'capability_type' => $this->ad_layers_capability,
+				'capability_type' => $this->post_type_capability,
 				'map_meta_cap' => true,
 			) ) );
 		}

@@ -70,12 +70,11 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 		public $handle = 'ad-layers';
 
 		/**
-		 * Capability required to manage the ad server settings. Defaults to
-		 * `manage_options`.
+		 * Capability required to manage the ad server settings.
 		 *
 		 * @var string
 		 */
-		public $settings_capability = 'manage_options';
+		public $settings_capability;
 
 		/**
 		 * Setup the singleton.
@@ -83,8 +82,17 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 		 * @access public
 		 */
 		public function setup() {
-			// Register the settings pages
-			add_action( 'init', array( $this, 'register_settings_page' ), 20 );
+			/**
+			 * Filter the capability required to manage the ad server settings.
+			 *
+			 * @param string $capability. Defaults to `manage_options`.
+			 */
+			$this->settings_capability = apply_filters( 'ad_layers_settings_capability', 'manage_options' );
+
+			// Register the settings page
+			if ( function_exists( 'fm_register_submenu_page' ) && current_user_can( $this->settings_capability ) ) {
+				fm_register_submenu_page( $this->option_name, Ad_Layers::instance()->get_edit_link(), __( 'Ad Server Settings', 'ad-layers' ) );
+			}
 
 			// Hook the ad layer settings page onto Fieldmanager's action.
 			add_action( 'fm_submenu_' . $this->option_name, array( $this, 'add_settings_page' ) );
@@ -120,18 +128,6 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 			if ( ! empty( self::$settings['ad_server'] ) && class_exists( self::$settings['ad_server'] ) ) {
 				$ad_server = new self::$settings['ad_server'];
 				$this->ad_server = $ad_server::instance();
-			}
-		}
-
-		/**
-		 * Register Fieldmanager settings page if user has proper capabilities.
-		 *
-		 * If you want to modify this capability, you can do so by modifying the
-		 * singleton anywhere before init:20.
-		 */
-		public function register_settings_page() {
-			if ( function_exists( 'fm_register_submenu_page' ) && current_user_can( $this->settings_capability ) ) {
-				fm_register_submenu_page( $this->option_name, Ad_Layers::instance()->get_edit_link(), __( 'Ad Server Settings', 'ad-layers' ) );
 			}
 		}
 
