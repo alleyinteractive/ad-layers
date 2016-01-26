@@ -1,6 +1,11 @@
 # Tell Travis to use new container-based infrastructure
 sudo: false
 
+notifications:
+  email:
+    on_success: never
+    on_failure: change
+
 # Declare project language.
 # @link http://about.travis-ci.org/docs/user/languages/php/
 language: php
@@ -10,12 +15,17 @@ php:
     - 5.4
     - 5.5
     - 5.6
+    - 7.0
 
 env:
     - WP_VERSION=master WP_MULTISITE=0
     - WP_VERSION=master WP_MULTISITE=1
-    - WP_VERSION=4.3 WP_MULTISITE=0
-    - WP_VERSION=4.3 WP_MULTISITE=0
+    - WP_VERSION=4.4 WP_MULTISITE=0
+    - WP_VERSION=4.4 WP_MULTISITE=0
+
+branches:
+    only:
+        - master
 
 before_script:
     # Setup WordPress
