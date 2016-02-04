@@ -150,7 +150,7 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 			}
 
 			// Load the base Javascript library
-			wp_enqueue_script( $this->handle, AD_LAYERS_ASSETS_DIR . 'js/ad-layers.js', $dependencies, AD_LAYERS_GLOBAL_ASSET_VERSION, false );
+			wp_enqueue_script( $this->handle, AD_LAYERS_ASSETS_DIR . 'js/ad-layers.js', $dependencies, AD_LAYERS_GLOBAL_ASSET_VERSION, true );
 
 			// Load the CSS. Mostly used in debug mode.
 			wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
