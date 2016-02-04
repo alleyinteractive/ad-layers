@@ -147,7 +147,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		 */
 		public function enqueue_scripts() {
 			// Load the base Javascript library
-			wp_enqueue_script( $this->handle, AD_LAYERS_ASSETS_DIR . 'js/ad-layers-dfp.js', array( 'jquery' ), AD_LAYERS_GLOBAL_ASSET_VERSION, false );
+			wp_enqueue_script( $this->handle, AD_LAYERS_ASSETS_DIR . 'js/ad-layers-dfp.js', array( 'jquery' ), AD_LAYERS_GLOBAL_ASSET_VERSION, true );
 
 			// Load the CSS. Mostly used in debug mode.
 			wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers-dfp.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
