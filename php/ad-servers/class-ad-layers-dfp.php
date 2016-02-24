@@ -542,7 +542,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				// Ad units are also saved to an array based on ad type so they can
 				// be refreshed if the page size changes.
 				printf(
-					"dfpAdUnits[%s] = googletag.%s(%s%s,%s)%s%s.addService(googletag.pubads());\n",
+					"dfpAdUnits[%s] = googletag.%s(%s%s,%s)%s%s%s.addService(googletag.pubads());\n",
 					wp_json_encode( $ad_unit ),
 					$is_oop ? 'defineOutOfPageSlot' : 'defineSlot',
 					wp_json_encode( $this->get_path( $page_type, $ad_unit ) ),
@@ -551,7 +551,9 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					$is_oop ? '' : ',' . wp_json_encode( $this->default_by_unit[ $ad_unit ] ),
 					wp_json_encode( $this->get_ad_unit_id( $ad_unit ) ),
 					( ! empty( $this->mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $this->oop_units ) ) ? '.defineSizeMapping(dfpBuiltMappings[' . wp_json_encode( $ad_unit ) . '])' : '',
-					( ! empty( $this->targeting_by_unit[ $ad_unit ] ) ) ? $this->targeting_by_unit[ $ad_unit ] : '' // This is escaped above as it is built
+					( ! empty( $this->targeting_by_unit[ $ad_unit ] ) ) ? $this->targeting_by_unit[ $ad_unit ] : '', // This is escaped above as it is built
+					// allow addition services such as '.setCollapseEmptyDiv(true,true)' to be added to the define call
+					apply_filters( 'ad_layers_dfp_additional_services', $ad_unit )
 				);
 			}
 		}
