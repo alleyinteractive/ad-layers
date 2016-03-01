@@ -229,6 +229,15 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				// Add custom targeting
 				$this->targeting_js( $ad_layer );
 
+				/**
+				 * Fires after all the ad unit javascript has been output. This
+				 * is a useful action to call additional methods on ad units.
+				 *
+				 * @param array $ad_layer The currently active ad layer.
+				 * @param Ad_Layers_DFP $this This object.
+				 */
+				do_action( 'ad_layers_dfp_ad_unit_js_output', $ad_layer, $this );
+
 				if ( apply_filters( 'ad_layers_dfp_enable_async_rendering', true, $this ) ) {
 					echo "googletag.pubads().enableAsyncRendering();\n";
 				}
