@@ -164,6 +164,9 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 					break;
 
 				case 'ad_layer_terms' :
+					// Normally, we'd avoid use of wp_get_object_terms, but here
+					// it's a bit more efficient than get_post_terms. It's also,
+					// less critical since this is the edit.php view in admin.
 					$terms = wp_get_object_terms( $post_id, get_object_taxonomies( get_post( $post_id ) ) );
 					if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
 						$term_list = array();
