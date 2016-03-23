@@ -493,7 +493,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					$custom_targeting = null;
 					if ( ! empty( $this->ad_units[ $unit_key ] ) ) {
 						$custom_targeting = $this->ad_units[ $unit_key ];
-					} elseif ( empty( $this->ad_units[ $unit_key ] ) && ! empty( $ad_unit['custom_targeting'] ) ) {
+					} elseif ( ! empty( $ad_unit['custom_targeting'] ) ) {
 						$custom_targeting = $ad_unit['custom_targeting'];
 					}
 
@@ -633,8 +633,12 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				$return[ $ad_unit ] = array(
 					'path' => $this->get_path( $page_type, $ad_unit ),
 					'sizes' => $this->default_by_unit[ $ad_unit ],
-					'targeting' => $this->get_targeting_array_from_custom_values( $this->raw_targeting_by_unit[ $ad_unit ] ),
+					'targeting' => array(),
 				);
+
+				if ( ! empty( $this->raw_targeting_by_unit[ $ad_unit ] ) ) {
+					$return[ $ad_unit ]['targeting'] = $this->get_targeting_array_from_custom_values( $this->raw_targeting_by_unit[ $ad_unit ] );
+				}
 			}
 
 			return $return;
