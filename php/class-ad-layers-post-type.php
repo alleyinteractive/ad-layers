@@ -107,12 +107,14 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 	  		$columns['ad_layer_page_types'] = __( 'Page Type', 'ad-layers' );
 	  		$columns['ad_layer_post_types'] = __( 'Post Types', 'ad-layers' );
 	  		$columns['ad_layer_taxonomies'] = __( 'Taxonomies', 'ad-layers' );
+	  		$columns['ad_layer_terms'] = __( 'Terms', 'ad-layers' );
 	  		$columns['ad_layer_ad_units'] = __( 'Ad Units', 'ad-layers' );
 	  		$columns['ad_layer_priority'] = __( 'Priority', 'ad-layers' );
 
-	  		// Move date back to the end
+	  		// Remove Date
 	  		unset( $columns['date'] );
-	  		$columns['date'] = __( 'Date', 'ad-layers' );
+	  		unset( $columns['categories'] );
+	  		unset( $columns['tags'] );
 
 	  		return apply_filters( 'ad_layers_edit_columns', $columns );
 		}
@@ -126,25 +128,59 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 		 */
 		public function manage_custom_columns( $column, $post_id ) {
 			switch ( $column ) {
-				case 'ad_layer_page_types':
-				case 'ad_layer_post_types':
-				case 'ad_layer_taxonomies':
-				case 'ad_layer_ad_units':
+				case 'ad_layer_ad_units' :
 					$value = get_post_meta( $post_id, $column, true );
-					if ( ! empty( $value ) ) {
-						if ( is_array( $value ) ) {
-							$value = implode( ', ', $value );
+					if ( ! empty( $value[0]['ad_unit'] ) ) {
+						$this->column_listify( wp_list_pluck( $value, 'ad_unit' ) );
+					}
+					break;
+
+				case 'ad_layer_page_types' :
+					$value = get_post_meta( $post_id, $column, true );
+					$page_types = Ad_Layers::instance()->get_page_types();
+					if ( is_array( $value ) ) {
+						$values = array();
+						foreach ( $value as $page_type ) {
+							$values[] = ( ! empty( $page_types[ $page_type ] ) ? $page_types[ $page_type ] : $page_type );
 						}
+						$this->column_listify( $values );
+					} else {
 						echo esc_html( $value );
 					}
 					break;
-				case 'ad_layer_priority':
+
+				case 'ad_layer_priority' :
 					$priority = Ad_Layers::instance()->get_ad_layer_priority( $post_id );
 					if ( ! empty( $priority ) ) {
 						echo absint( $priority );
 					} else {
 						echo '&mdash;';
 					}
+					break;
+
+				case 'ad_layer_taxonomies' :
+					$taxonomies = $this->get_taxonomy_names( get_post_meta( $post_id, $column, true ) );
+					$this->column_listify( $taxonomies );
+					break;
+
+				case 'ad_layer_terms' :
+					// Normally, we'd avoid use of wp_get_object_terms, but here
+					// it's a bit more efficient than get_post_terms. It's also,
+					// less critical since this is the edit.php view in admin.
+					$terms = wp_get_object_terms( $post_id, get_object_taxonomies( get_post( $post_id ) ) );
+					if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+						$term_list = array();
+						foreach ( $terms as $term ) {
+							list( $taxonomy_name ) = $this->get_taxonomy_names( (array) $term->taxonomy );
+							$term_list[] = sprintf( '%s: %s', $taxonomy_name, $term->name );
+						}
+						$this->column_listify( $term_list );
+					}
+					break;
+
+				case 'ad_layer_post_types' :
+					$post_types = $this->get_post_type_names( get_post_meta( $post_id, $column, true ) );
+					$this->column_listify( $post_types );
 					break;
 			}
 		}
@@ -334,6 +370,55 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 			}
 
 			update_option( 'ad_layers', apply_filters( 'ad_layers_delete_post', $ad_layers ) );
+		}
+
+		/**
+		 * Get the human-readable names for given taxonomies.
+		 *
+		 * This is a helper for custom column values, so the user sees e.g.
+		 * "Tags" instead of "post_tag".
+		 *
+		 * @param  array $taxonomies Taxonomy slugs.
+		 * @return array Taxonomy names.
+		 */
+		public function get_taxonomy_names( $taxonomies ) {
+			if ( empty( $taxonomies ) ) {
+				return array();
+			}
+			foreach ( (array) $taxonomies as $i => $taxonomy ) {
+				$tax_obj = get_taxonomy( $taxonomy );
+				$taxonomies[ $i ] = $tax_obj->labels->name;
+			}
+			return $taxonomies;
+		}
+
+		/**
+		 * Get the human-readable names for given post types.
+		 *
+		 * This is a helper for custom column values, so the user sees e.g.
+		 * "My Custom Posts" instead of "my-custom-posts".
+		 *
+		 * @param  array $post_types Post type slugs.
+		 * @return array Post type names.
+		 */
+		public function get_post_type_names( $post_types ) {
+			if ( empty( $post_types ) ) {
+				return array();
+			}
+			foreach ( (array) $post_types as $i => $post_type ) {
+				$post_type_obj = get_post_type_object( $post_type );
+				$post_types[ $i ] = $post_type_obj->labels->name;
+			}
+			return $post_types;
+		}
+
+		/**
+		 * Output an array as an unordered list for custom columns.
+		 *
+		 * @param  array $array The array to output.
+		 */
+		protected function column_listify( $array ) {
+			echo '<ul class="ad-layers-column-list"><li>' . implode( '</li><li>', array_map( 'esc_html', $array ) ) . '</li></ul>';
 		}
 	}
 
