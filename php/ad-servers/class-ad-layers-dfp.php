@@ -202,23 +202,28 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				return;
 			}
 
-			do_action( 'ad_layers_dfp_before_setup' ); ?>
-			<script type='text/javascript'>
-			var dfpAdUnits = {};
-			var googletag = googletag || {};
-			googletag.cmd = googletag.cmd || [];
-			(function() {
-			var gads = document.createElement('script');
-			gads.async = true;
-			gads.type = 'text/javascript';
-			var useSSL = 'https:' == document.location.protocol;
-			gads.src = (useSSL ? 'https:' : 'http:') +
-			'//www.googletagservices.com/tag/js/gpt.js';
-			var node = document.getElementsByTagName('script')[0];
-			node.parentNode.insertBefore(gads, node);
-			})();
-			</script>
-			<?php do_action( 'ad_layers_dfp_after_setup' ); ?>
+			do_action( 'ad_layers_dfp_before_setup' );
+			// by default use google's async method of loading gpt.js
+			// and pass through a filter to allow customization
+			$gpt_library_script = <<<JAVASCRIPT
+				<script type='text/javascript'>
+				var dfpAdUnits = {};
+				var googletag = googletag || {};
+				googletag.cmd = googletag.cmd || [];
+				(function() {
+				var gads = document.createElement('script');
+				gads.async = true;
+				gads.type = 'text/javascript';
+				var useSSL = 'https:' == document.location.protocol;
+				gads.src = (useSSL ? 'https:' : 'http:') +
+				'//www.googletagservices.com/tag/js/gpt.js';
+				var node = document.getElementsByTagName('script')[0];
+				node.parentNode.insertBefore(gads, node);
+				})();
+				</script>
+JAVASCRIPT;
+			echo apply_filters( 'ad_layers_dfp_gpt_script', $gpt_library_script );
+			do_action( 'ad_layers_dfp_after_setup' ); ?>
 			<script type="text/javascript">
 			var dfpBuiltMappings = {}, dfpAdUnits = {};
 			googletag.cmd.push(function() {
