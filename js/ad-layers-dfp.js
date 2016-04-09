@@ -103,10 +103,10 @@
 				var maxWidth = -1;
 				var maxHeight = -1;
 				$.each( dfpSizeMapping[ adSlot ], function( index, value ) {
-					if ( $( window ).width() > value[0][0]
-						&& $( window ).height() > value[0][1]
-						&& value[0][0] > maxWidth
-						&& value[0][1] > maxHeight
+					if ( $( window ).width() >= value[0][0]
+						&& $( window ).height() >= value[0][1]
+						&& value[0][0] >= maxWidth
+						&& value[0][1] >= maxHeight
 					) {
 						maxWidth = value[0][0];
 						maxHeight = value[0][1];
