@@ -47,10 +47,10 @@ if ( ! class_exists( 'Ad_Layers_Admin' ) ) :
 			// Register the settings pages
 			if ( function_exists( 'fm_register_submenu_page' ) ) {
 				if ( current_user_can( $this->layer_priority_capability ) ) {
-					fm_register_submenu_page( 'ad_layers', Ad_Layers::instance()->get_edit_link(), __( 'Layer Priority', 'ad-layers' ) );
+					fm_register_submenu_page( 'ad_layers', Ad_Layers::instance()->get_edit_link(), __( 'Layer Priority', 'ad-layers' ), null, $this->layer_priority_capability );
 				}
 				if ( current_user_can( $this->custom_variables_capability ) ) {
-					fm_register_submenu_page( 'ad_layers_custom_variables', Ad_Layers::instance()->get_edit_link(), __( 'Custom Variables', 'ad-layers' ) );
+					fm_register_submenu_page( 'ad_layers_custom_variables', Ad_Layers::instance()->get_edit_link(), __( 'Custom Variables', 'ad-layers' ), null, $this->custom_variables_capability );
 				}
 			}
 

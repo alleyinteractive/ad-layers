@@ -91,7 +91,7 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 
 			// Register the settings page
 			if ( function_exists( 'fm_register_submenu_page' ) && current_user_can( $this->settings_capability ) ) {
-				fm_register_submenu_page( $this->option_name, Ad_Layers::instance()->get_edit_link(), __( 'Ad Server Settings', 'ad-layers' ) );
+				fm_register_submenu_page( $this->option_name, Ad_Layers::instance()->get_edit_link(), __( 'Ad Server Settings', 'ad-layers' ), null, $this->settings_capability );
 			}
 
 			// Hook the ad layer settings page onto Fieldmanager's action.
