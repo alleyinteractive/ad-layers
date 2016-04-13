@@ -146,8 +146,8 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		 * @access public
 		 */
 		public function enqueue_scripts() {
-			// Load the base Javascript library
-			wp_enqueue_script( $this->handle, AD_LAYERS_ASSETS_DIR . 'js/ad-layers-dfp.js', array( 'jquery' ), AD_LAYERS_GLOBAL_ASSET_VERSION, true );
+			// Load the base Javascript library (in header to ensure early ad loading)
+			wp_enqueue_script( $this->handle, AD_LAYERS_ASSETS_DIR . 'js/ad-layers-dfp.js', array( 'jquery' ), AD_LAYERS_GLOBAL_ASSET_VERSION, false );
 
 			// Load the CSS. Mostly used in debug mode.
 			wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers-dfp.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
@@ -203,21 +203,23 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			do_action( 'ad_layers_dfp_before_setup' ); ?>
-			<script type='text/javascript'>
-			var dfpAdUnits = {};
-			var googletag = googletag || {};
-			googletag.cmd = googletag.cmd || [];
-			(function() {
-			var gads = document.createElement('script');
-			gads.async = true;
-			gads.type = 'text/javascript';
-			var useSSL = 'https:' == document.location.protocol;
-			gads.src = (useSSL ? 'https:' : 'http:') +
-			'//www.googletagservices.com/tag/js/gpt.js';
-			var node = document.getElementsByTagName('script')[0];
-			node.parentNode.insertBefore(gads, node);
-			})();
-			</script>
+			<?php if ( apply_filters( 'ad_layers_dfp_output_default_gpt_library_script', true, $this ) ) : ?>
+				<script type='text/javascript'>
+				var dfpAdUnits = {};
+				var googletag = googletag || {};
+				googletag.cmd = googletag.cmd || [];
+				(function() {
+				var gads = document.createElement('script');
+				gads.async = true;
+				gads.type = 'text/javascript';
+				var useSSL = 'https:' == document.location.protocol;
+				gads.src = (useSSL ? 'https:' : 'http:') +
+				'//www.googletagservices.com/tag/js/gpt.js';
+				var node = document.getElementsByTagName('script')[0];
+				node.parentNode.insertBefore(gads, node);
+				})();
+				</script>
+			<?php endif; ?>
 			<?php do_action( 'ad_layers_dfp_after_setup' ); ?>
 			<script type="text/javascript">
 			var dfpBuiltMappings = {}, dfpAdUnits = {};
@@ -228,6 +230,15 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 
 				// Add custom targeting
 				$this->targeting_js( $ad_layer );
+
+				/**
+				 * Fires after all the ad unit javascript has been output. This
+				 * is a useful action to call additional methods on ad units.
+				 *
+				 * @param array $ad_layer The currently active ad layer.
+				 * @param Ad_Layers_DFP $this This object.
+				 */
+				do_action( 'ad_layers_dfp_ad_unit_js_output', $ad_layer, $this );
 
 				if ( apply_filters( 'ad_layers_dfp_enable_async_rendering', true, $this ) ) {
 					echo "googletag.pubads().enableAsyncRendering();\n";
@@ -484,7 +495,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					$custom_targeting = null;
 					if ( ! empty( $this->ad_units[ $unit_key ] ) ) {
 						$custom_targeting = $this->ad_units[ $unit_key ];
-					} elseif ( empty( $this->ad_units[ $unit_key ] ) && ! empty( $ad_unit['custom_targeting'] ) ) {
+					} elseif ( ! empty( $ad_unit['custom_targeting'] ) ) {
 						$custom_targeting = $ad_unit['custom_targeting'];
 					}
 
@@ -624,8 +635,12 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				$return[ $ad_unit ] = array(
 					'path' => $this->get_path( $page_type, $ad_unit ),
 					'sizes' => $this->default_by_unit[ $ad_unit ],
-					'targeting' => $this->get_targeting_array_from_custom_values( $this->raw_targeting_by_unit[ $ad_unit ] ),
+					'targeting' => array(),
 				);
+
+				if ( ! empty( $this->raw_targeting_by_unit[ $ad_unit ] ) ) {
+					$return[ $ad_unit ]['targeting'] = $this->get_targeting_array_from_custom_values( $this->raw_targeting_by_unit[ $ad_unit ] );
+				}
 			}
 
 			return $return;

@@ -91,7 +91,7 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 
 			// Register the settings page
 			if ( function_exists( 'fm_register_submenu_page' ) && current_user_can( $this->settings_capability ) ) {
-				fm_register_submenu_page( $this->option_name, Ad_Layers::instance()->get_edit_link(), __( 'Ad Server Settings', 'ad-layers' ) );
+				fm_register_submenu_page( $this->option_name, Ad_Layers::instance()->get_edit_link(), __( 'Ad Server Settings', 'ad-layers' ), null, $this->settings_capability );
 			}
 
 			// Hook the ad layer settings page onto Fieldmanager's action.
@@ -149,8 +149,8 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 				$js_api_class = $this->js_api_class;
 			}
 
-			// Load the base Javascript library
-			wp_enqueue_script( $this->handle, AD_LAYERS_ASSETS_DIR . 'js/ad-layers.js', $dependencies, AD_LAYERS_GLOBAL_ASSET_VERSION, true );
+			// Load the base Javascript library (in header to ensure early ad loading)
+			wp_enqueue_script( $this->handle, AD_LAYERS_ASSETS_DIR . 'js/ad-layers.js', $dependencies, AD_LAYERS_GLOBAL_ASSET_VERSION, false );
 
 			// Load the CSS. Mostly used in debug mode.
 			wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );

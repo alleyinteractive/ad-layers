@@ -17,5 +17,8 @@
 	<rule ref="WordPress.XSS.EscapeOutput.OutputNotEscaped">
 		<type>warning</type>
 	</rule>
+	<rule ref="WordPress.VIP.RestrictedFunctions.wp_get_post_terms">
+		<type>warning</type>
+	</rule>
 
 </ruleset>
