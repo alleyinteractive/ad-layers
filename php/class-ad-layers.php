@@ -353,7 +353,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 				$archived_post_types = apply_filters( 'ad_layers_ad_server_archived_post_types', wp_list_filter( get_post_types( array( 'has_archive' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
 				if ( ! empty( $archived_post_types ) ) {
 					foreach ( $archived_post_types as $post_type ) {
-						$page_types[ $post_type->name ] = $post_type->label . __( ' Archive', 'ad-layers' );
+						$page_types[ 'archive::' . $post_type->name ] = $post_type->label . __( ' Archive', 'ad-layers' );
 					}
 				}
 
@@ -396,6 +396,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					( function_exists( 'is_' . $key ) && true === call_user_func( 'is_' . $key ) )
 					|| ( 'post_tag' == $key && is_tag() )
 					|| ( 'notfound' == $key && is_404() )
+					|| ( 'archive::' == substr( $key, 0, 9 ) && is_post_type_archive( substr( $key, 9 ) ) )
 					|| ( post_type_exists( $key ) && is_singular( $key ) )
 					|| ( taxonomy_exists( $key ) && is_tax( $key ) )
 				) {
