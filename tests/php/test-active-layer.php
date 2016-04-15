@@ -6,7 +6,7 @@ class Ad_Layers_Active_Layer_Tests extends Ad_Layers_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		register_taxonomy( 'test-taxonomy', 'post', array( 'label' => rand_str() ) );
+		register_taxonomy( 'test-taxonomy', 'post' );
 
 		$this->editor_id = $this->factory->user->create( array( 'role' => 'editor' ) );
 
@@ -167,7 +167,7 @@ class Ad_Layers_Active_Layer_Tests extends Ad_Layers_UnitTestCase {
 	public function test_active_layer_cpt_without_archive() {
 		$post_type = rand_str( 20 );
 		register_post_type( $post_type, array( 'public' => true ) );
-		$cpt_id = $this->factory->post->create( array( 'post_title' => 'hello-cpt', 'post_type' => $post_type, 'label' => rand_str() ) );
+		$cpt_id = $this->factory->post->create( array( 'post_title' => 'hello-cpt', 'post_type' => $post_type ) );
 		$layer = $this->build_and_get_layer( array( 'page_types' => $post_type ) );
 
 		$this->go_to( get_permalink( $cpt_id ) );
@@ -178,7 +178,7 @@ class Ad_Layers_Active_Layer_Tests extends Ad_Layers_UnitTestCase {
 	public function test_active_layer_cpt_with_archive() {
 		$post_type = rand_str( 20 );
 		register_post_type( $post_type, array( 'public' => true, 'has_archive' => true ) );
-		$cpt_id = $this->factory->post->create( array( 'post_title' => 'hello-cpt', 'post_type' => $post_type, 'label' => rand_str() ) );
+		$cpt_id = $this->factory->post->create( array( 'post_title' => 'hello-cpt', 'post_type' => $post_type ) );
 
 		$layer_single = $this->build_and_get_layer( array( 'page_types' => $post_type ) );
 		$layer_archive = $this->build_and_get_layer( array( 'page_types' => 'archive::' . $post_type ) );
