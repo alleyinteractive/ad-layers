@@ -866,7 +866,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			// The default path template should always just be the account ID and domain
 			$account_id = $this->get_setting( 'account_id' );
 			$domain = $this->get_domain();
-			$path = '/' . $account_id . '/' . $domain;
+			$path_template = '/' . $account_id . '/' . $domain;
 
 			if ( ! empty( $ad_unit ) && ! empty( $this->ad_unit_paths[ $ad_unit ] ) ) {
 				$path_template = $this->ad_unit_paths[ $ad_unit ];
@@ -885,11 +885,12 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			if ( ! empty( $path_template ) ) {
+				$replacements = array();
+
 				// Handle any formatting tags
 				preg_match_all( apply_filters( 'ad_layers_dfp_formatting_tag_pattern', $this->formatting_tag_pattern ), $path_template, $matches );
 				if ( ! empty( $matches[0] ) ) {
 					// Build a list of found tags for replacement
-					$replacements = array();
 					$unique_matches = array_unique( $matches[0] );
 
 					// Iterate over and replace each
@@ -948,12 +949,10 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 							}
 						}
 					}
-
-					// Do the replacements and create the final path
-					if ( ! empty( $replacements ) ) {
-						$path = str_replace( array_keys( $replacements ), array_values( $replacements ), $path_template );
-					}
 				}
+
+				// Do the replacements and create the final path
+				$path = str_replace( array_keys( $replacements ), array_values( $replacements ), $path_template );
 			}
 
 			// Finally, the path should never end in a trailing slash.
