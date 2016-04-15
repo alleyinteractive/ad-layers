@@ -193,4 +193,48 @@ class Ad_Layers_Active_Layer_Tests extends Ad_Layers_UnitTestCase {
 		$this->assertTrue( is_post_type_archive( $post_type ) );
 		$this->assertSame( $layer_archive, $this->get_active_ad_layer() );
 	}
+
+	public function test_active_layer_post_types() {
+		$layer = $this->build_and_get_layer( array( 'post_types' => 'page' ) );
+
+		// Ensure that a singular post fails
+		$this->go_to( get_permalink( $this->post_id ) );
+		$this->assertTrue( is_single() );
+		$this->assertNotSame( $layer, $this->get_active_ad_layer() );
+
+		// ... but that a singular page passes
+		$this->go_to( get_permalink( $this->page_id ) );
+		$this->assertTrue( is_page() );
+		$this->assertSame( $layer, $this->get_active_ad_layer() );
+	}
+
+	public function test_active_layer_post_types_by_archive() {
+		$post_type_1 = rand_str( 20 );
+		$post_type_2 = rand_str( 20 );
+		register_post_type( $post_type_1, array( 'public' => true, 'has_archive' => true ) );
+		register_post_type( $post_type_2, array( 'public' => true, 'has_archive' => true ) );
+		$cpt_1 = $this->factory->post->create( array( 'post_title' => 'hello-cpt-1', 'post_type' => $post_type_1 ) );
+		$cpt_2 = $this->factory->post->create( array( 'post_title' => 'hello-cpt-2', 'post_type' => $post_type_2 ) );
+
+		$layer_1 = $this->build_and_get_layer( array( 'post_types' => $post_type_1 ) );
+		$layer_2 = $this->build_and_get_layer( array( 'post_types' => $post_type_2 ) );
+
+		// Singular view
+		$this->go_to( get_permalink( $cpt_1 ) );
+		$this->assertTrue( is_singular( $post_type_1 ) );
+		$this->assertSame( $layer_1, $this->get_active_ad_layer() );
+
+		$this->go_to( get_permalink( $cpt_2 ) );
+		$this->assertTrue( is_singular( $post_type_2 ) );
+		$this->assertSame( $layer_2, $this->get_active_ad_layer() );
+
+		// Archive view
+		$this->go_to( get_post_type_archive_link( $post_type_1 ) );
+		$this->assertTrue( is_post_type_archive( $post_type_1 ) );
+		$this->assertSame( $layer_1, $this->get_active_ad_layer() );
+
+		$this->go_to( get_post_type_archive_link( $post_type_2 ) );
+		$this->assertTrue( is_post_type_archive( $post_type_2 ) );
+		$this->assertSame( $layer_2, $this->get_active_ad_layer() );
+	}
 }
