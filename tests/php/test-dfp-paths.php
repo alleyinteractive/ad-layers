@@ -11,6 +11,16 @@ class Ad_Layers_DFP_Paths_Tests extends Ad_Layers_UnitTestCase {
 		$this->assertEquals( '/6355419/sidebar/front', $this->ad_server->get_path( 'default', 'sidebar' ) );
 	}
 
+	public function test_static_path_templates() {
+		$path = rand_str();
+		$settings = $this->ad_server_settings;
+		$settings['ad_units'][0]['path_override'] = "/{$path}";
+		$this->update_ad_server_settings( $settings );
+		$this->ad_server->get_ad_units_for_layer( $this->ad_layer );
+
+		$this->assertEquals( "/{$path}", $this->ad_server->get_path( 'default', 'sidebar' ) );
+	}
+
 	public function test_no_path_templates() {
 		$settings = $this->ad_server_settings;
 		$settings['path_templates'] = array();
