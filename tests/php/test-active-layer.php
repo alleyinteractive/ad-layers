@@ -29,7 +29,7 @@ class Ad_Layers_Active_Layer_Tests extends Ad_Layers_UnitTestCase {
 		parent::tearDown();
 	}
 
-	protected function build_and_get_layer( $args ) {
+	protected function build_and_get_layer( $args = array() ) {
 		$layer = $this->factory->post->create( array( 'post_type' => 'ad-layer' ) );
 		$args = wp_parse_args( $args, array(
 			'post_types' => array(),
@@ -236,5 +236,31 @@ class Ad_Layers_Active_Layer_Tests extends Ad_Layers_UnitTestCase {
 		$this->go_to( get_post_type_archive_link( $post_type_2 ) );
 		$this->assertTrue( is_post_type_archive( $post_type_2 ) );
 		$this->assertSame( $layer_2, $this->get_active_ad_layer() );
+	}
+
+	public function test_active_layer_taxonomies() {
+		$layer = $this->build_and_get_layer( array( 'taxonomies' => 'category' ) );
+
+		$this->go_to( get_category_link( $this->cat_id ) );
+		$this->assertTrue( is_category() );
+		$this->assertSame( $layer, $this->get_active_ad_layer() );
+	}
+
+	public function test_active_layer_terms() {
+		$layer = $this->build_and_get_layer();
+		wp_set_object_terms( $layer, $this->cat_id, 'category' );
+
+		$this->go_to( get_category_link( $this->cat_id ) );
+		$this->assertTrue( is_category() );
+		$this->assertSame( $layer, $this->get_active_ad_layer() );
+	}
+
+	public function test_active_layer_post_by_terms() {
+		$layer = $this->build_and_get_layer();
+		wp_set_object_terms( $layer, $this->cat_id, 'category' );
+
+		$this->go_to( get_permalink( $this->post_id ) );
+		$this->assertTrue( is_single() );
+		$this->assertSame( $layer, $this->get_active_ad_layer() );
 	}
 }
