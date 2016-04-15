@@ -263,4 +263,19 @@ class Ad_Layers_Active_Layer_Tests extends Ad_Layers_UnitTestCase {
 		$this->assertTrue( is_single() );
 		$this->assertSame( $layer, $this->get_active_ad_layer() );
 	}
+
+	public function test_active_layer_post_with_layer_override() {
+		$layer_override = $this->build_and_get_layer( array( 'page_type' => 'search' ) );
+		$layer_natural = $this->build_and_get_layer( array( 'page_type' => 'post' ) );
+
+		// verify that without an override, the post matches $layer_natural
+		$this->go_to( get_permalink( $this->post_id ) );
+		$this->assertTrue( is_single() );
+		$this->assertSame( $layer_natural, $this->get_active_ad_layer() );
+		$this->assertNotSame( $layer_override, $this->get_active_ad_layer() );
+
+		// now use the post meta to override the natural match
+		add_post_meta( $this->post_id, 'ad_layer', $layer_override );
+		$this->assertSame( $layer_override, $this->get_active_ad_layer() );
+	}
 }
