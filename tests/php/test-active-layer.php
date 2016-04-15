@@ -82,6 +82,50 @@ class Ad_Layers_Active_Layer_Tests extends Ad_Layers_UnitTestCase {
 		$this->assertSame( $layer, $this->get_active_ad_layer() );
 	}
 
+	public function test_active_layer_filter_override() {
+		$layer_override = $this->build_and_get_layer( array( 'page_type' => 'author' ) );
+		$layer_natural = $this->build_and_get_layer( array( 'page_type' => 'post' ) );
+
+		// verify that without an override, the post matches $layer_natural
+		$this->go_to( get_permalink( $this->post_id ) );
+		$this->assertTrue( is_single() );
+		$this->assertSame( $layer_natural, $this->get_active_ad_layer() );
+		$this->assertNotSame( $layer_override, $this->get_active_ad_layer() );
+
+		// now use the filter to override the natural match
+		add_filter( 'ad_layers_active_ad_layer', function() use ( $layer_override ) {
+			return array(
+				'post_id' => $layer_override,
+				'title' => get_the_title( $layer_override ),
+			);
+		} );
+		$this->assertSame( $layer_override, $this->get_active_ad_layer() );
+	}
+
+	public function test_active_layer_post_with_layer_override() {
+		$layer_override = $this->build_and_get_layer( array( 'page_type' => 'search' ) );
+		$layer_natural = $this->build_and_get_layer( array( 'page_type' => 'post' ) );
+
+		// verify that without an override, the post matches $layer_natural
+		$this->go_to( get_permalink( $this->post_id ) );
+		$this->assertTrue( is_single() );
+		$this->assertSame( $layer_natural, $this->get_active_ad_layer() );
+		$this->assertNotSame( $layer_override, $this->get_active_ad_layer() );
+
+		// now use the post meta to override the natural match
+		add_post_meta( $this->post_id, 'ad_layer', $layer_override );
+		$this->assertSame( $layer_override, $this->get_active_ad_layer() );
+	}
+
+	public function test_active_layer_post_by_terms() {
+		$layer = $this->build_and_get_layer();
+		wp_set_object_terms( $layer, $this->cat_id, 'category' );
+
+		$this->go_to( get_permalink( $this->post_id ) );
+		$this->assertTrue( is_single() );
+		$this->assertSame( $layer, $this->get_active_ad_layer() );
+	}
+
 	public function test_active_layer_single_page() {
 		$layer = $this->build_and_get_layer( array( 'page_types' => 'page' ) );
 
@@ -92,6 +136,23 @@ class Ad_Layers_Active_Layer_Tests extends Ad_Layers_UnitTestCase {
 
 	public function test_active_layer_category() {
 		$layer = $this->build_and_get_layer( array( 'page_types' => 'category' ) );
+
+		$this->go_to( get_category_link( $this->cat_id ) );
+		$this->assertTrue( is_category() );
+		$this->assertSame( $layer, $this->get_active_ad_layer() );
+	}
+
+	public function test_active_layer_taxonomies() {
+		$layer = $this->build_and_get_layer( array( 'taxonomies' => 'category' ) );
+
+		$this->go_to( get_category_link( $this->cat_id ) );
+		$this->assertTrue( is_category() );
+		$this->assertSame( $layer, $this->get_active_ad_layer() );
+	}
+
+	public function test_active_layer_terms() {
+		$layer = $this->build_and_get_layer();
+		wp_set_object_terms( $layer, $this->cat_id, 'category' );
 
 		$this->go_to( get_category_link( $this->cat_id ) );
 		$this->assertTrue( is_category() );
@@ -236,46 +297,5 @@ class Ad_Layers_Active_Layer_Tests extends Ad_Layers_UnitTestCase {
 		$this->go_to( get_post_type_archive_link( $post_type_2 ) );
 		$this->assertTrue( is_post_type_archive( $post_type_2 ) );
 		$this->assertSame( $layer_2, $this->get_active_ad_layer() );
-	}
-
-	public function test_active_layer_taxonomies() {
-		$layer = $this->build_and_get_layer( array( 'taxonomies' => 'category' ) );
-
-		$this->go_to( get_category_link( $this->cat_id ) );
-		$this->assertTrue( is_category() );
-		$this->assertSame( $layer, $this->get_active_ad_layer() );
-	}
-
-	public function test_active_layer_terms() {
-		$layer = $this->build_and_get_layer();
-		wp_set_object_terms( $layer, $this->cat_id, 'category' );
-
-		$this->go_to( get_category_link( $this->cat_id ) );
-		$this->assertTrue( is_category() );
-		$this->assertSame( $layer, $this->get_active_ad_layer() );
-	}
-
-	public function test_active_layer_post_by_terms() {
-		$layer = $this->build_and_get_layer();
-		wp_set_object_terms( $layer, $this->cat_id, 'category' );
-
-		$this->go_to( get_permalink( $this->post_id ) );
-		$this->assertTrue( is_single() );
-		$this->assertSame( $layer, $this->get_active_ad_layer() );
-	}
-
-	public function test_active_layer_post_with_layer_override() {
-		$layer_override = $this->build_and_get_layer( array( 'page_type' => 'search' ) );
-		$layer_natural = $this->build_and_get_layer( array( 'page_type' => 'post' ) );
-
-		// verify that without an override, the post matches $layer_natural
-		$this->go_to( get_permalink( $this->post_id ) );
-		$this->assertTrue( is_single() );
-		$this->assertSame( $layer_natural, $this->get_active_ad_layer() );
-		$this->assertNotSame( $layer_override, $this->get_active_ad_layer() );
-
-		// now use the post meta to override the natural match
-		add_post_meta( $this->post_id, 'ad_layer', $layer_override );
-		$this->assertSame( $layer_override, $this->get_active_ad_layer() );
 	}
 }
