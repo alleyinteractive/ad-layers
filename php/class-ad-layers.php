@@ -281,6 +281,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					} else {
 						// if there is no taxonomy data, this is a page type match
 						$this->ad_layer = $ad_layer;
+						break;
 					}
 				} else if ( is_post_type_archive()
 					&& empty( $taxonomies )
@@ -289,7 +290,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 						( ! empty( $post_types ) && in_array( $queried_object->name, $post_types ) )
 						|| empty( $post_types )
 					)
-					&& ( empty( $page_types ) || in_array( $queried_object->name, $page_types ) ) ) {
+					&& ( empty( $page_types ) || in_array( 'archive::' . $queried_object->name, $page_types ) ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
 				} else if ( is_author()
