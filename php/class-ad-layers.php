@@ -262,7 +262,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					&& ( empty( $page_types ) || in_array( 'home', $page_types ) ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
-				} else if ( ( is_tax() || is_category() || is_tag() )
+				} elseif ( ( is_tax() || is_category() || is_tag() )
 					&& empty( $post_types )
 					&& ( empty( $page_types ) || in_array( $queried_object->taxonomy, $page_types ) ) ) {
 
@@ -283,7 +283,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 						$this->ad_layer = $ad_layer;
 						break;
 					}
-				} else if ( is_post_type_archive()
+				} elseif ( is_post_type_archive()
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
 					&& (
@@ -293,32 +293,32 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					&& ( empty( $page_types ) || in_array( 'archive::' . $queried_object->name, $page_types ) ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
-				} else if ( is_author()
+				} elseif ( is_author()
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
 					&& empty( $post_types )
-					&& ( empty( $page_types ) || in_array( 'author', $page_types ) ) ) {
+					&& in_array( 'author', $page_types ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
-				} else if ( is_date()
+				} elseif ( is_date()
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
 					&& empty( $post_types )
-					&& ( empty( $page_types ) || in_array( 'date', $page_types ) ) ) {
+					&& in_array( 'date', $page_types ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
-				} else if ( is_404()
+				} elseif ( is_404()
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
 					&& empty( $post_types )
-					&& ( empty( $page_types ) || in_array( 'notfound', $page_types ) ) ) {
+					&& in_array( 'notfound', $page_types ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
-				} else if ( is_search()
+				} elseif ( is_search()
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
 					&& empty( $post_types )
-					&& ( empty( $page_types ) || in_array( 'search', $page_types ) ) ) {
+					&& in_array( 'search', $page_types ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
 				}
