@@ -219,7 +219,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 
 				if ( is_singular() ) {
 					// See if a specific ad layer is set
-					$ad_layer_id = get_post_meta( get_the_ID(), 'ad_layer', true );
+					$ad_layer_id = intval( get_post_meta( get_the_ID(), 'ad_layer', true ) );
 					if ( ! empty( $ad_layer_id ) ) {
 						$this->ad_layer = array(
 							'post_id' => $ad_layer_id,
