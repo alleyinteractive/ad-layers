@@ -396,15 +396,11 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					( function_exists( 'is_' . $key ) && true === call_user_func( 'is_' . $key ) )
 					|| ( 'post_tag' == $key && is_tag() )
 					|| ( 'notfound' == $key && is_404() )
-					|| ( 'archive::' == substr( $key, 0, 9 ) && is_post_type_archive( substr( $key, 9 ) ) )
+					|| ( 'archive::' === substr( $key, 0, 9 ) && is_post_type_archive( substr( $key, 9 ) ) )
 					|| ( post_type_exists( $key ) && is_singular( $key ) )
 					|| ( taxonomy_exists( $key ) && is_tax( $key ) )
 				) {
 					$page_type = $key;
-				}
-
-				// The page type was found
-				if ( ! empty( $page_type ) ) {
 					break;
 				}
 			}
