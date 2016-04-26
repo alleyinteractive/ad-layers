@@ -422,7 +422,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 		/**
 		 * Finds and removes orphaned Ad Layers prior to the ad_layers WP option
 		 * being updated in the database.
-		 * 
+		 *
 		 * @access public
 		 * @param array $ad_layers
 		 * @return array
