@@ -3,7 +3,7 @@
  * Ad Layers Base Plugin File.
  *
  * @package AdLayers
- * @version 0.0.1
+ * @version 0.1
  */
 
 /*
@@ -11,7 +11,7 @@
 	Plugin URI: https://github.com/alleyinteractive/ad-layers
 	Description: Manages custom ad layers.
 	Author: Bradford Campeau-Laurion, Matthew Boynes, Alley Interactive
-	Version: 0.0.1
+	Version: 0.1
 	Author URI: http://www.alleyinteractive.com/
 */
 
@@ -36,7 +36,7 @@
  *
  * @var string
  */
-define( 'AD_LAYERS_VERSION', '0.0.2' );
+define( 'AD_LAYERS_VERSION', '0.1' );
 
 /**
  * Filesystem path to Ad Layers.
