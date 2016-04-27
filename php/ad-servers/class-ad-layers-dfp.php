@@ -124,6 +124,13 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		public $do_not_render_ads = array();
 
 		/**
+		 * List of ads for which to skip rendering.
+		 *
+		 * @var array
+		 */
+		public $ad_unit_paths = array();
+
+		/**
 		 * Setup the singleton.
 		 */
 		public function setup() {
@@ -138,6 +145,9 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 
 			// Handle caching
 			add_action( 'update_option', array( $this, 'cache_settings' ), 10, 3 );
+
+			// Add the path override field to the ad layer ad units
+			add_filter( 'ad_layers_ad_units_field_args', array( $this, 'ad_layer_path_overrides' ) );
 		}
 
 		/**
@@ -287,9 +297,8 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				'label_macro' => array( __( 'Ad Unit: %s', 'ad-layers' ), 'code' ),
 				'add_more_label' => __( 'Add Ad Unit', 'ad-layers' ),
 				'children' => array(
-					'code' => new Fieldmanager_Textfield( array(
-						'label' => __( 'Code', 'ad-layers' ),
-					) ),
+					'code' => new Fieldmanager_Textfield( __( 'Code', 'ad-layers' ) ),
+					'path_override' => new Fieldmanager_TextField( __( 'Custom Path Template', 'ad-layers' ) ),
 					'sizes' => new Fieldmanager_Group( array(
 						'limit' => 0,
 						'extra_elements' => 0,
@@ -416,6 +425,11 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			return $args;
+		}
+
+		public function ad_layer_path_overrides( $ad_unit_args ) {
+			$ad_unit_args['children']['path_override'] = new Fieldmanager_TextField( __( 'Custom Path Template', 'ad-layers' ) );
+			return $ad_unit_args;
 		}
 
 		/**
@@ -573,7 +587,14 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		 * @param  int $ad_layer_id ad-layer post ID.
 		 * @return array
 		 */
-		protected function get_ad_units_for_layer( $ad_layer_id ) {
+		public function get_ad_units_for_layer( $ad_layer_id ) {
+			$global_ad_units = $this->get_setting( 'ad_units' );
+			foreach ( $global_ad_units as $global_ad_unit ) {
+				if ( ! empty( $global_ad_unit['code'] ) && ! empty( $global_ad_unit['path_override'] ) ) {
+					$global_path_overrides[ $global_ad_unit['code'] ] = $global_ad_unit['path_override'];
+				}
+			}
+
 			$this->ad_units = array();
 			$temp_ad_units = get_post_meta( $ad_layer_id, 'ad_layer_ad_units', true );
 			if ( ! empty( $temp_ad_units ) ) {
@@ -585,6 +606,11 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 						$this->ad_units[ $ad_unit['ad_unit'] ] = $ad_unit['custom_targeting'];
 						if ( ! empty( $ad_unit['do_not_render'] ) ) {
 							$this->do_not_render_ads[ $ad_unit['ad_unit'] ] = true;
+						}
+						if ( ! empty( $ad_unit['path_override'] ) ) {
+							$this->ad_unit_paths[ $ad_unit['ad_unit'] ] = $ad_unit['path_override'];
+						} elseif ( ! empty( $global_path_overrides[ $ad_unit['ad_unit'] ] ) ) {
+							$this->ad_unit_paths[ $ad_unit['ad_unit'] ] = $global_path_overrides[ $ad_unit['ad_unit'] ];
 						}
 					}
 				}
@@ -842,84 +868,90 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			$domain = $this->get_domain();
 			$path = '/' . $account_id . '/' . $domain;
 
-			// Get all available path templates
-			$path_templates = $this->get_setting( 'path_templates' );
-			if ( ! empty( $path_templates ) ) {
-				// Re-sort by page type
-				$path_templates_by_page_type = wp_list_pluck( $path_templates, 'path_template', 'page_type' );
+			if ( ! empty( $ad_unit ) && ! empty( $this->ad_unit_paths[ $ad_unit ] ) ) {
+				$path_template = $this->ad_unit_paths[ $ad_unit ];
+			} else {
+				// Get all available path templates
+				$path_templates = $this->get_setting( 'path_templates' );
+				if ( ! empty( $path_templates ) ) {
+					// Re-sort by page type
+					$path_templates_by_page_type = wp_list_pluck( $path_templates, 'path_template', 'page_type' );
 
-				// If we have a match, use that template
-				if ( ! empty( $path_templates_by_page_type[ $page_type ] ) ) {
-					$path_template = $path_templates_by_page_type[ $page_type ];
+					// If we have a match, use that template
+					if ( ! empty( $path_templates_by_page_type[ $page_type ] ) ) {
+						$path_template = $path_templates_by_page_type[ $page_type ];
+					}
+				}
+			}
 
-					// Handle any formatting tags
-					preg_match_all( apply_filters( 'ad_layers_dfp_formatting_tag_pattern', $this->formatting_tag_pattern ), $path_template, $matches );
-					if ( ! empty( $matches[0] ) ) {
-						// Build a list of found tags for replacement
-						$replacements = array();
-						$unique_matches = array_unique( $matches[0] );
+			if ( ! empty( $path_template ) ) {
+				// Handle any formatting tags
+				preg_match_all( apply_filters( 'ad_layers_dfp_formatting_tag_pattern', $this->formatting_tag_pattern ), $path_template, $matches );
+				if ( ! empty( $matches[0] ) ) {
+					// Build a list of found tags for replacement
+					$replacements = array();
+					$unique_matches = array_unique( $matches[0] );
 
-						// Iterate over and replace each
-						foreach ( $this->formatting_tags as $tag => $description ) {
-							if ( in_array( $tag, $unique_matches ) ) {
-								$value = null;
+					// Iterate over and replace each
+					foreach ( $this->formatting_tags as $tag => $description ) {
+						if ( in_array( $tag, $unique_matches ) ) {
+							$value = null;
 
-								// Handle built-in formatting tags
-								switch ( $tag ) {
-									case '#account_id#':
-										$value = $account_id;
-										break;
-									case '#domain#':
-										$value = $domain;
-										break;
-									case '#ad_unit#':
-										$value = $ad_unit;
-										break;
-									case '#post_type#':
-										if ( is_post_type_archive() ) {
-											$value = get_queried_object()->name;
+							// Handle built-in formatting tags
+							switch ( $tag ) {
+								case '#account_id#':
+									$value = $account_id;
+									break;
+								case '#domain#':
+									$value = $domain;
+									break;
+								case '#ad_unit#':
+									$value = $ad_unit;
+									break;
+								case '#post_type#':
+									if ( is_post_type_archive() ) {
+										$value = get_queried_object()->name;
+									} else if ( is_singular() ) {
+										$value = get_post_type();
+									}
+									break;
+								default:
+									// This is one of the available taxonomy tags if it's not custom
+									// which would be handled later by the filter.
+									$taxonomy = str_replace( '#', '', $tag );
+									if ( taxonomy_exists( $taxonomy ) ) {
+										if ( is_tax() || is_category() || is_tag() ) {
+											$value = $this->get_term_path( get_queried_object()->term_id, $taxonomy );
 										} else if ( is_singular() ) {
-											$value = get_post_type();
-										}
-										break;
-									default:
-										// This is one of the available taxonomy tags if it's not custom
-										// which would be handled later by the filter.
-										$taxonomy = str_replace( '#', '', $tag );
-										if ( taxonomy_exists( $taxonomy ) ) {
-											if ( is_tax() || is_category() || is_tag() ) {
-												$value = $this->get_term_path( get_queried_object()->term_id, $taxonomy );
-											} else if ( is_singular() ) {
-												$terms = get_the_terms( get_the_ID(), $taxonomy );
-												if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
-													$term = array_shift( $terms );
-													$value = $this->get_term_path( $term->term_id, $taxonomy );
-												}
-											}
-
-											// If nothing was found, strip this off the path
-											if ( null === $value ) {
-												$value = '';
+											$terms = get_the_terms( get_the_ID(), $taxonomy );
+											if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+												$term = array_shift( $terms );
+												$value = $this->get_term_path( $term->term_id, $taxonomy );
 											}
 										}
-										break;
-								}
 
-								// Always allow filtering of the value for custom formatting tags
-								$value = apply_filters( 'ad_layers_dfp_formatting_tag_value', $value, $tag, $page_type, $ad_unit );
+										// If nothing was found, strip this off the path
+										if ( null === $value ) {
+											$value = '';
+										}
+									}
+									break;
+							}
 
-								// If a value was found, we'll replace it.
-								// Otherwise, the "match" will be ignored.
-								if ( null !== $value ) {
-									$replacements[ $tag ] = $value;
-								}
+							// Always allow filtering of the value for custom formatting tags
+							$value = apply_filters( 'ad_layers_dfp_formatting_tag_value', $value, $tag, $page_type, $ad_unit );
+
+							// If a value was found, we'll replace it.
+							// Otherwise, the "match" will be ignored.
+							if ( null !== $value ) {
+								$replacements[ $tag ] = $value;
 							}
 						}
+					}
 
-						// Do the replacements and create the final path
-						if ( ! empty( $replacements ) ) {
-							$path = str_replace( array_keys( $replacements ), array_values( $replacements ), $path_template );
-						}
+					// Do the replacements and create the final path
+					if ( ! empty( $replacements ) ) {
+						$path = str_replace( array_keys( $replacements ), array_values( $replacements ), $path_template );
 					}
 				}
 			}
@@ -928,7 +960,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			// This would possibly mean a term was stripped that wasn't matched.
 			$path = untrailingslashit( $path );
 
-			return apply_filters( 'ad_layers_dfp_path', $path, $page_type );
+			return apply_filters( 'ad_layers_dfp_path', $path, $page_type, $ad_unit );
 		}
 
 		/**

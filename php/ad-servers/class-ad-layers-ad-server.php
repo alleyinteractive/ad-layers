@@ -172,6 +172,16 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 		}
 
 		/**
+		 * Get the current ad server.
+		 *
+		 * @access public
+		 * @return Ad_Layers_Ad_Server
+		 */
+		public function get_ad_server() {
+			return $this->ad_server;
+		}
+
+		/**
 		 * Get current available ad servers for use in an option list.
 		 *
 		 * @access public
