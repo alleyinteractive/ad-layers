@@ -6,7 +6,7 @@ class Ad_Layers_Page_Types_Tests extends Ad_Layers_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		register_taxonomy( 'test-taxonomy', 'post', array( 'label' => rand_str() ) );
+		register_taxonomy( 'test-taxonomy', 'post' );
 
 		$this->editor_id = $this->factory->user->create( array( 'role' => 'editor' ) );
 
@@ -110,7 +110,7 @@ class Ad_Layers_Page_Types_Tests extends Ad_Layers_UnitTestCase {
 	public function test_cpt_without_archive_page_type() {
 		$post_type = rand_str( 20 );
 		register_post_type( $post_type, array( 'public' => true ) );
-		$cpt_id = $this->factory->post->create( array( 'post_title' => 'hello-cpt', 'post_type' => $post_type, 'label' => rand_str() ) );
+		$cpt_id = $this->factory->post->create( array( 'post_title' => 'hello-cpt', 'post_type' => $post_type ) );
 		Ad_Layers::instance()->page_types = null;
 
 		$this->go_to( get_permalink( $cpt_id ) );
@@ -121,7 +121,7 @@ class Ad_Layers_Page_Types_Tests extends Ad_Layers_UnitTestCase {
 	public function test_cpt_with_archive_page_types() {
 		$post_type = rand_str( 20 );
 		register_post_type( $post_type, array( 'public' => true, 'has_archive' => true ) );
-		$cpt_id = $this->factory->post->create( array( 'post_title' => 'hello-cpt', 'post_type' => $post_type, 'label' => rand_str() ) );
+		$cpt_id = $this->factory->post->create( array( 'post_title' => 'hello-cpt', 'post_type' => $post_type ) );
 		Ad_Layers::instance()->page_types = null;
 
 		// Singular view
@@ -132,7 +132,6 @@ class Ad_Layers_Page_Types_Tests extends Ad_Layers_UnitTestCase {
 		// Archive view
 		$this->go_to( get_post_type_archive_link( $post_type ) );
 		$this->assertTrue( is_post_type_archive( $post_type ) );
-		// commented due to https://github.com/alleyinteractive/ad-layers/issues/42
-		// $this->assertSame( $post_type, Ad_Layers::instance()->get_current_page_type() );
+		$this->assertSame( 'archive::' . $post_type, Ad_Layers::instance()->get_current_page_type() );
 	}
 }
