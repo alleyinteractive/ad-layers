@@ -472,7 +472,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					$sizes = array();
 					foreach ( $ad_unit['sizes'] as $size ) {
 						// If no width or height is set, assume we added an empty size to hide the ad.
-						$unit_size = [];
+						$unit_size = array();
 						// Set the width.
 						if ( isset( $size['width'] ) ) {
 							$unit_size[] = absint($size['width']);
