@@ -770,7 +770,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 								$value = array();
 							}
 							$targeting_value = $value;
-						} else if ( is_tax() ) {
+						} else if ( is_tax() || is_category() || is_tag() ) {
 							$targeting_value = $queried_object->slug;
 						}
 					}
