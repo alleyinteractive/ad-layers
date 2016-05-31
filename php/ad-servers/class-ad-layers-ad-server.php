@@ -221,9 +221,9 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 		 *
 		 * @access public
 		 */
-		public function get_ad_unit( $ad_unit ) {
+		public function get_ad_unit( $ad_unit, $echo = true ) {
 			if ( ! empty( $this->ad_server ) ) {
-				$this->ad_server->get_ad_unit( $ad_unit );
+				$this->ad_server->get_ad_unit( $ad_unit, $echo );
 			}
 		}
 
