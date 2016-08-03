@@ -25,6 +25,9 @@ tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
 require $_tests_dir . '/includes/bootstrap.php';
 
+// Load a custom UnitTestCase for this plugin
+require dirname( __FILE__ ) . '/class-ad-layers-unit-test-case.php';
+
 /**
  * Is the current version of WordPress at least ... ?
  *

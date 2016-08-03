@@ -172,6 +172,16 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 		}
 
 		/**
+		 * Get the current ad server.
+		 *
+		 * @access public
+		 * @return Ad_Layers_Ad_Server
+		 */
+		public function get_ad_server() {
+			return $this->ad_server;
+		}
+
+		/**
 		 * Get current available ad servers for use in an option list.
 		 *
 		 * @access public
@@ -211,9 +221,9 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 		 *
 		 * @access public
 		 */
-		public function get_ad_unit( $ad_unit ) {
+		public function get_ad_unit( $ad_unit, $echo = true ) {
 			if ( ! empty( $this->ad_server ) ) {
-				$this->ad_server->get_ad_unit( $ad_unit );
+				return $this->ad_server->get_ad_unit( $ad_unit, $echo );
 			}
 		}
 

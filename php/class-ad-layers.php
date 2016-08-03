@@ -222,7 +222,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 
 				if ( is_singular() ) {
 					// See if a specific ad layer is set
-					$ad_layer_id = get_post_meta( get_the_ID(), 'ad_layer', true );
+					$ad_layer_id = intval( get_post_meta( get_the_ID(), 'ad_layer', true ) );
 					if ( ! empty( $ad_layer_id ) ) {
 						$this->ad_layer = array(
 							'post_id' => $ad_layer_id,
@@ -265,7 +265,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					&& ( empty( $page_types ) || in_array( 'home', $page_types ) ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
-				} else if ( ( is_tax() || is_category() || is_tag() )
+				} elseif ( ( is_tax() || is_category() || is_tag() )
 					&& empty( $post_types )
 					&& ( empty( $page_types ) || in_array( $queried_object->taxonomy, $page_types ) ) ) {
 
@@ -284,43 +284,44 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					} else {
 						// if there is no taxonomy data, this is a page type match
 						$this->ad_layer = $ad_layer;
+						break;
 					}
-				} else if ( is_post_type_archive()
+				} elseif ( is_post_type_archive()
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
 					&& (
 						( ! empty( $post_types ) && in_array( $queried_object->name, $post_types ) )
 						|| empty( $post_types )
 					)
-					&& ( empty( $page_types ) || in_array( $queried_object->name, $page_types ) ) ) {
+					&& ( empty( $page_types ) || in_array( 'archive::' . $queried_object->name, $page_types ) ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
-				} else if ( is_author()
+				} elseif ( is_author()
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
 					&& empty( $post_types )
-					&& ( empty( $page_types ) || in_array( 'author', $page_types ) ) ) {
+					&& in_array( 'author', $page_types ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
-				} else if ( is_date()
+				} elseif ( is_date()
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
 					&& empty( $post_types )
-					&& ( empty( $page_types ) || in_array( 'date', $page_types ) ) ) {
+					&& in_array( 'date', $page_types ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
-				} else if ( is_404()
+				} elseif ( is_404()
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
 					&& empty( $post_types )
-					&& ( empty( $page_types ) || in_array( 'notfound', $page_types ) ) ) {
+					&& in_array( 'notfound', $page_types ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
-				} else if ( is_search()
+				} elseif ( is_search()
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
 					&& empty( $post_types )
-					&& ( empty( $page_types ) || in_array( 'search', $page_types ) ) ) {
+					&& in_array( 'search', $page_types ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
 				}
@@ -356,7 +357,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 				$archived_post_types = apply_filters( 'ad_layers_ad_server_archived_post_types', wp_list_filter( get_post_types( array( 'has_archive' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
 				if ( ! empty( $archived_post_types ) ) {
 					foreach ( $archived_post_types as $post_type ) {
-						$page_types[ $post_type->name ] = $post_type->label . __( ' Archive', 'ad-layers' );
+						$page_types[ 'archive::' . $post_type->name ] = $post_type->label . __( ' Archive', 'ad-layers' );
 					}
 				}
 
@@ -399,14 +400,11 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					( function_exists( 'is_' . $key ) && true === call_user_func( 'is_' . $key ) )
 					|| ( 'post_tag' == $key && is_tag() )
 					|| ( 'notfound' == $key && is_404() )
+					|| ( 'archive::' === substr( $key, 0, 9 ) && is_post_type_archive( substr( $key, 9 ) ) )
 					|| ( post_type_exists( $key ) && is_singular( $key ) )
 					|| ( taxonomy_exists( $key ) && is_tax( $key ) )
 				) {
 					$page_type = $key;
-				}
-
-				// The page type was found
-				if ( ! empty( $page_type ) ) {
 					break;
 				}
 			}
