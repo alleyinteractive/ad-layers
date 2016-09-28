@@ -213,6 +213,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			do_action( 'ad_layers_dfp_before_setup' ); ?>
+        <?php if ( apply_filters( 'ad_layers_dfp_output_default_gpt_library_script', true, $this ) ) : ?>
 			<script async='async' src='https://www.googletagservices.com/tag/js/gpt.js'></script>
 			<script>
 			  var googletag = googletag || {};
