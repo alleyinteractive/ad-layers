@@ -48,6 +48,14 @@ if ( ! class_exists( 'Ad_Layers_Meta_Boxes' ) ) :
 			foreach ( $this->post_types as $post_type ) {
 				add_action( 'fm_post_' . $post_type, array( $this, 'add_meta_boxes' ) );
 			}
+
+			// Set terms used by ad layers
+			$this->terms = apply_filters( 'ad_layers_taxonomies', $this->terms );
+
+			// Add the custom meta boxes used for ad layers on terms
+			foreach ( $this->terms as $term ) {
+				add_action( 'fm_term_' . $term, array( $this, 'add_term_meta_boxes' ) );
+			}
 		}
 
 		/**
@@ -73,6 +81,31 @@ if ( ! class_exists( 'Ad_Layers_Meta_Boxes' ) ) :
 				)
 			);
 			$fm_ad_layer->add_meta_box( __( 'Ad Layer', 'ad-layers' ), $post_type, 'side', 'core' );
+		}
+
+		/**
+		 * Adds the meta boxes required to manage ad layers on terms.
+		 * @access public
+		 */
+		public function add_term_meta_boxes() {
+			// Get the term name
+			$term = str_replace( 'fm_term_', '', current_filter() );
+
+			// Add ad units
+			$fm_ad_layer = new Fieldmanager_Autocomplete(
+				array(
+					'name' => 'ad_layer',
+					'description' => __( 'Select a specific custom ad layer to use with this term.', 'ad-layers' ),
+					'datasource' => new Fieldmanager_Datasource_Post( array(
+						'query_args' => array(
+							'post_type' => array( Ad_Layers_Post_Type::instance()->get_post_type() ),
+							'post_status' => 'publish',
+							'order_by' => 'title',
+						),
+					) ),
+				)
+			);
+			$fm_ad_layer->add_term_meta_box( __( 'Ad Layer', 'ad-layers' ), $term );
 		}
 	}
 
