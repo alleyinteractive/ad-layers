@@ -20,6 +20,13 @@ if ( ! class_exists( 'Ad_Layers_Meta_Boxes' ) ) :
 		public $post_types = array( 'post' );
 
 		/**
+		 * Terms used by ad layers
+		 *
+		 * @var string
+		 */
+		public $terms = array();
+
+		/**
 		 * Capability required to assign ads to posts.
 		 *
 		 * @var string
