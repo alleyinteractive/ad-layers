@@ -57,7 +57,7 @@ if ( ! class_exists( 'Ad_Layers_Meta_Boxes' ) ) :
 			}
 
 			// Set terms used by ad layers
-			$this->terms = apply_filters( 'ad_layers_taxonomies', $this->terms );
+			$this->terms = apply_filters( 'ad_layers_taxonomy_types', $this->terms );
 
 			// Add the custom meta boxes used for ad layers on terms
 			foreach ( $this->terms as $term ) {
