@@ -225,7 +225,7 @@ ad_layers_dfp_custom_targeting_field_args
 
 ad_layers_post_types
 
-ad_layers_taxonomies
+ad_layers_taxonomy_types
 
 *Ad_Layers_Post_Type*
 
