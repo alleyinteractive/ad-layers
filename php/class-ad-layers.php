@@ -276,7 +276,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 						);
 						break;
 					}
-					
+
 					// Check if there is taxonomy data
 					if ( ! empty( $taxonomy_terms ) ) {
 						// Check if this taxonomy matches
