@@ -298,4 +298,20 @@ class Ad_Layers_Active_Layer_Tests extends Ad_Layers_UnitTestCase {
 		$this->assertTrue( is_post_type_archive( $post_type_2 ) );
 		$this->assertSame( $layer_2, $this->get_active_ad_layer() );
 	}
+	
+	public function test_active_layer_term_override() {
+		$layer_override = $this->build_and_get_layer( array( 'page_types' => 'test-taxonomy' ) );
+		$layer = $this->build_and_get_layer( array( 'page_types' => 'post_tag' ) );
+
+		$this->go_to( get_tag_link( $this->tag_id ) );
+		$this->assertTrue( is_tag() );
+
+		// the tag level ad-layer reflects here as active ad-layer.
+		$this->assertSame( $layer, $this->get_active_ad_layer() );
+
+		// After adding ad_layer to the term, the ad_layer for that term overrides the tag level ad-layer.
+		add_term_meta( $this->tag_id, 'ad_layer', $layer_override );
+		$this->assertNotSame( $layer, $this->get_active_ad_layer() );
+		$this->assertSame( $layer_override, $this->get_active_ad_layer() );
+	}
 }
