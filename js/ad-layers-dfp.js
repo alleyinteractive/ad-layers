@@ -24,7 +24,7 @@
 		}
 	}
 
-	AdLayersDFPAPI.prototype.buildAd = function( slotName, path, sizes, targets, sizeMapping ) {
+	AdLayersDFPAPI.prototype.buildAd = function( slotName, path, sizes, targets, sizeMapping, callback ) {
 		if ( AdLayersAPI.isDebug() ) {
 			var adSizes = [];
 
@@ -70,11 +70,25 @@
 					dfpAdUnits[ slotName ].defineSizeMapping( sizeMapping );
 				}
 				dfpAdUnits[ slotName ].addService( googletag.pubads() );
+
+				if ( callback ) {
+					callback( dfpAdUnits[ slotName ] );
+				}
+
 				googletag.display( divId );
 			} );
 		}
 	};
 
+	/*
+	 * Lazy Load Ad
+	 * Tries to assemble the necessary args to define a DFP ad.
+	 * Allows for an additional callback to add functionality.
+	 * A simple use case for the callback would be to set additional targeting to the defined slot.
+	 *
+	 * @param {object} args Arguments for loading an ad slot.
+	 * @return {bool|function} bool|AdLayersDFPAPI.buildAd
+	 */
 	AdLayersDFPAPI.prototype.lazyLoadAd = function( args ) {
 		if ( ! args.slotName ) {
 			return;
@@ -101,7 +115,12 @@
 				}
 			}
 		}
-		return this.buildAd( args.slotName, args.path, args.sizes, args.targeting, args.sizeMapping );
+
+		if ( ! args.callback || 'function' !== typeof args.callback ) {
+			args.callback = '';
+		}
+
+		return this.buildAd( args.slotName, args.path, args.sizes, args.targeting, args.sizeMapping, args.callback );
 	};
 
 
