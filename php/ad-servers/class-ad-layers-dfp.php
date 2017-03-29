@@ -344,7 +344,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 								'label' => __( 'Page Type', 'ad-layers' ),
 								'options' => array_merge(
 									array(
-										'all' => __( 'All Pages', 'ad-layers' )
+										'all' => __( 'All Pages', 'ad-layers' ),
 									),
 									Ad_Layers::instance()->get_page_types()
 								),
