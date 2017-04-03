@@ -765,6 +765,11 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 						$targeting_value = $queried_object->name;
 					}
 					break;
+				case 'post_id':
+					if ( is_singular() ) {
+						$targeting_value = (string) get_the_ID();
+					}
+					break;
 				default:
 					if ( taxonomy_exists( $source ) ) {
 						if ( is_singular() ) {

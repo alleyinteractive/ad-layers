@@ -403,6 +403,7 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 			// Add additional options
 			$options = array_merge( $options, array(
 				'post_type' => __( 'Post Type', 'ad-layers' ),
+				'post_id' => __( 'Post ID', 'ad-layers' ),
 				'author' => __( 'Author', 'ad-layers' ),
 				'other' => __( 'Other', 'ad-layers' ),
 			) );

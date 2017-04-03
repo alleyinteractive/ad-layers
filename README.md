@@ -36,6 +36,7 @@ All taxonomies that are associated with Ad Layers (category and post_tag by defa
 Click "Add custom targeting" to choose one or more DFP custom targeting variables to add to the DFP request produced by this ad layer. The value can be:
 - The term(s) associated with the page. This will only be populated on taxonomy archives or single posts. The taxonomies associated with Ad Layers are available for selection.
 - The post type of the page. This will only be populated on post type archives or single posts.
+- The post id of the post or page. This will only be populated on single posts and pages.
 - The author. This will only be populated on author archives or single posts.
 - Other. This can be any free-form text value and will be static anywhere the ad layer is displayed.
 
