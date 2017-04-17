@@ -476,21 +476,36 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					// Set the sizes
 					$sizes = array();
 					foreach ( $ad_unit['sizes'] as $size ) {
-						if ( ! empty( $size['width'] ) && ! empty( $size['height'] ) ) {
-							$sizes[] = array( absint( $size['width'] ), absint( $size['height'] ) );
-
-							// If this is the default size, save it.
-							// If more than one size is accidentally marked as default, the last one will be used.
-							if ( ! empty( $size['default_size'] ) && 'default' == $size['default_size'] ) {
-								$this->default_by_unit[ $ad_unit['code'] ] = array( absint( $size['width'] ), absint( $size['height'] ) );
-							}
-
-							// If this is an oop unit, note it.
-							// If more than one size is accidentally marked as default, the last one will be used.
-							if ( ! empty( $size['out_of_page'] ) && 'oop' == $size['out_of_page'] ) {
-								$this->oop_units[] = $ad_unit['code'];
-							}
+						// If no width or height is set, assume we added an empty size to hide the ad.
+						$unit_size = array();
+						// Set the width.
+						if ( isset( $size['width'] ) ) {
+							$unit_size[] = absint($size['width']);
 						}
+						else {
+							$unit_size[] = 0;
+						}
+						// Set the height.
+						if ( isset( $size['height'] ) ) {
+							$unit_size[] = absint($size['height']);
+						}
+						else {
+							$unit_size[] = 0;
+						}
+						$sizes[] = $unit_size;
+
+						// If this is the default size, save it.
+						// If more than one size is accidentally marked as default, the last one will be used.
+						if ( ! empty( $size['default_size'] ) && 'default' == $size['default_size'] ) {
+							$this->default_by_unit[ $ad_unit['code'] ] = array( absint( $size['width'] ), absint( $size['height'] ) );
+						}
+
+						// If this is an oop unit, note it.
+						// If more than one size is accidentally marked as default, the last one will be used.
+						if ( ! empty( $size['out_of_page'] ) && 'oop' == $size['out_of_page'] ) {
+							$this->oop_units[] = $ad_unit['code'];
+						}
+
 					}
 					$sizes = apply_filters( 'ad_layers_dfp_ad_unit_sizes', $sizes, $ad_unit, $breakpoint );
 
