@@ -213,22 +213,12 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			do_action( 'ad_layers_dfp_before_setup' ); ?>
-			<?php if ( apply_filters( 'ad_layers_dfp_output_default_gpt_library_script', true, $this ) ) : ?>
-				<script type='text/javascript'>
-				var dfpAdUnits = {};
-				var googletag = googletag || {};
-				googletag.cmd = googletag.cmd || [];
-				(function() {
-				var gads = document.createElement('script');
-				gads.async = true;
-				gads.type = 'text/javascript';
-				var useSSL = 'https:' == document.location.protocol;
-				gads.src = (useSSL ? 'https:' : 'http:') +
-				'//www.googletagservices.com/tag/js/gpt.js';
-				var node = document.getElementsByTagName('script')[0];
-				node.parentNode.insertBefore(gads, node);
-				})();
-				</script>
+        <?php if ( apply_filters( 'ad_layers_dfp_output_default_gpt_library_script', true, $this ) ) : ?>
+			<script async='async' src='https://www.googletagservices.com/tag/js/gpt.js'></script>
+			<script>
+			  var googletag = googletag || {};
+			  googletag.cmd = googletag.cmd || [];
+			</script>
 			<?php endif; ?>
 			<?php do_action( 'ad_layers_dfp_after_setup' ); ?>
 			<script type="text/javascript">
