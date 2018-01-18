@@ -47,7 +47,8 @@ if ( ! class_exists( 'Ad_Layers_Widget' ) ) :
 			}
 
 			// Display the ad unit
-			echo wp_kses_post( $args['before_widget'] . $ad_unit_html . $args['after_widget'] );
+			// @todo Determine way to sanitize without stripping <script> tag.
+			echo $args['before_widget'] . $ad_unit_html . $args['after_widget'];
 		}
 
 		/**
