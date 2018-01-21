@@ -182,6 +182,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 
 			// If the ad layer is filtered for this page, skip the logic below
 			$ad_layer = apply_filters( 'ad_layers_active_ad_layer', array(), $queried_object );
+
 			if ( ! empty( $ad_layer ) ) {
 				$this->ad_layer = $ad_layer;
 				return;
@@ -272,6 +273,16 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 				} elseif ( ( is_tax() || is_category() || is_tag() )
 					&& empty( $post_types )
 					&& ( empty( $page_types ) || in_array( $queried_object->taxonomy, $page_types ) ) ) {
+
+					$ad_layer_id = intval( get_term_meta( get_queried_object()->term_id, 'ad_layer', true ) );
+
+					if ( ! empty( $ad_layer_id ) ) {
+						$this->ad_layer = array(
+							'post_id' => $ad_layer_id,
+							'title' => get_the_title( $ad_layer_id ),
+						);
+						break;
+					}
 
 					// Check if there is taxonomy data
 					if ( ! empty( $taxonomy_terms ) ) {
