@@ -153,7 +153,9 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 			wp_enqueue_script( $this->handle, AD_LAYERS_ASSETS_DIR . 'js/ad-layers.js', $dependencies, AD_LAYERS_GLOBAL_ASSET_VERSION, false );
 
 			// Load the CSS. Mostly used in debug mode.
-			wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
+			if ( false !== get_query_var( 'adlayers_debug' ) ) {
+				wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers.css', array(), AD_LAYERS_GLOBAL_ASSET_VERSION );
+			}
 
 			// Localize the base API with the class name
 			wp_localize_script( 'ad-layers', 'adLayersAdServer', array(
