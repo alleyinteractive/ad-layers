@@ -56,9 +56,20 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 			// Load current settings
 			$this->ad_layers = apply_filters( 'ad_layers', get_option( 'ad_layers' ) );
 			$this->custom_variables = apply_filters( 'ad_layers_custom_variables', get_option( 'ad_layers_custom_variables' ) );
-
+			add_filter( 'query_vars', array( $this, 'add_ad_layer_debug_query_var' ) );
 			// Set the active ad layer before anything else.
 			add_action( 'wp_head', array( $this, 'set_active_ad_layer' ), 1 );
+		}
+
+		/**
+		 * Add debug query var.
+		 *
+		 * @param array $query_vars Supported query ar.
+		 * @return array Filtered.
+		 */
+		public function add_ad_layer_debug_query_var( $query_vars ) {
+			$query_vars[] = 'adlayers_debug';
+			return $query_vars;
 		}
 
 		/**
