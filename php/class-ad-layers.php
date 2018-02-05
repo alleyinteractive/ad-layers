@@ -245,11 +245,14 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 						continue;
 					}
 
-					// Check taxonomies
+					// Check taxonomies.
+					$taxonomy_match = false;
 					if ( ! empty( $taxonomy_terms ) ) {
 						foreach ( $taxonomy_terms as $taxonomy => $terms ) {
 							if ( has_term( $terms, $taxonomy ) ) {
 								$taxonomy_match = true;
+							} else {
+								$taxonomy_match = false;
 								break;
 							}
 						}
