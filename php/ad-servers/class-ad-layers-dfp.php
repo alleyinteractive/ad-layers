@@ -342,7 +342,12 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 						'page_type' => new Fieldmanager_Select(
 							array(
 								'label' => __( 'Page Type', 'ad-layers' ),
-								'options' => Ad_Layers::instance()->get_page_types(),
+								'options' => array_merge(
+									array(
+										'all' => __( 'All Pages', 'ad-layers' ),
+									),
+									Ad_Layers::instance()->get_page_types()
+								),
 							)
 						),
 					),
@@ -701,10 +706,12 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		private function get_targeting_array_from_custom_values( $custom_targeting ) {
 			$targeting_values = array();
 			foreach ( (array) $custom_targeting as $custom_target ) {
-				$values = ( isset( $custom_target['values'] ) ) ? $custom_target['values'] : null;
-				$targeting_value = $this->get_targeting_value( $custom_target['custom_variable'], $custom_target['source'], $values );
-				if ( ! empty( $targeting_value ) ) {
-					$targeting_values[ $custom_target['custom_variable'] ] = $targeting_value;
+				if ( ! empty( $custom_target['custom_variable'] ) ) {
+					$values = ( isset( $custom_target['values'] ) ) ? $custom_target['values'] : null;
+					$targeting_value = $this->get_targeting_value( $custom_target['custom_variable'], $custom_target['source'], $values );
+					if ( ! empty( $targeting_value ) ) {
+						$targeting_values[ $custom_target['custom_variable'] ] = $targeting_value;
+					}
 				}
 			}
 
@@ -880,6 +887,10 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					// If we have a match, use that template
 					if ( ! empty( $path_templates_by_page_type[ $page_type ] ) ) {
 						$path_template = $path_templates_by_page_type[ $page_type ];
+					} else if ( empty( $path_templates_by_page_type[ $page_type ] )
+						&& ! empty( $path_templates_by_page_type['all'] ) ) {
+						// If the path template is still empty, check if a global template exists for all pages
+						$path_template = $path_templates_by_page_type['all'];
 					}
 				}
 			}
