@@ -330,6 +330,19 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					break;
 				}
 			}
+
+			// If no ad layer has been defined.
+			// Try to set a default ad layer.
+			if ( empty( $this->ad_layer ) ) {
+				foreach ( $this->ad_layers as $ad_layer ) {
+					$page_types = get_post_meta( $ad_layer['post_id'], 'ad_layer_page_types', true );
+
+					if ( in_array( 'default', $page_types ) ) {
+						$this->ad_layer = $ad_layer;
+						break;
+					}
+				}
+			}
 		}
 
 		/**
