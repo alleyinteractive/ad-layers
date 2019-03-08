@@ -344,7 +344,7 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 
 			$ad_layers[ $position ] = $new_layer;
 
-			update_option( 'ad_layers', apply_filters( 'ad_layers_save_post', $ad_layers ) );
+			update_option( 'ad_layers', apply_filters( 'ad_layers_save_post', array_values( $ad_layers ) ) );
 		}
 
 		/**
@@ -369,7 +369,7 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 				}
 			}
 
-			update_option( 'ad_layers', apply_filters( 'ad_layers_delete_post', $ad_layers ) );
+			update_option( 'ad_layers', apply_filters( 'ad_layers_delete_post', array_values( $ad_layers ) ) );
 		}
 
 		/**
