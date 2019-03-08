@@ -205,6 +205,13 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 				$page_types = get_post_meta( $ad_layer['post_id'], 'ad_layer_page_types', true );
 				$taxonomies = get_post_meta( $ad_layer['post_id'], 'ad_layer_taxonomies', true );
 
+				// Ensure page types is an array
+				if ( ! is_array( $page_types ) && ! empty( $page_types ) ) {
+					$page_types = array( $page_types );
+				} elseif ( empty( $page_types ) ) {
+					$page_types = array();
+				}
+
 				// Build an array of taxonomies and terms
 				$taxonomy_terms = array();
 				if ( ! empty( $taxonomies ) ) {

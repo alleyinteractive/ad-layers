@@ -47,7 +47,7 @@ if ( ! class_exists( 'Ad_Layers_Widget' ) ) :
 			}
 
 			// Display the ad unit
-			echo wp_kses_post( $args['before_widget'] . $ad_unit_html . $args['after_widget'] );
+			echo $args['before_widget'] . $ad_unit_html . $args['after_widget']; // WPCS: XSS okay.
 		}
 
 		/**
