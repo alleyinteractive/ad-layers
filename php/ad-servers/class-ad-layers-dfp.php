@@ -305,9 +305,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 						'group_is_empty' => function( $values ) {
 							if ( isset( $values['width'], $values['height'] ) ) {
 								// Disallow 0px X 0px for an ad unit size. This sometimes leads to an "unremovable" field in the group.
-								if ( empty( $values['width'] ) && empty( $values['height'] ) ) {
-									return true;
-								}
+								return ( empty( $values['width'] ) && empty( $values['height'] ) );
 							}
 
 							// Default to saving the field.
