@@ -300,11 +300,21 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					'code' => new Fieldmanager_Textfield( __( 'Code', 'ad-layers' ) ),
 					'path_override' => new Fieldmanager_TextField( __( 'Custom Path Template', 'ad-layers' ) ),
 					'sizes' => new Fieldmanager_Group( array(
-						'limit' => 0,
-						'extra_elements' => 0,
-						'one_label_per_item' => false,
-						'label' => __( 'Sizes', 'ad-layers' ),
 						'add_more_label' => __( 'Add Size', 'ad-layers' ),
+						'description' => __( 'Size cannot be 0x0.', 'ad-layers' ),
+						'group_is_empty' => function( $values ) {
+							if ( isset( $values['width'], $values['height'] ) ) {
+								// Disallow 0px X 0px for an ad unit size. This sometimes leads to an "unremovable" field in the group.
+								return ( empty( $values['width'] ) && empty( $values['height'] ) );
+							}
+
+							// Default to saving the field.
+							return false;
+						},
+						'extra_elements' => 0,
+						'limit' => 0,
+						'label' => __( 'Sizes', 'ad-layers' ),
+						'one_label_per_item' => false,
 						'children' => $this->get_size_options(),
 					) ),
 				),
