@@ -304,15 +304,8 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 						'description' => __( 'Size cannot be 0x0.', 'ad-layers' ),
 						'group_is_empty' => function( $values ) {
 							if ( isset( $values['width'], $values['height'] ) ) {
-								if ( is_numeric( $values['width'] ) && is_numeric( $values['height'] ) ) {
-									// Disallow 0px X 0px for an ad unit size. This sometimes leads to an "unremovable" field in the group.
-									if ( empty( $values['width'] ) && empty( $values['height'] ) ) {
-										return true;
-									}
-
-									// Valid size, save the group.
-									return false;
-								} else {
+								// Disallow 0px X 0px for an ad unit size. This sometimes leads to an "unremovable" field in the group.
+								if ( empty( $values['width'] ) && empty( $values['height'] ) ) {
 									return true;
 								}
 							}
