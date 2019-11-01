@@ -106,6 +106,8 @@ Maximum Width: The maximum width at which this breakpoint is displayed.
 
 The above two fields correspond to how DFP handles responsive ad serving. Depending on how your ad units are configured, these might not correspond exactly to your design breakpoints.
 
+**At least one breakpoint is required for ad layers to be functional.**
+
 *Ad Units*
 
 You can then click "Add Ad Unit" to add one or more ad units. For each you can add:
@@ -115,7 +117,7 @@ Code: This the DFP Ad Unit code. It is preferable to the name since it acts a ke
 After that, add one or more sizes with following fields:
 Width: Width of the ad
 Height: Height of the ad
-Default Size: Check this if this is the default size for this ad unit across all breakpoints. This value is required for responsive ad serving. If not checked for at least one size, the ad will not be displayed.
+Default Size: Check this if this is the default size for this ad unit across all breakpoints. This value is required for responsive ad serving. If not checked for at least one size, the ad will not be displayed. If multiple sizes are checked as default, the last size in the list will be the considered the default size.
 Out of Page: Indicates this size is an Out of Page unit for DFP.
 Breakpoints: Check off all breakpoints where this size should be displayed.
 
