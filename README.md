@@ -106,7 +106,7 @@ Maximum Width: The maximum width at which this breakpoint is displayed.
 
 The above two fields correspond to how DFP handles responsive ad serving. Depending on how your ad units are configured, these might not correspond exactly to your design breakpoints.
 
-**At least one breakpoint is required for the ad layers to be functional.**
+**At least one breakpoint is required for ad layers to be functional.**
 
 *Ad Units*
 
