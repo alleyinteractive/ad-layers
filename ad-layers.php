@@ -109,5 +109,10 @@ function ad_layers_load_files() {
 		require_once( AD_LAYERS_BASE_DIR . '/php/class-ad-layers-meta-boxes.php' );
 		require_once( AD_LAYERS_BASE_DIR . '/php/class-ad-layers-admin.php' );
 	}
+
+	/**
+	 * Import/Export
+	 */
+	require_once( AD_LAYERS_BASE_DIR . '/php/class-ad-layers-importer.php' );
 }
 add_action( 'after_setup_theme', 'ad_layers_load_files' );
