@@ -92,6 +92,7 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 				'taxonomies' => apply_filters( 'ad_layers_taxonomies', array( 'category', 'post_tag' ) ),
 				'capability_type' => $this->post_type_capability,
 				'map_meta_cap' => true,
+				'can_export' => false, // Handled in custom export feature.
 			) ) );
 		}
 
