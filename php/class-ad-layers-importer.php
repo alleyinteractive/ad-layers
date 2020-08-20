@@ -13,7 +13,7 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 	/**
 	 * The import/export version.
 	 */
-	const VERSION = 7;
+	const VERSION = 1;
 
 	/**
 	 * The attachment ID.
@@ -154,7 +154,7 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 	}
 
 	/**
-	 * Registered callback function for the Options Importer
+	 * Registered callback function for the importer
 	 */
 	public function dispatch() {
 		$this->header();
@@ -389,28 +389,6 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 			'post_title'  => $data['post_title'] . ' - IMPORTED',
 			'post_status' => 'draft',
 		);
-	}
-
-	/**
-	 * Returns an existing layer by matching the layer slug.
-	 *
-	 * @param string $slug Ad layer slug.
-	 * @return WP_Post|null The post object if a layer is found, otherwise null.
-	 */
-	public function get_existing_layer( $slug ) {
-		$layers_found = new \WP_Query(
-			array(
-				'post_type'      => 'ad-layer',
-				'pagename'       => $slug,
-				'posts_per_page' => 1,
-			)
-		);
-
-		if ( ! empty( $layers_found->posts[0] ) ) {
-			return $layers_found->posts[0];
-		}
-
-		return null;
 	}
 
 	/**
