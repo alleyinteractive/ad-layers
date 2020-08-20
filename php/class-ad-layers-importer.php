@@ -211,6 +211,13 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 		// Loop through layers and populate their export data.
 		foreach ( $layer_priority as $layer ) {
 
+			$layer_object = get_post( $layer['post_id'] );
+
+			// Skip if this layer does not have a valid post type.
+			if ( ! in_array( $layer_object->post_status, array( 'publish', 'draft', 'future', 'pending' ), true ) ) {
+				continue;
+			}
+
 			// Get the post meta data.
 			$meta_data = array();
 
@@ -219,7 +226,7 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 			}
 
 			$ad_layers[] = array(
-				'post_object' => get_post( $layer['post_id'] ),
+				'post_object' => $layer_object,
 				'meta'        => $meta_data,
 			);
 		}
@@ -252,15 +259,6 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 			<?php wp_nonce_field( 'import-wordpress-ad-layers' ); ?>
 			<input type="hidden" name="import_id" value="<?php echo absint( $this->file_id ); ?>" />
 
-			<h3><?php esc_html_e( 'What would you like to import?', 'ad-layers' ); ?></h3>
-			<p>
-				<label><input type="radio" class="which-options" name="settings[which_options]" value="all" checked="checked" /> <?php esc_html_e( 'All Data', 'ad-layers' ); ?></label>
-				<br /><label><input type="radio" class="which-options" name="settings[which_options]" value="ad_layers_ad_server_settings" /> <?php esc_html_e( 'Ad Server Settings', 'ad-layers' ); ?></label>
-				<br /><label><input type="radio" class="which-options" name="settings[which_options]" value="ad_layers_custom_variables" /> <?php esc_html_e( 'Custom Variables', 'ad-layers' ); ?></label>
-				<br /><label><input type="radio" class="which-options" name="settings[which_options]" value="ad_layers" /> <?php esc_html_e( 'Ad Layer Priority', 'ad-layers' ); ?></label>
-				<br /><label><input type="radio" class="which-options" name="settings[which_options]" value="layers" /> <?php esc_html_e( 'Ad Layers', 'ad-layers' ); ?></label>
-			</p>
-
 			<h3><?php esc_html_e( 'Additional Settings', 'ad-layers' ); ?></h3>
 			<p>
 				<input type="checkbox" value="1" name="settings[override]" id="override_current" checked="checked" />
@@ -281,41 +279,20 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 		check_admin_referer( 'import-wordpress-ad-layers' );
 
 		if ( $this->run_data_check() ) {
-
-			$which_options = ! empty( $_POST['settings']['which_options'] ) ? sanitize_text_field( wp_unslash( $_POST['settings']['which_options'] ) ) : 'all';
-			$override      = ( ! empty( $_POST['settings']['override'] ) && '1' === $_POST['settings']['override'] );
-
-			if ( ! $override ) {
-				// We're going to use a random hash as our default, to know if something is set or not.
-				$old_value = get_option( $name, $hash );
-
-				// Only import the setting if it's not present.
-				if ( $old_value !== $hash ) {
-					/* translators: 1. option name */
-					return new \WP_Error( 'skipped', sprintf( __( 'Skipped option `%s` because it currently exists.', 'ad-layers' ), $name ) );
-				}
-			}
+			$override = ( ! empty( $_POST['settings']['override'] ) && '1' === $_POST['settings']['override'] );
 
 			$valid_options = array(
 				'ad_layers_ad_server_settings',
 				'ad_layers_custom_variables',
-				'ad_layers',
 			);
 
-			if ( 'all' !== $which_options && in_array( $which_options, $valid_options, true ) ) {
-				$this->import_option( $which_options, $override );
-			} elseif ( 'layers' === $which_options ) {
-				$this->import_all_ad_layers();
-			} elseif ( 'all' === $which_options ) {
-
-				// Import all options.
-				foreach ( $valid_options as $valid_option ) {
-					$this->import_option( $valid_option, $override );
-				}
-
-				// Ad layers.
-				$this->import_all_ad_layers( $override );
+			// Import all options.
+			foreach ( $valid_options as $valid_option ) {
+				$this->import_option( $valid_option, $override );
 			}
+
+			// Ad layers.
+			$this->import_all_ad_layers( $override );
 
 			$this->clean_up();
 			echo '<p>' . esc_html__( 'All done. That was easy.', 'ad-layers' ) . ' <a href="' . esc_url( admin_url() ) . '">' . esc_html__( 'Have fun!', 'ad-layers' ) . '</a></p>';
@@ -356,14 +333,11 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 
 	/**
 	 * Imports all ad layers.
-	 *
-	 * @param  boolean $override Whether or not to override existing settings.
-	 * @return bool|WP_Error     True if sucessful, otherwise a WP_Error object.
 	 */
-	public function import_all_ad_layers( $override = false ) {
+	public function import_all_ad_layers() {
 		// Bail if there are no layers to import.
 		if ( empty( $this->import_data['layers'] ) || ! is_array( $this->import_data['layers'] ) ) {
-			return $this->error_message( __( 'No layers to import.', 'ad-layers' ) );
+			$this->error_message( __( 'No layers to import.', 'ad-layers' ) );
 		}
 
 		foreach ( $this->import_data['layers'] as $layer ) {
@@ -374,31 +348,13 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 				continue;
 			}
 
-			if ( $override ) {
-				$existing_layer = $this->get_existing_layer( $layer['post_object']['post_name'] );
-
-				if ( $existing_layer instanceof \WP_Post ) {
-					$layer_id  = $existing_layer->ID;
-					$new_layer = $layer['post_object'];
-
-					// Update the post object.
-					$layer_id = wp_update_post(
-						array_merge(
-							array( 'ID' => $layer_id ),
-							$this->get_postarr_from_data( $layer['post_object'] ),
-						)
-					);
-				} else {
-					$layer_id = wp_insert_post( $this->get_postarr_from_data( $layer['post_object'] ) );
-				}
-			} else {
-				$layer_id = wp_insert_post( $this->get_postarr_from_data( $layer['post_object'] ) );
-			}
+			// Insert the Ad Layer.
+			$layer_id = wp_insert_post( $this->get_postarr_from_data( $layer['post_object'] ) );
 
 			// Skip post meta if layer was not created properly.
 			if ( empty( $layer_id ) ) {
 				/* translators: 1. Ad Layer name */
-				$this->error_message( sprintf( __( 'Skipping: Layer %s could not be created', 'ad-layers' ), $layer['post_object']['post_name'] ) );
+				$this->error_message( sprintf( __( 'Skipping: Layer %s could not be created', 'ad-layers' ), $layer['post_object']['post_title'] ) );
 				continue;
 			}
 
@@ -413,10 +369,8 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 			}
 
 			// Add custom post meta flagging this layer being imported.
-			update_post_meta( $layer_id, 'ad_layers_imported', true );
+			update_post_meta( $layer_id, 'ad_layers_imported', time() );
 		}
-
-		return true;
 	}
 
 	/**
@@ -432,8 +386,8 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 
 		return array(
 			'post_type'   => $data['post_type'],
-			'post_title'  => $data['post_title'],
-			'post_status' => $data['post_status'],
+			'post_title'  => $data['post_title'] . ' - IMPORTED',
+			'post_status' => 'draft',
 		);
 	}
 
