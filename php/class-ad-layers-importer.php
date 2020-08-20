@@ -201,37 +201,25 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 	public function export_ad_layers() {
 		$ad_layers = array();
 
-		$query = new \WP_Query(
-			array(
-				'post_type'      => 'ad-layer',
-				'post_status'    => 'any',
-				// Set to a high number to get all layers at once.
-				'posts_per_page' => 100,
-			)
-		);
+		$layer_priority = apply_filters( 'ad_layers', get_option( 'ad_layers' ) );
 
 		// No layers found.
-		if ( empty( $query->posts ) ) {
+		if ( empty( $layer_priority ) ) {
 			return $ad_layers;
 		}
 
 		// Loop through layers and populate their export data.
-		foreach ( $query->posts as $layer ) {
+		foreach ( $layer_priority as $layer ) {
+
 			// Get the post meta data.
-			$meta_data     = array();
-			$all_post_meta = get_post_meta( $layer->ID );
+			$meta_data = array();
 
-			foreach ( $all_post_meta as $key => $value ) {
-				// Skip meta key if not in list.
-				if ( ! in_array( $key, $this->post_meta_keys(), true ) ) {
-					continue;
-				}
-
-				$meta_data[ $key ] = $value;
+			foreach ( $this->post_meta_keys() as $key ) {
+				$meta_data[ $key ] = get_post_meta( $layer['post_id'], $key, true );
 			}
 
 			$ad_layers[] = array(
-				'post_object' => $layer,
+				'post_object' => get_post( $layer['post_id'] ),
 				'meta'        => $meta_data,
 			);
 		}
@@ -304,7 +292,7 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 				// Only import the setting if it's not present.
 				if ( $old_value !== $hash ) {
 					/* translators: 1. option name */
-					return new \WP_Error( 'skipped', sprintf( __( 'Skipped option `%s` because it currently exists.', 'wp-options-importer' ), $name ) );
+					return new \WP_Error( 'skipped', sprintf( __( 'Skipped option `%s` because it currently exists.', 'ad-layers' ), $name ) );
 				}
 			}
 
@@ -326,7 +314,7 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 				}
 
 				// Ad layers.
-				$this->import_all_ad_layers();
+				$this->import_all_ad_layers( $override );
 			}
 
 			$this->clean_up();
@@ -352,13 +340,15 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 			// Only import the setting if it's not present.
 			if ( $old_value !== $hash ) {
 				/* translators: 1. option name */
-				return new \WP_Error( 'skipped', sprintf( __( 'Skipped option `%s` because it currently exists.', 'wp-options-importer' ), $name ) );
+				return $this->error_message( sprintf( __( 'Skipped option `%s` because it currently exists.', 'ad-layers' ), $name ) );
 			}
+		}
+
+		if ( isset( $this->import_data[ $name ] ) ) {
+			update_option( $name, $this->import_data[ $name ] );
 		} else {
-			if ( false === update_option( $name, $this->import_data[ $name ] ?? null ) ) {
-				/* translators: 1. option name */
-				return new \WP_Error( 'error', sprintf( __( 'Failed updating option `%s`.', 'ad-layers' ), $name ) );
-			}
+			/* translators: 1. option name */
+			return $this->error_message( sprintf( __( 'Could not find option `%s` in export file.', 'ad-layers' ), $name ) );
 		}
 
 		return true;
@@ -373,14 +363,19 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 	public function import_all_ad_layers( $override = false ) {
 		// Bail if there are no layers to import.
 		if ( empty( $this->import_data['layers'] ) || ! is_array( $this->import_data['layers'] ) ) {
-			return new \WP_Error( 'error', __( 'No layers to import.', 'ad-layers' ) );
+			return $this->error_message( __( 'No layers to import.', 'ad-layers' ) );
 		}
 
 		foreach ( $this->import_data['layers'] as $layer ) {
 			$layer_id = 0;
 
+			if ( empty( $layer ) || empty( $layer['post_object']['ID'] ) ) {
+				$this->error_message( __( 'Skipping: Layer does not have proper data.', 'ad-layers' ) );
+				continue;
+			}
+
 			if ( $override ) {
-				$existing_layer = $this->get_existing_layer( $layer['post_object']->post_name );
+				$existing_layer = $this->get_existing_layer( $layer['post_object']['post_name'] );
 
 				if ( $existing_layer instanceof \WP_Post ) {
 					$layer_id  = $existing_layer->ID;
@@ -390,16 +385,20 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 					$layer_id = wp_update_post(
 						array_merge(
 							array( 'ID' => $layer_id ),
-							$this->get_postarr_from_object( $layer['post_object'] ),
+							$this->get_postarr_from_data( $layer['post_object'] ),
 						)
 					);
+				} else {
+					$layer_id = wp_insert_post( $this->get_postarr_from_data( $layer['post_object'] ) );
 				}
 			} else {
-				$layer_id = wp_insert_post( $this->get_postarr_from_object( $layer['post_object'] ) );
+				$layer_id = wp_insert_post( $this->get_postarr_from_data( $layer['post_object'] ) );
 			}
 
 			// Skip post meta if layer was not created properly.
 			if ( empty( $layer_id ) ) {
+				/* translators: 1. Ad Layer name */
+				$this->error_message( sprintf( __( 'Skipping: Layer %s could not be created', 'ad-layers' ), $layer['post_object']['post_name'] ) );
 				continue;
 			}
 
@@ -412,6 +411,9 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 
 				update_post_meta( $layer_id, $key, $value );
 			}
+
+			// Add custom post meta flagging this layer being imported.
+			update_post_meta( $layer_id, 'ad_layers_imported', true );
 		}
 
 		return true;
@@ -420,18 +422,18 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 	/**
 	 * Get post array from post object.
 	 *
-	 * @param \WP_Post $object The post object.
+	 * @param  array $data The post object data.
 	 * @return array The post attributes array.
 	 */
-	public function get_postarr_from_object( $object ) {
-		if ( empty( $object ) || ! ( $object instanceof \WP_Post ) ) {
+	public function get_postarr_from_data( $data ) {
+		if ( empty( $data ) ) {
 			return array();
 		}
 
 		return array(
-			'post_type'   => $object->post_type,
-			'post_title'  => $object->post_title,
-			'post_status' => $object->post_status,
+			'post_type'   => $data['post_type'],
+			'post_title'  => $data['post_title'],
+			'post_status' => $data['post_status'],
 		);
 	}
 
@@ -578,10 +580,10 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 		}
 
 		if (
-			empty( $this->import_data['layer_priority'] )
-			&& empty( $this->import_data['custom_variables'] )
-			&& empty( $this->import_data['ad_server_settings'] )
-			&& empty( $this->import_data['ad-layers'] )
+			empty( $this->import_data['ad_layers'] )
+			&& empty( $this->import_data['ad_layers_custom_variables'] )
+			&& empty( $this->import_data['ad_layers_ad_server_settings'] )
+			&& empty( $this->import_data['layers'] )
 		) {
 			$this->clean_up();
 			return $this->error_message( esc_html__( 'Sorry, there has been an error. This file appears valid, but does not seem to have any options.', 'ad-layers' ) );
