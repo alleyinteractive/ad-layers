@@ -259,12 +259,14 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 			<?php wp_nonce_field( 'import-wordpress-ad-layers' ); ?>
 			<input type="hidden" name="import_id" value="<?php echo absint( $this->file_id ); ?>" />
 
-			<h3><?php esc_html_e( 'Additional Settings', 'ad-layers' ); ?></h3>
 			<p>
 				<input type="checkbox" value="1" name="settings[override]" id="override_current" checked="checked" />
-				<label for="override_current"><?php esc_html_e( 'Override existing options', 'ad-layers' ); ?></label>
+				<label for="override_current"><?php esc_html_e( 'Override existing custom variables and Ad Server settings', 'ad-layers' ); ?></label>
 			</p>
-			<p class="description"><?php esc_html_e( 'If you uncheck this box, options will be skipped if they currently exist.', 'ad-layers' ); ?></p>
+			<p class="description"><?php esc_html_e( 'If you uncheck this box, custom variables and ad server settings will be skipped if they currently exist.', 'ad-layers' ); ?></p>
+
+			<h3><?php esc_html_e( 'IMPORTANT', 'ad-layers' ); ?></h3>
+			<p><?php esc_html_e( 'Note that the import process will need to remove all existing Ad Layers before importing the Ad Layers specified in the import file. There is no undoing this import process. We suggest only using this feature to import into a site with no prior Ad Layers configured.', 'ad-layers' ); ?></p>
 
 			<?php submit_button( esc_html__( 'Import Ad Layers', 'ad-layers' ) ); ?>
 		</form>
@@ -291,8 +293,38 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 				$this->import_option( $valid_option, $override );
 			}
 
+			// Delete all existing ad layers.
+			$this->delete_all_ad_layers();
+
 			// Ad layers.
-			$this->import_all_ad_layers( $override );
+			$imported_ad_layers = $this->import_all_ad_layers( $override );
+
+			// Clear out layer priority option and set from imported data.
+			delete_option( 'ad_layers' );
+
+			$layer_priority = array();
+
+			if ( ! empty( $this->import_data['ad_layers'] ) && is_array( $this->import_data['ad_layers'] ) ) {
+				foreach ( $this->import_data['ad_layers'] as $layer ) {
+					// No title.
+					if ( empty( $layer['title'] ) ) {
+						continue;
+					}
+
+					// Layer was imported so use its new post ID.
+					if ( ! empty( $imported_ad_layers[ $layer['title'] ] ) ) {
+						$layer_priority[] = array(
+							'post_id' => absint( $imported_ad_layers[ $layer['title'] ] ),
+							'title'   => $layer['title'],
+						);
+					}
+				}
+			}
+
+			// Set the priority.
+			if ( ! empty( $layer_priority ) ) {
+				update_option( 'ad_layers', $layer_priority );
+			}
 
 			$this->clean_up();
 			echo '<p>' . esc_html__( 'All done. That was easy.', 'ad-layers' ) . ' <a href="' . esc_url( admin_url() ) . '">' . esc_html__( 'Have fun!', 'ad-layers' ) . '</a></p>';
@@ -333,8 +365,12 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 
 	/**
 	 * Imports all ad layers.
+	 *
+	 * @return array $imported_ad_layers All of the imported Ad layers.
 	 */
 	public function import_all_ad_layers() {
+		$imported_ad_layers = array();
+
 		// Bail if there are no layers to import.
 		if ( empty( $this->import_data['layers'] ) || ! is_array( $this->import_data['layers'] ) ) {
 			$this->error_message( __( 'No layers to import.', 'ad-layers' ) );
@@ -358,6 +394,11 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 				continue;
 			}
 
+			$layer_object = get_post( $layer_id );
+
+			// Add layer to imported layers array.
+			$imported_ad_layers[ $layer_object->post_title ] = $layer_id;
+
 			// Update post meta.
 			foreach ( $layer['meta'] as $key => $value ) {
 				// Skip meta key if not in list.
@@ -371,6 +412,42 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 			// Add custom post meta flagging this layer being imported.
 			update_post_meta( $layer_id, 'ad_layers_imported', time() );
 		}
+
+		return $imported_ad_layers;
+	}
+
+	/**
+	 * Deletes all Ad Layers.
+	 */
+	public function delete_all_ad_layers() {
+		$ad_layer_ids = $this->get_all_ad_layers();
+
+		// No ad layers found.
+		if ( empty( $ad_layer_ids ) ) {
+			return;
+		}
+
+		foreach ( $ad_layer_ids as $ad_layer_id ) {
+			wp_delete_post( $ad_layer_id, true );
+		}
+	}
+
+	/**
+	 * Gets all Ad Layers.
+	 *
+	 * @return array All ad layer ids.
+	 */
+	public function get_all_ad_layers() {
+		global $wpdb;
+
+		$ad_layer_ids = $wpdb->get_col( "SELECT ID FROM $wpdb->posts WHERE post_type = 'ad-layer' LIMIT 500" );
+
+		// No ad layers found.
+		if ( empty( $ad_layer_ids ) ) {
+			return array();
+		}
+
+		return (array) $ad_layer_ids;
 	}
 
 	/**
@@ -386,8 +463,8 @@ class Ad_Layers_Importer extends Ad_Layers_Singleton {
 
 		return array(
 			'post_type'   => $data['post_type'],
-			'post_title'  => $data['post_title'] . ' - IMPORTED',
-			'post_status' => 'draft',
+			'post_title'  => $data['post_title'],
+			'post_status' => $data['post_status'],
 		);
 	}
 
