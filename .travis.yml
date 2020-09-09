@@ -1,46 +1,76 @@
-sudo: false
+# Travis CI (MIT License) configuration file for Ad Layers.
+# @link https://travis-ci.org/
 
+# Xenial image has PHP versions 5.6,7.1,7.2 pre-installed
+dist: xenial
+
+# Xenial does not start mysql by default
+services:
+  - mysql
+  - memcached
+
+# Declare project language.
+# @link http://about.travis-ci.org/docs/user/languages/php/
 language: php
 
-notifications:
-  email:
-    on_success: never
-    on_failure: change
-
+# Specify when Travis should build.
 branches:
   only:
     - master
 
+# Cache directories to speed up builds.
+# @link https://docs.travis-ci.com/user/caching/#arbitrary-directories
+cache:
+  directories:
+    - $HOME/.config/composer/cache
+
 matrix:
-  include:
-    - php: 5.6
-      env: WP_VERSION=4.4
-    - php: 7.0
-      env: WP_VERSION=latest
-    - php: 7.0
-      env: WP_VERSION=nightly
-    - php: 7.2
-      env: WP_VERSION=nightly
-    - php: 7.0
-      env: WP_TRAVISCI=phpcs
   fast_finish: true
+  include:
+    - php: 7.3
+      env: WP_VERSION=latest PHP_LINT=1 WP_PHPCS=1
+    - php: 7.2
+      env: WP_VERSION=latest PHP_LINT=1
+    - php: 7.1
+      env: WP_VERSION=latest PHP_LINT=1
+    - php: 7.0
+      env: WP_VERSION=latest PHP_LINT=1
+    - php: 5.6
+      env: WP_VERSION=latest PHP_LINT=1
+    - php: 7.3
+      env: WP_VERSION=nightly
+    - php: 'nightly'
+      env: WP_VERSION=latest PHP_LINT=1
+  allow_failures:
+    - php: 'nightly'
 
 before_script:
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
+
+  # Couple the PHPUnit version to the PHP version.
   - |
-    if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
-      composer global require "phpunit/phpunit=5.7.*"
-    else
+    case "$TRAVIS_PHP_VERSION" in
+    7.*)
+      echo "Using PHPUnit 6.1"
+      composer global require "phpunit/phpunit=6.1.*"
+      ;;
+    *)
+      echo "Using PHPUnit 4.8"
       composer global require "phpunit/phpunit=4.8.*"
-    fi
+      ;;
+    esac
+
   - |
     if [[ ! -z "$WP_VERSION" ]] ; then
       bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION
     fi
+
+
+  # Set up phpcs.
   - |
-    if [[ "$WP_TRAVISCI" == "phpcs" ]] ; then
-      composer install
-      npm install
+    if [[ "$WP_PHPCS" == "1" ]] ; then
+      composer global require automattic/vipwpcs
+      phpcs --config-set installed_paths $HOME/.composer/vendor/wp-coding-standards/wpcs,$HOME/.composer/vendor/automattic/vipwpcs
     fi
 
 script:
@@ -52,5 +82,10 @@ script:
     fi
   - |
     if [[ "$WP_TRAVISCI" == "phpcs" ]] ; then
-      grunt phpcs
+      phpcs
     fi
+
+# Receive notifications for build results.
+# @link http://docs.travis-ci.com/user/notifications/#Email-notifications
+notifications:
+  email: false

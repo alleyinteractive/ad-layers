@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<ruleset name="ad-layers">
+	<description>Sniffs for the coding standards of the Ad Layers plugin.</description>
+
+	<!--
+	Pass some flags to PHPCS:
+	 p flag: Show progress of the run.
+	 s flag: Show sniff codes in all reports.
+	-->
+	<arg value="ps" />
+
+	<!-- Strip the filepaths down to the relevant bit. -->
+	<arg name="basepath" value="./" />
+
+	<!-- Check 8 files simultaneously. -->
+	<arg name="parallel" value="8" />
+
+	<!-- Only check JS and PHP files. -->
+	<arg name="extensions" value="php" />
+
+	<!-- Set severity to 1 to see everything that isn't effectively turned off. -->
+	<arg name="severity" value="1" />
+
+	<!-- Check all files in this directory and the directories below it. -->
+	<file>.</file>
+
+	<!-- Excluded directories. -->
+	<exclude-pattern>tests/*</exclude-pattern>
+	<exclude-pattern>bin/*</exclude-pattern>
+	<exclude-pattern>vendor/*</exclude-pattern>
+
+	<!-- Include the WordPress ruleset, with exclusions. -->
+	<rule ref="WordPressVIPMinimum">
+		<!-- These may need to be excluded if they throw too many false positives -->
+		<!-- <exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect" /> -->
+		<!-- <exclude name="Generic.WhiteSpace.ScopeIndent.IncorrectExact" /> -->
+		<exclude name="PEAR.Functions.FunctionCallSignature.Indent" />
+	</rule>
+
+	<!-- Tweak the VIP rules -->
+	<rule ref="WordPress.Security.EscapeOutput.OutputNotEscaped">
+		<type>warning</type>
+	</rule>
+	<rule ref="WordPressVIPMinimum.Functions.RestrictedFunctions.wp_get_post_terms">
+		<type>warning</type>
+	</rule>
+	<rule ref="WordPressVIPMinimum.Files.IncludingFile.UsingCustomConstant">
+		<exclude-pattern>ad-layers.php</exclude-pattern>
+		<exclude-pattern>php/ad-servers/class-ad-layers-ad-server.php</exclude-pattern>
+	</rule>
+</ruleset>
