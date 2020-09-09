@@ -280,11 +280,11 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 		 * @return array
 		 */
 		private function get_taxonomies() {
-			if ( ! isset( $_GET['post'] ) ) {
+			if ( ! isset( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				return array();
 			}
 
-			return get_post_meta( intval( $_GET['post'] ), 'ad_layer_taxonomies', true );
+			return get_post_meta( intval( $_GET['post'] ), 'ad_layer_taxonomies', true ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 
 		/**
@@ -301,12 +301,12 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 		 * Decide how to manage this post in the ad layer list on save.
 		 *
 		 * @access public
-		 * @param int $post_id
+		 * @param int     $post_id
 		 * @param WP_Post $post
 		 * @param boolean $update
 		 */
 		public function save_post( $post_id, $post, $update ) {
-			if ( 'auto-draft' == $post->post_status ) {
+			if ( 'auto-draft' === $post->post_status ) {
 				return;
 			}
 
@@ -316,7 +316,7 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 			// Create the data to be saved
 			$new_layer = array(
 				'post_id' => $post_id,
-				'title' => $post->post_title,
+				'title'   => $post->post_title,
 			);
 
 			// If this is not an update, just append it.
@@ -324,14 +324,14 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 			$position = null;
 			if ( $update ) {
 				// If this was an unpublish, delete instead.
-				if ( 'publish' != $post->post_status ) {
+				if ( 'publish' !== $post->post_status ) {
 					$this->delete_post( $post_id );
 					return;
 				}
 
 				// Otherwise, find and update the layer.
 				foreach ( $ad_layers as $i => $layer ) {
-					if ( $layer['post_id'] == $post_id ) {
+					if ( $layer['post_id'] === $post_id ) {
 						$position = $i;
 						break;
 					}
@@ -361,9 +361,9 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 				return;
 			}
 
-			// Find and remove the layer
+			// Find and remove the layer.
 			foreach ( $ad_layers as $i => $layer ) {
-				if ( $layer['post_id'] == $post_id ) {
+				if ( $layer['post_id'] === $post_id ) {
 					unset( $ad_layers[ $i ] );
 					break;
 				}
