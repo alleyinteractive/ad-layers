@@ -46,8 +46,8 @@ if ( ! class_exists( 'Ad_Layers_Widget' ) ) :
 				return;
 			}
 
-			// Display the ad unit
-			echo $args['before_widget'] . $ad_unit_html . $args['after_widget']; // WPCS: XSS okay.
+			// Display the ad unit.
+			echo $args['before_widget'] . $ad_unit_html . $args['after_widget']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 
 		/**
@@ -64,7 +64,10 @@ if ( ! class_exists( 'Ad_Layers_Widget' ) ) :
 			<p>
 				<label for="<?php echo esc_attr( $this->get_field_id( 'ad_unit' ) ) ?>"><?php esc_html_e( 'Ad Unit', 'ad-layers' ) ?></label>
 				<br />
-				<?php echo $this->ad_unit_select_field_html( $ad_unit ) ?>
+				<?php
+				// @TODO Add and test escaping.
+				echo $this->ad_unit_select_field_html( $ad_unit ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
 				<br /><i><?php esc_html_e( 'Select an ad unit to display in this widget. The widget will be automatically hidden if the unit is not present in the current ad layer.', 'ad-layers' ); ?></i>
 			</p>
 			<?php
