@@ -119,7 +119,7 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 			if ( ! empty( $this->ad_servers ) && is_array( $this->ad_servers ) ) {
 				foreach ( $this->ad_servers as $ad_server ) {
 					if ( file_exists( $ad_server ) ) {
-						require_once( $ad_server );
+						require_once( $ad_server ); // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingVariable
 					}
 				}
 			}

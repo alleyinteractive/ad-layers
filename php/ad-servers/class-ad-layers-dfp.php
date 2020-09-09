@@ -460,7 +460,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			$this->ad_units = apply_filters( 'ad_layers_dfp_ad_units', $this->ad_units, $this );
 
 			// Loop through the breakpoints and add the desired units
-			foreach ( $ad_setup as $i => $breakpoint ) {
+			foreach ( $ad_setup as $breakpoint ) {
 				// Ensure this breakpoint is valid or else skip it
 				if ( empty( $breakpoint['ad_units'] ) ) {
 					continue;
@@ -481,13 +481,13 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 
 							// If this is the default size, save it.
 							// If more than one size is accidentally marked as default, the last one will be used.
-							if ( ! empty( $size['default_size'] ) && 'default' == $size['default_size'] ) {
+							if ( ! empty( $size['default_size'] ) && 'default' === $size['default_size'] ) {
 								$this->default_by_unit[ $ad_unit['code'] ] = array( absint( $size['width'] ), absint( $size['height'] ) );
 							}
 
 							// If this is an oop unit, note it.
 							// If more than one size is accidentally marked as default, the last one will be used.
-							if ( ! empty( $size['out_of_page'] ) && 'oop' == $size['out_of_page'] ) {
+							if ( ! empty( $size['out_of_page'] ) && 'oop' === $size['out_of_page'] ) {
 								$this->oop_units[] = $ad_unit['code'];
 							}
 						}
@@ -548,7 +548,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				printf(
 					"dfpBuiltMappings[%s] = googletag.sizeMapping()%s.build();\n",
 					wp_json_encode( $ad_unit ),
-					$mapping_js
+					$mapping_js // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				);
 			}
 
@@ -566,11 +566,13 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					continue;
 				}
 
-				$is_oop = in_array( $ad_unit, $this->oop_units );
+				$is_oop = in_array( $ad_unit, $this->oop_units, true );
 
 				// Finalize output for this unit and add it to the final return value.
 				// Ad units are also saved to an array based on ad type so they can
 				// be refreshed if the page size changes.
+				// This is escaped above as it is built.
+				// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 				printf(
 					"dfpAdUnits[%s] = googletag.%s(%s%s,%s)%s%s.addService(googletag.pubads());\n",
 					wp_json_encode( $ad_unit ),
@@ -580,9 +582,10 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					// method call, and is prefixed with a comma:
 					$is_oop ? '' : ',' . wp_json_encode( $this->default_by_unit[ $ad_unit ] ),
 					wp_json_encode( $this->get_ad_unit_id( $ad_unit ) ),
-					( ! empty( $this->mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $this->oop_units ) ) ? '.defineSizeMapping(dfpBuiltMappings[' . wp_json_encode( $ad_unit ) . '])' : '',
-					( ! empty( $this->targeting_by_unit[ $ad_unit ] ) ) ? $this->targeting_by_unit[ $ad_unit ] : '' // This is escaped above as it is built
+					( ! empty( $this->mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $this->oop_units, true ) ) ? '.defineSizeMapping(dfpBuiltMappings[' . wp_json_encode( $ad_unit ) . '])' : '',
+					( ! empty( $this->targeting_by_unit[ $ad_unit ] ) ) ? $this->targeting_by_unit[ $ad_unit ] : ''
 				);
+				// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 		}
 
@@ -596,7 +599,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			$global_ad_units = $this->get_setting( 'ad_units' );
 			foreach ( $global_ad_units as $global_ad_unit ) {
 				if ( ! empty( $global_ad_unit['code'] ) && ! empty( $global_ad_unit['path_override'] ) ) {
-					$global_path_overrides[ $global_ad_unit['code'] ] = $global_ad_unit['path_override'];
+					$global_path_overrides[ $global_ad_unit['code'] ] = $global_ad_unit['path_override']; // phpcs:ignore WordPressVIPMinimum.Variables.VariableAnalysis.UndefinedVariable
 				}
 			}
 
@@ -614,8 +617,8 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 						}
 						if ( ! empty( $ad_unit['path_override'] ) ) {
 							$this->ad_unit_paths[ $ad_unit['ad_unit'] ] = $ad_unit['path_override'];
-						} elseif ( ! empty( $global_path_overrides[ $ad_unit['ad_unit'] ] ) ) {
-							$this->ad_unit_paths[ $ad_unit['ad_unit'] ] = $global_path_overrides[ $ad_unit['ad_unit'] ];
+						} elseif ( ! empty( $global_path_overrides[ $ad_unit['ad_unit'] ] ) ) { // phpcs:ignore WordPressVIPMinimum.Variables.VariableAnalysis.UndefinedVariable
+							$this->ad_unit_paths[ $ad_unit['ad_unit'] ] = $global_path_overrides[ $ad_unit['ad_unit'] ]; // phpcs:ignore WordPressVIPMinimum.Variables.VariableAnalysis.UndefinedVariable
 						}
 					}
 				}
@@ -639,10 +642,9 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				return;
 			}
 
-			// Add the JS
-			if ( ! empty( $custom_targeting ) ) {
-				echo 'googletag.pubads()' . apply_filters( 'ad_layers_dfp_page_level_targeting_output_html', $this->get_targeting_js_from_array( $custom_targeting ) ) . ";\n";
-			}
+			// If custom targeting is not empty, add the JS.
+			// @TODO Add and test escaping.
+			echo 'googletag.pubads()' . apply_filters( 'ad_layers_dfp_page_level_targeting_output_html', $this->get_targeting_js_from_array( $custom_targeting ) ) . ";\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 
 		/**
@@ -653,12 +655,12 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		protected function get_ad_details() {
 			$return = array();
 
-			// Get the page type
+			// Get the page type.
 			$page_type = Ad_Layers::instance()->get_current_page_type();
 
-			// Add the units
-			foreach ( $this->ad_units as $ad_unit => $custom_targeting ) {
-				// If no default size is defined, skip it
+			// Add the units.
+			foreach ( $this->ad_units as $ad_unit => $custom_targeting ) { // phpcs:ignore WordPressVIPMinimum.Variables.VariableAnalysis.UnusedVariable
+				// If no default size is defined, skip it.
 				if ( empty( $this->default_by_unit[ $ad_unit ] ) ) {
 					continue;
 				}
@@ -833,7 +835,8 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			$output_html = apply_filters( 'ad_layers_dfp_ad_unit_output_html', $output_html, $ad_unit );
 
 			if ( $echo ) {
-				echo $output_html;
+				// @TODO Add and test escaping.
+				echo $output_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			} else {
 				return $output_html;
 			}
@@ -898,18 +901,18 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			if ( ! empty( $path_template ) ) {
 				$replacements = array();
 
-				// Handle any formatting tags
+				// Handle any formatting tags.
 				preg_match_all( apply_filters( 'ad_layers_dfp_formatting_tag_pattern', $this->formatting_tag_pattern ), $path_template, $matches );
 				if ( ! empty( $matches[0] ) ) {
-					// Build a list of found tags for replacement
+					// Build a list of found tags for replacement.
 					$unique_matches = array_unique( $matches[0] );
 
-					// Iterate over and replace each
-					foreach ( $this->formatting_tags as $tag => $description ) {
-						if ( in_array( $tag, $unique_matches ) ) {
+					// Iterate over and replace each.
+					foreach ( $this->formatting_tags as $tag => $description ) { // phpcs:ignore WordPressVIPMinimum.Variables.VariableAnalysis.UnusedVariable
+						if ( in_array( $tag, $unique_matches, true ) ) {
 							$value = null;
 
-							// Handle built-in formatting tags
+							// Handle built-in formatting tags.
 							switch ( $tag ) {
 								case '#account_id#':
 									$value = $account_id;
@@ -1072,14 +1075,12 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		 * @return mixed
 		 */
 		public function cache_settings( $option, $old_value, $value, $return = false ) {
-			// Make sure this is saving ad server settings
+			// Make sure this is saving ad server settings.
 			if ( $option !== $this->option_name ) {
 				return;
 			}
 
-			$cached_setup = array();
-
-			// Don't bother if no breakpoints or no ad units are set
+			// Don't bother if no breakpoints or no ad units are set.
 			if ( empty( $value['breakpoints'] ) || empty( $value['ad_units'] ) ) {
 				return;
 			}
@@ -1099,7 +1100,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 								}
 
 								// If this ad unit isn't used by the breakpoint, drop it
-								if ( ! in_array( $breakpoint['title'], $size['breakpoints'] ) ) {
+								if ( ! in_array( $breakpoint['title'], $size['breakpoints'], true ) ) {
 									unset( $ad_unit['sizes'][ $i ] );
 								} else {
 									// Leave it alone, but drop the breakpoint info since the cache won't need it
