@@ -22,6 +22,7 @@ branches:
 # @link https://docs.travis-ci.com/user/caching/#arbitrary-directories
 cache:
   directories:
+    - $HOME/.composer/cache
     - $HOME/.config/composer/cache
 
 matrix:

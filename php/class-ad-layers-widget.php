@@ -101,7 +101,8 @@ if ( ! class_exists( 'Ad_Layers_Widget' ) ) :
 			// Get all ad units in the system.
 			// If none exist, display a message.
 			// This will also prevent the widget from being saved due to the validation rules in update().
-			$no_units = '<p>' . esc_html__( 'No ad units are currently available.', 'ad-layers' ) . '</p>';
+			// @TODO Finish implementing $no_units.
+			$no_units = '<p>' . esc_html__( 'No ad units are currently available.', 'ad-layers' ) . '</p>'; // phpcs:ignore WordPressVIPMinimum.Variables.VariableAnalysis.UnusedVariable
 
 			$ad_units = Ad_Layers_Ad_Server::instance()->get_ad_units();
 
