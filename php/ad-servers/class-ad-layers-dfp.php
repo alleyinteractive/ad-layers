@@ -599,7 +599,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			$global_ad_units = $this->get_setting( 'ad_units' );
 			foreach ( $global_ad_units as $global_ad_unit ) {
 				if ( ! empty( $global_ad_unit['code'] ) && ! empty( $global_ad_unit['path_override'] ) ) {
-					$global_path_overrides[ $global_ad_unit['code'] ] = $global_ad_unit['path_override']; // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable, WordPressVIPMinimum.Variables.VariableAnalysis.UnusedVariable
+					$global_path_overrides[ $global_ad_unit['code'] ] = $global_ad_unit['path_override']; // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable, WordPressVIPMinimum.Variables.VariableAnalysis.UndefinedVariable
 				}
 			}
 
@@ -617,8 +617,8 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 						}
 						if ( ! empty( $ad_unit['path_override'] ) ) {
 							$this->ad_unit_paths[ $ad_unit['ad_unit'] ] = $ad_unit['path_override'];
-						} elseif ( ! empty( $global_path_overrides[ $ad_unit['ad_unit'] ] ) ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable, WordPressVIPMinimum.Variables.VariableAnalysis.UnusedVariable
-							$this->ad_unit_paths[ $ad_unit['ad_unit'] ] = $global_path_overrides[ $ad_unit['ad_unit'] ]; // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable, WordPressVIPMinimum.Variables.VariableAnalysis.UnusedVariable
+						} elseif ( ! empty( $global_path_overrides[ $ad_unit['ad_unit'] ] ) ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable, WordPressVIPMinimum.Variables.VariableAnalysis.UndefinedVariable
+							$this->ad_unit_paths[ $ad_unit['ad_unit'] ] = $global_path_overrides[ $ad_unit['ad_unit'] ]; // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UndefinedVariable, WordPressVIPMinimum.Variables.VariableAnalysis.UndefinedVariable
 						}
 					}
 				}
