@@ -111,7 +111,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 		public function get_ad_layer_priority( $post_id ) {
 			if ( ! empty( $this->ad_layers ) ) {
 				foreach ( $this->ad_layers as $i => $ad_layer ) {
-					if ( $post_id == $ad_layer['post_id'] ) {
+					if ( $post_id === $ad_layer['post_id'] ) {
 						return absint( $i + 1 );
 					}
 				}
@@ -217,7 +217,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					}
 				}
 
-				foreach ( $this->get_taxonomies() as $taxonomy => $label ) {
+				foreach ( $this->get_taxonomies() as $taxonomy => $label ) { // phpcs:ignore WordPressVIPMinimum.Variables.VariableAnalysis.UnusedVariable
 					$terms = get_the_terms( $ad_layer['post_id'], $taxonomy );
 					if ( ! empty( $terms ) ) {
 						$taxonomy_terms[ $taxonomy ] = wp_list_pluck( $terms, 'term_id' );
@@ -235,17 +235,17 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 						break;
 					}
 
-					// Check the page type
-					if ( ! empty( $page_types ) && ! in_array( $queried_object->post_type, $page_types ) ) {
+					// Check the page type.
+					if ( ! empty( $page_types ) && ! in_array( $queried_object->post_type, $page_types, true ) ) {
 						continue;
 					}
 
-					// Check the post type
-					if ( ! empty( $post_types ) && ! in_array( $queried_object->post_type, $post_types ) ) {
+					// Check the post type.
+					if ( ! empty( $post_types ) && ! in_array( $queried_object->post_type, $post_types, true ) ) {
 						continue;
 					}
 
-					// Check taxonomies
+					// Check taxonomies.
 					if ( ! empty( $taxonomy_terms ) ) {
 						foreach ( $taxonomy_terms as $taxonomy => $terms ) {
 							if ( has_term( $terms, $taxonomy ) ) {
@@ -266,27 +266,27 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					&& empty( $post_types )
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
-					&& ( empty( $page_types ) || in_array( 'home', $page_types ) ) ) {
+					&& ( empty( $page_types ) || in_array( 'home', $page_types, true ) ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
 				} elseif ( ( is_tax() || is_category() || is_tag() )
 					&& empty( $post_types )
-					&& ( empty( $page_types ) || in_array( $queried_object->taxonomy, $page_types ) ) ) {
+					&& ( empty( $page_types ) || in_array( $queried_object->taxonomy, $page_types, true ) ) ) {
 
-					// Check if there is taxonomy data
+					// Check if there is taxonomy data.
 					if ( ! empty( $taxonomy_terms ) ) {
-						// Check if this taxonomy matches
+						// Check if this taxonomy matches.
 						if ( array_key_exists( $queried_object->taxonomy, $taxonomy_terms )
 							&& (
 								empty( $taxonomy_terms[ $queried_object->taxonomy ] )
-								|| in_array( $queried_object->term_id, $taxonomy_terms[ $queried_object->taxonomy ] )
+								|| in_array( $queried_object->term_id, $taxonomy_terms[ $queried_object->taxonomy ], true )
 							)
 						) {
 							$this->ad_layer = $ad_layer;
 							break;
 						}
 					} else {
-						// if there is no taxonomy data, this is a page type match
+						// if there is no taxonomy data, this is a page type match.
 						$this->ad_layer = $ad_layer;
 						break;
 					}
@@ -294,38 +294,38 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
 					&& (
-						( ! empty( $post_types ) && in_array( $queried_object->name, $post_types ) )
+						( ! empty( $post_types ) && in_array( $queried_object->name, $post_types, true ) )
 						|| empty( $post_types )
 					)
-					&& ( empty( $page_types ) || in_array( 'archive::' . $queried_object->name, $page_types ) ) ) {
+					&& ( empty( $page_types ) || in_array( 'archive::' . $queried_object->name, $page_types, true ) ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
 				} elseif ( is_author()
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
 					&& empty( $post_types )
-					&& in_array( 'author', $page_types ) ) {
+					&& in_array( 'author', $page_types, true ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
 				} elseif ( is_date()
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
 					&& empty( $post_types )
-					&& in_array( 'date', $page_types ) ) {
+					&& in_array( 'date', $page_types, true ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
 				} elseif ( is_404()
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
 					&& empty( $post_types )
-					&& in_array( 'notfound', $page_types ) ) {
+					&& in_array( 'notfound', $page_types, true ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
 				} elseif ( is_search()
 					&& empty( $taxonomies )
 					&& empty( $taxonomy_terms )
 					&& empty( $post_types )
-					&& in_array( 'search', $page_types ) ) {
+					&& in_array( 'search', $page_types, true ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
 				}
@@ -336,6 +336,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 		 * Get the available page types for all ad servers.
 		 * These are especially used by path targeting.
 		 * This is kind of expensive so make sure we only do it once.
+		 *
 		 * @access public
 		 * @return array
 		 */
@@ -351,7 +352,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 				$single_post_types = apply_filters( 'ad_layers_ad_server_single_post_types', wp_list_filter( get_post_types( array( 'public' => true ), 'objects' ), array( 'label' => false ), 'NOT' ) );
 				if ( ! empty( $single_post_types ) ) {
 					foreach ( $single_post_types as $post_type ) {
-						if ( Ad_Layers_Post_Type::instance()->get_post_type() != $post_type->name ) {
+						if ( Ad_Layers_Post_Type::instance()->get_post_type() !== $post_type->name ) {
 							$page_types[ $post_type->name ] = $post_type->label;
 						}
 					}
@@ -390,20 +391,21 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 
 		/**
 		 * Get the current page type.
+		 *
 		 * @access public
 		 * @return string
 		 */
 		public function get_current_page_type() {
-			// Get the current page types
+			// Get the current page types.
 			$page_types = $this->get_page_types();
 
-			// Iterate for a match
+			// Iterate for a match.
 			$page_type = '';
-			foreach ( $page_types as $key => $label ) {
+			foreach ( $page_types as $key => $label ) { // phpcs:ignore WordPressVIPMinimum.Variables.VariableAnalysis.UnusedVariable
 				if (
 					( function_exists( 'is_' . $key ) && true === call_user_func( 'is_' . $key ) )
-					|| ( 'post_tag' == $key && is_tag() )
-					|| ( 'notfound' == $key && is_404() )
+					|| ( 'post_tag' === $key && is_tag() )
+					|| ( 'notfound' === $key && is_404() )
 					|| ( 'archive::' === substr( $key, 0, 9 ) && is_post_type_archive( substr( $key, 9 ) ) )
 					|| ( post_type_exists( $key ) && is_singular( $key ) )
 					|| ( taxonomy_exists( $key ) && is_tax( $key ) )
@@ -413,7 +415,7 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 				}
 			}
 
-			// Use default if no match
+			// Use default if no match.
 			if ( empty( $page_type ) ) {
 				$page_type = 'default';
 			}
