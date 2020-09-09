@@ -29,7 +29,7 @@ if ( ! class_exists( 'Ad_Layers_Shortcodes' ) ) :
 		 * @param string $tag
 		 * @return string
 		 */
-		public function do_ad_unit( $atts, $content, $tag ) {
+		public function do_ad_unit( $atts, $content, $tag ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable, WordPressVIPMinimum.Variables.VariableAnalysis.UnusedVariable
 			// Ensure the shortcode is valid
 			if ( empty( $atts['unit'] ) ) {
 				return;

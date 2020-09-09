@@ -81,7 +81,7 @@ if ( ! class_exists( 'Ad_Layers_Widget' ) ) :
 		 * @param array $old_instance
 		 * @return array|boolean
 		 */
-		public function update( $new_instance, $old_instance ) {
+		public function update( $new_instance, $old_instance ) { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable, WordPressVIPMinimum.Variables.VariableAnalysis.UnusedVariable
 			$instance = array();
 			$instance['ad_unit'] = strval( $new_instance['ad_unit'] );
 
@@ -105,7 +105,7 @@ if ( ! class_exists( 'Ad_Layers_Widget' ) ) :
 			// If none exist, display a message.
 			// This will also prevent the widget from being saved due to the validation rules in update().
 			// @TODO Finish implementing $no_units.
-			$no_units = '<p>' . esc_html__( 'No ad units are currently available.', 'ad-layers' ) . '</p>'; // phpcs:ignore WordPressVIPMinimum.Variables.VariableAnalysis.UnusedVariable
+			$no_units = '<p>' . esc_html__( 'No ad units are currently available.', 'ad-layers' ) . '</p>'; // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable, WordPressVIPMinimum.Variables.VariableAnalysis.UnusedVariable
 
 			$ad_units = Ad_Layers_Ad_Server::instance()->get_ad_units();
 
