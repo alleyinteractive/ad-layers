@@ -8,6 +8,7 @@
       "email": "noreply@alleyinteractive.com"
     }
   ],
+  "license": "GPL-3.0-or-later",
   "require-dev": {
     "alleyinteractive/alley-coding-standards": "^0.3.0",
     "phpunit/phpunit": "7.5.*",
