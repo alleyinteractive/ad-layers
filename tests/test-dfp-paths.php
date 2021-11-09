@@ -7,7 +7,6 @@
  */
 
 use Ad_Layers\Ad_Servers\Ad_Layers_DFP;
-use Ad_Layers\Ad_Servers\Ad_Server;
 
 /**
  * Test_DFP_Paths Class.
@@ -17,7 +16,8 @@ class Test_DFP_Paths extends Ad_Layers_TestCase {
 	public function setUp() {
 		parent::setUp();
 
-		Ad_Layers_DFP::instance()->get_ad_units_for_layer( $this->ad_layer );
+		$this->ad_server = Ad_Layers_DFP::instance();
+		$this->ad_server->get_ad_units_for_layer( $this->ad_layer );
 	}
 
 	public function test_path_templates() {
