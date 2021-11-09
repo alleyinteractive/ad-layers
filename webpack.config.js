@@ -53,7 +53,14 @@ module.exports = (env, { mode }) => ({
           {
             loader: 'postcss-loader',
             options: {
-              plugins: [autoprefixer()],
+              // https://webpack.js.org/loaders/postcss-loader/#autoprefixer
+              postcssOptions: {
+                plugins: [
+                  [
+                    autoprefixer,
+                  ],
+                ],
+              },
             },
           },
           'resolve-url-loader',

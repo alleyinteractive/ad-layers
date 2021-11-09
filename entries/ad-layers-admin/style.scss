@@ -1,0 +1,17 @@
+//--------------------------------------------------------------
+// Admin/Fieldmanager style helpers.
+//--------------------------------------------------------------
+
+.fm-ad_layers-wrapper .fmjs-remove,
+.fm-ad_layers-wrapper .fm-add-another-wrapper {
+  display: none;
+}
+
+.ad-layers-column-list {
+  margin: 0;
+  padding: 0;
+
+  li {
+    white-space: pre;
+  }
+}

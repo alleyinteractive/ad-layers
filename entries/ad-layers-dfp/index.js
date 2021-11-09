@@ -1,222 +1,224 @@
-import './style.css';
+import './style.scss';
 
 // TODO: Refactor to remove jquery dependency.
-(function( $ ) {
+/* eslint-disable func-names, no-undef, no-array-constructor, no-param-reassign, consistent-return, prefer-destructuring, max-len */
+(function ($) {
+  /*
+  The AdLayersDFPAPI class implements functionality specific to DFP For the AdLayersAPI.
+  */
+  AdLayersDFPAPI = function () {};
 
-	/*
-	The AdLayersDFPAPI class implements functionality specific to DFP For the AdLayersAPI.
-	*/
-	AdLayersDFPAPI = function() {}
+  // Refreshes a specific ad unit
+  AdLayersDFPAPI.prototype.refresh = function (adUnit) {
+    if (typeof dfpAdUnits[adUnit] !== 'undefined') {
+      googletag.pubads().refresh([dfpAdUnits[adUnit]]);
+    }
+  };
 
-	// Refreshes a specific ad unit
-	AdLayersDFPAPI.prototype.refresh = function( ad_unit ) {
-		if ( 'undefined' !== typeof dfpAdUnits[ ad_unit ] ) {
-			googletag.pubads().refresh( [ dfpAdUnits[ ad_unit ] ] );
-		}
-	}
+  // Refreshes all ad units
+  AdLayersDFPAPI.prototype.refreshAll = function () {
+    if ($.isEmptyObject(dfpAdUnits) === false) {
+      // DFP needs a numerical indexed array
+      const unitsToRefresh = new Array();
+      for (const adUnit in dfpAdUnits) {
+        if (dfpAdUnits[adUnit]) {
+          unitsToRefresh.push(dfpAdUnits[adUnit]);
+        }
+      }
+      googletag.pubads().refresh(unitsToRefresh);
+    }
+  };
 
-	// Refreshes all ad units
-	AdLayersDFPAPI.prototype.refreshAll = function() {
-		if ( false === $.isEmptyObject( dfpAdUnits ) ) {
-			// DFP needs a numerical indexed array
-			var unitsToRefresh = new Array;
-			for ( var adUnit in dfpAdUnits ) {
-				unitsToRefresh.push( dfpAdUnits[ adUnit ] );
-			}
-			googletag.pubads().refresh( unitsToRefresh );
-		}
-	}
+  AdLayersDFPAPI.prototype.buildAd = function (slotName, path, sizes, targets, sizeMapping) {
+    if (AdLayersAPI.isDebug()) {
+      let adSizes = [];
 
-	AdLayersDFPAPI.prototype.buildAd = function( slotName, path, sizes, targets, sizeMapping ) {
-		if ( AdLayersAPI.isDebug() ) {
-			var adSizes = [];
+      if (sizeMapping) {
+        // Get the appropriate sizes for this breakpoint
+        let maxWidth = -1;
+        let maxHeight = -1;
+        $.each(sizeMapping, (index, value) => {
+          if ($(window).width() >= value[0][0]
+            && $(window).height() >= value[0][1]
+            && value[0][0] >= maxWidth
+            && value[0][1] >= maxHeight
+          ) {
+            maxWidth = value[0][0];
+            maxHeight = value[0][1];
+            adSizes = value[1];
+          }
+        });
+      } else if (sizes && sizes[0]) {
+        // Ensure sizes is a two-dimensional array
+        if (!sizes[0][0]) {
+          sizes = [sizes];
+        }
+        adSizes = sizes;
+      }
 
-			if ( sizeMapping ) {
-				// Get the appropriate sizes for this breakpoint
-				var maxWidth = -1;
-				var maxHeight = -1;
-				$.each( sizeMapping, function( index, value ) {
-					if ( $( window ).width() >= value[0][0]
-						&& $( window ).height() >= value[0][1]
-						&& value[0][0] >= maxWidth
-						&& value[0][1] >= maxHeight
-					) {
-						maxWidth = value[0][0];
-						maxHeight = value[0][1];
-						adSizes = value[1];
-					}
-				});
-			} else {
-				if ( sizes && sizes[0] ) {
-					// Ensure sizes is a two-dimensional array
-					if ( ! sizes[0][0] ) {
-						sizes = [ sizes ];
-					}
-					adSizes = sizes;
-				}
-			}
+      AdLayersDFPAPI.addDebugPlaceholder($(`#${adLayersDFP.adUnitPrefix}${slotName}`), adSizes);
+    } else {
+      return googletag.cmd.push(() => {
+        let key;
+        let value;
+        const divId = adLayersDFP.adUnitPrefix + slotName;
+        dfpAdUnits = dfpAdUnits || {};
+        dfpAdUnits[slotName] = googletag.defineSlot(path, sizes, divId);
+        if (targets) {
+          for (key in targets) {
+            if (targets[key]) {
+              value = targets[key];
+              dfpAdUnits[slotName].setTargeting(key, value);
+            }
+          }
+        }
+        if (sizeMapping) {
+          dfpAdUnits[slotName].defineSizeMapping(sizeMapping);
+        }
+        dfpAdUnits[slotName].addService(googletag.pubads());
+        googletag.display(divId);
+      });
+    }
+  };
 
-			AdLayersDFPAPI.addDebugPlaceholder( $( '#' + adLayersDFP.adUnitPrefix + slotName ), adSizes );
-		} else {
-			return googletag.cmd.push( function() {
-				var key, value, divId;
-				divId = adLayersDFP.adUnitPrefix + slotName;
-				dfpAdUnits = dfpAdUnits || {};
-				dfpAdUnits[ slotName ] = googletag.defineSlot( path, sizes, divId );
-				if ( targets ) {
-					for ( key in targets ) {
-						value = targets[ key ];
-						dfpAdUnits[ slotName ].setTargeting( key, value );
-					}
-				}
-				if ( sizeMapping ) {
-					dfpAdUnits[ slotName ].defineSizeMapping( sizeMapping );
-				}
-				dfpAdUnits[ slotName ].addService( googletag.pubads() );
-				googletag.display( divId );
-			} );
-		}
-	};
+  AdLayersDFPAPI.prototype.lazyLoadAd = function (args) {
+    if (!args.slotName) {
+      return;
+    }
 
-	AdLayersDFPAPI.prototype.lazyLoadAd = function( args ) {
-		if ( ! args.slotName ) {
-			return;
-		}
+    if (args.format) {
+      if (!(dfpAdDetails && dfpAdDetails[args.format])) {
+        return;
+      }
+      if (!args.path) {
+        args.path = dfpAdDetails[args.format].path;
+      }
+      if (!args.sizes) {
+        args.sizes = dfpAdDetails[args.format].sizes;
+      }
+      if (!args.targeting) {
+        args.targeting = dfpAdDetails[args.format].targeting;
+      }
+      if (!args.sizeMapping) {
+        if (dfpBuiltMappings && dfpBuiltMappings[args.format]) {
+          args.sizeMapping = dfpBuiltMappings[args.format];
+        } else {
+          args.sizeMapping = null;
+        }
+      }
+    }
+    return this.buildAd(args.slotName, args.path, args.sizes, args.targeting, args.sizeMapping);
+  };
 
-		if ( args.format ) {
-			if ( ! ( dfpAdDetails && dfpAdDetails[ args.format ] ) ) {
-				return;
-			}
-			if ( ! args.path ) {
-				args.path = dfpAdDetails[ args.format ].path;
-			}
-			if ( ! args.sizes ) {
-				args.sizes = dfpAdDetails[ args.format ].sizes;
-			}
-			if ( ! args.targeting ) {
-				args.targeting = dfpAdDetails[ args.format ].targeting;
-			}
-			if ( ! args.sizeMapping ) {
-				if ( dfpBuiltMappings && dfpBuiltMappings[ args.format ] ) {
-					args.sizeMapping = dfpBuiltMappings[ args.format ];
-				} else {
-					args.sizeMapping = null;
-				}
-			}
-		}
-		return this.buildAd( args.slotName, args.path, args.sizes, args.targeting, args.sizeMapping );
-	};
+  // Switches sizes in debug mode
+  AdLayersDFPAPI.swapSizes = function ($size) {
+    // Unselect all other sizes and set this one
+    $size.siblings().removeClass('selected');
+    $size.addClass('selected');
 
+    // Set the width and height
+    $size.parents('.dfp-ad').width($size.data('width'));
+    $size.parents('.dfp-ad').height($size.data('height'));
 
-	// Switches sizes in debug mode
-	AdLayersDFPAPI.swapSizes = function( $size ) {
-		// Unselect all other sizes and set this one
-		$size.siblings().removeClass( 'selected' );
-		$size.addClass( 'selected' );
+    // Center the debug container vertically
+    $size.parents('.dfp-debug-container').css({
+      top: ($size.data('height') - $size.parents('.dfp-debug-container').outerHeight()) / 2,
+    });
+  };
 
-		// Set the width and height
-		$size.parents( '.dfp-ad' ).width( $size.data( 'width' ) );
-		$size.parents( '.dfp-ad' ).height( $size.data( 'height' ) );
+  AdLayersDFPAPI.addDebugPlaceholder = function ($adDiv, adSizes) {
+    // Get the ad slot sizes for the current breakpoint
+    const adSlot = $adDiv.data('adUnit');
 
-		// Center the debug container vertically
-		$size.parents( '.dfp-debug-container' ).css({
-			top: ( $size.data( 'height' ) - $size.parents( '.dfp-debug-container' ).outerHeight() )/2,
-		});
-	}
+    // Set the background
+    $adDiv.addClass('dfp-debug');
 
-	AdLayersDFPAPI.addDebugPlaceholder = function( $adDiv, adSizes ) {
-		// Get the ad slot sizes for the current breakpoint
-		var adSlot = $adDiv.data( 'adUnit' );
+    // Create a container for the ad data
+    $container = $('<div>')
+      .addClass('dfp-debug-container');
 
-		// Set the background
-		$adDiv.addClass( 'dfp-debug' );
+    // Add a label
+    $label = $('<div>')
+      .addClass('dfp-debug-unit')
+      .text(adSlot);
+    $container.append($label);
 
-		// Create a container for the ad data
-		$container = $( '<div>' )
-			.addClass( 'dfp-debug-container' );
+    // Add additional sizes for selection
+    $.each(adSizes, (index, value) => {
+      $link = $('<a>')
+        .attr('href', '#')
+        .data('width', value[0])
+        .data('height', value[1])
+        .text(`${value[0]}x${value[1]}`)
+        .addClass('dfp-debug-size');
 
-		// Add a label
-		$label = $( '<div>' )
-			.addClass( 'dfp-debug-unit' )
-			.text( adSlot );
-		$container.append( $label );
+      $container.append($link);
+    });
 
-		// Add additional sizes for selection
-		$.each( adSizes, function( index, value ) {
-			$link = $( '<a>' )
-				.attr( 'href', '#' )
-				.data( 'width', value[0] )
-				.data( 'height', value[1] )
-				.text( value[0] + 'x' + value[1] )
-				.addClass( 'dfp-debug-size' );
+    // Add to the ad div
+    $adDiv.append($container);
 
-			$container.append( $link );
-		});
+    // Set to the first size
+    AdLayersDFPAPI.swapSizes($adDiv.find('a').first());
+  };
 
-		// Add to the ad div
-		$adDiv.append( $container );
+  // Enables debug mode
+  AdLayersDFPAPI.prototype.debug = function () {
+    // Iterate through all of the ad units and display them in debug mode
+    $('.dfp-ad').each(function () {
+      const $adDiv = $(this);
+      const adSlot = $adDiv.data('adUnit');
 
-		// Set to the first size
-		AdLayersDFPAPI.swapSizes( $adDiv.find( 'a' ).first() );
-	}
+      if (adSlot && dfpSizeMapping[adSlot] !== 'undefined') {
+        // Get the appropriate sizes for this breakpoint
+        let adSizes = [];
+        let maxWidth = -1;
+        let maxHeight = -1;
+        $.each(dfpSizeMapping[adSlot], (index, value) => {
+          if ($(window).width() >= value[0][0]
+            && $(window).height() >= value[0][1]
+            && value[0][0] >= maxWidth
+            && value[0][1] >= maxHeight
+          ) {
+            maxWidth = value[0][0];
+            maxHeight = value[0][1];
+            adSizes = value[1];
+          }
+        });
 
-	// Enables debug mode
-	AdLayersDFPAPI.prototype.debug = function() {
-		// Iterate through all of the ad units and display them in debug mode
-		$( '.dfp-ad' ).each( function() {
-			var $adDiv = $( this ),
-				adSlot = $adDiv.data( 'adUnit' );
+        AdLayersDFPAPI.addDebugPlaceholder($(this), adSizes);
+      }
+    });
 
-			if ( adSlot && 'undefined' !== dfpSizeMapping[ adSlot ] ) {
-				// Get the appropriate sizes for this breakpoint
-				var adSizes = [];
-				var maxWidth = -1;
-				var maxHeight = -1;
-				$.each( dfpSizeMapping[ adSlot ], function( index, value ) {
-					if ( $( window ).width() >= value[0][0]
-						&& $( window ).height() >= value[0][1]
-						&& value[0][0] >= maxWidth
-						&& value[0][1] >= maxHeight
-					) {
-						maxWidth = value[0][0];
-						maxHeight = value[0][1];
-						adSizes = value[1];
-					}
-				});
+    // Add a debug bar with general layer information and a DFP console toggle
+    $layerTitle = $('<div>')
+      .addClass('dfp-ad-layer')
+      .text(`${adLayersDFP.layerDebugLabel}: ${dfpAdLayer.title}`);
 
-				AdLayersDFPAPI.addDebugPlaceholder( $( this ), adSizes );
-			}
-		});
+    $googleConsole = $('<a>')
+      .addClass('dfp-console')
+      .attr('href', window.location.href.replace('adlayers_debug', 'googfc'))
+      .text(adLayersDFP.consoleDebugLabel);
 
-		// Add a debug bar with general layer information and a DFP console toggle
-		$layerTitle = $( '<div>' )
-				.addClass( 'dfp-ad-layer' )
-				.text( adLayersDFP.layerDebugLabel + ': ' + dfpAdLayer.title );
+    $debugBar = $('<div>')
+      .attr('id', 'dfp-debug-bar')
+      .addClass('dfp-debug')
+      .append($layerTitle)
+      .append($googleConsole);
 
-		$googleConsole = $( '<a>' )
-				.addClass( 'dfp-console' )
-				.attr( 'href', window.location.href.replace( 'adlayers_debug', 'googfc' ) )
-				.text( adLayersDFP.consoleDebugLabel );
+    $('body').append($debugBar);
 
-		$debugBar = $( '<div>' )
-			.attr( 'id', 'dfp-debug-bar' )
-			.addClass( 'dfp-debug' )
-			.append( $layerTitle )
-			.append( $googleConsole );
+    // If the WordPress admin bar exists, push it down
+    if ($('#wpadminbar').length) {
+      $('#dfp-debug-bar').css('top', '32px');
+    }
+  };
 
-		$( 'body' ).append( $debugBar );
-
-		// If the WordPress admin bar exists, push it down
-		if ( $( '#wpadminbar' ).length ) {
-			$( '#dfp-debug-bar' ).css( 'top', '32px' );
-		}
-	}
-
-	// Handle click actions for swapping ad unit sizes
-	$( document ).ready(function() {
-		$( 'body' ).on( 'click', 'a.dfp-debug-size', function( e ) {
-			e.preventDefault();
-			AdLayersDFPAPI.swapSizes( $( this ) );
-		});
-	});
-})( jQuery );
+  // Handle click actions for swapping ad unit sizes
+  $(document).ready(() => {
+    $('body').on('click', 'a.dfp-debug-size', function (e) {
+      e.preventDefault();
+      AdLayersDFPAPI.swapSizes($(this));
+    });
+  });
+}(jQuery));
