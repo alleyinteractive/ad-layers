@@ -5,7 +5,9 @@
  * @package Ad_Layers
  */
 
-if ( ! class_exists( 'Ad_Layers_Admin' ) ) :
+namespace Ad_Layers;
+
+if ( ! class_exists( 'Ad_Layers\Ad_Layers_Admin' ) ) :
 
 	/**
 	 * Ad_Layers_Admin Class.

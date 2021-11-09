@@ -5,7 +5,12 @@
  * @package Ad_Layers
  */
 
-if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
+namespace Ad_Layers;
+
+use Ad_Layers\Ad_Layers;
+use Ad_Layers\Ad_Server;
+
+if ( ! class_exists( 'Ad_Layers\Ad_Layers_Post_Type' ) ) :
 
 	/**
 	 * Ad_Layers_Post_Type Class.
@@ -213,14 +218,14 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 					'ad_unit'       => new Fieldmanager_Select(
 						[
 							'label'   => __( 'Ad Unit', 'ad-layers' ),
-							'options' => Ad_Layers_Ad_Server::instance()->get_ad_units(),
+							'options' => Ad_Server::instance()->get_ad_units(),
 						]
 					),
 					'do_not_render' => new Fieldmanager_Checkbox( __( 'Do not render the ad on load', 'ad-layers' ) ),
 				],
 			];
 
-			$targeting_args = Ad_Layers_Ad_Server::instance()->get_custom_targeting_args( 'custom_targeting' );
+			$targeting_args = Ad_Server::instance()->get_custom_targeting_args( 'custom_targeting' );
 			if ( ! empty( $targeting_args ) ) {
 				$ad_unit_args['children']['custom_targeting'] = new Fieldmanager_Group( apply_filters( 'ad_layers_custom_targeting_ad_unit_args', $targeting_args ) );
 			}
@@ -280,7 +285,7 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 			$fm_post_types->add_meta_box( __( 'Post Types', 'ad-layers' ), $this->post_type, 'normal', 'high' );
 
 			// Custom targeting variables.
-			$targeting_args = Ad_Layers_Ad_Server::instance()->get_custom_targeting_args();
+			$targeting_args = Ad_Server::instance()->get_custom_targeting_args();
 			if ( ! empty( $targeting_args ) ) {
 				$fm_custom = new Fieldmanager_Group( apply_filters( 'ad_layers_custom_targeting_field_args', $targeting_args ) );
 				$fm_custom->add_meta_box( __( 'Page Level Custom Targeting', 'ad-layers' ), $this->post_type, 'normal', 'low' );

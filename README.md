@@ -73,7 +73,7 @@ This defines what custom variables are available for targeting and makes them av
 
 ## Ad Servers
 
-The architecture of Ad Layers abstracts the functionality that would be common to any ad server and allows for extending the built-in Ad_Layers_Ad_Server class to add support for additional ad servers. Currently, Ad Layers only supports DoubleClick for Publishers (DFP).
+The architecture of Ad Layers abstracts the functionality that would be common to any ad server and allows for extending the built-in Ad_Server class to add support for additional ad servers. Currently, Ad Layers only supports DoubleClick for Publishers (DFP).
 
 ### DFP
 
@@ -169,7 +169,7 @@ ad_layers_dfp_after_ad_units
 
 ### Filter Hooks by Class
 
-#### Ad_Layers_Ad_Server
+#### Ad_Server
 
 ad_layers_ad_server_settings
 

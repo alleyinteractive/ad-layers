@@ -5,7 +5,9 @@
  * @package Ad_Layers
  */
 
-if ( ! class_exists( 'Ad_Layers_Singleton' ) ) :
+namespace Ad_Layers;
+
+if ( ! class_exists( 'Ad_Layers\Ad_Layers_Singleton' ) ) :
 
 	/**
 	 * Abstract Ad_Layers_Singleton Class.

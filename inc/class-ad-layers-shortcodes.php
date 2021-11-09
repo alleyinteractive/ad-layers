@@ -5,7 +5,11 @@
  * @package Ad_Layers
  */
 
-if ( ! class_exists( 'Ad_Layers_Shortcodes' ) ) :
+namespace Ad_Layers;
+
+use Ad_Layers\Ad_Server;
+
+if ( ! class_exists( 'Ad_Layers\Ad_Layers_Shortcodes' ) ) :
 
 	/**
 	 * Ad_Layers_Shortcodes Class.
@@ -41,7 +45,7 @@ if ( ! class_exists( 'Ad_Layers_Shortcodes' ) ) :
 			// Since the WP shortcode pattern is running and trying to replace
 			// our shortcode, we need to return the ad and what to replace there,
 			// so we set the echo value to false for get_ad_unit.
-			return Ad_Layers_Ad_Server::instance()->get_ad_unit( $atts['unit'], false );
+			return Ad_Server::instance()->get_ad_unit( $atts['unit'], false );
 		}
 	}
 

@@ -5,12 +5,18 @@
  * @package Ad_Layers
  */
 
-if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
+namespace Ad_Layers\Ad_Servers;
+
+use Ad_Layers\Ad_Layers;
+use Ad_Layers\Ad_Layers_Post_Type;
+use Ad_Layers\Ad_Servers\Ad_Server;
+
+if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Layers_DFP' ) ) :
 
 	/**
 	 * Ad_Layers_DFP Class.
 	 */
-	class Ad_Layers_DFP extends Ad_Layers_Ad_Server {
+	class Ad_Layers_DFP extends Ad_Server {
 
 		/**
 		 * The display label for this ad server.
@@ -1080,7 +1086,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 
 		/**
 		 * Gets the current DFP-specific settings required to build the setup code.
-		 * These are cached from the main Ad_Layers_Ad_Server settings on update for efficiency.
+		 * These are cached from the main Ad_Server settings on update for efficiency.
 		 *
 		 * @access public
 		 * @return array

@@ -5,7 +5,9 @@
  * @package Ad_Layers
  */
 
-if ( ! class_exists( 'Ad_Layers_Meta_Boxes' ) ) :
+namespace Ad_Layers;
+
+if ( ! class_exists( 'Ad_Layers\Ad_Layers_Meta_Boxes' ) ) :
 
 	/**
 	 * Ad_Layers_Meta_Boxes Class.

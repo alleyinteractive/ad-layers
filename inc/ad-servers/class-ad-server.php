@@ -5,12 +5,16 @@
  * @package Ad_Layers
  */
 
-if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
+namespace Ad_Layers\Ad_Servers;
+
+use Ad_Layers\Ad_Layers_Singleton;
+
+if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Server' ) ) :
 
 	/**
-	 * Ad_Layers_Ad_Server Class.
+	 * Ad_Server Class.
 	 */
-	class Ad_Layers_Ad_Server extends Ad_Layers_Singleton {
+	class Ad_Server extends Ad_Layers_Singleton {
 
 		/**
 		 * All available ad servers
@@ -114,7 +118,7 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 			$this->ad_servers = apply_filters(
 				'ad_layers_ad_servers',
 				[
-					'Ad_Layers_DFP' => __DIR__. '/inc/ad-servers/class-ad-layers-dfp.php',
+					'Ad_Layers_DFP' => '\Ad_Layers\Ad_Servers\Ad_Layers_DFP',
 				]
 			);
 
@@ -185,7 +189,7 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 		 * Get the current ad server.
 		 *
 		 * @access public
-		 * @return Ad_Layers_Ad_Server
+		 * @return Ad_Server
 		 */
 		public function get_ad_server() {
 			return $this->ad_server;
@@ -442,6 +446,6 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 		}
 	}
 
-	Ad_Layers_Ad_Server::instance();
+	Ad_Server::instance();
 
 endif;

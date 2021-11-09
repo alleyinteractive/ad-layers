@@ -5,7 +5,12 @@
  * @package Ad_Layers
  */
 
-if ( ! class_exists( 'Ad_Layers_Widget' ) ) :
+namespace Ad_Layers;
+
+use \WP_Widget;
+use Ad_Layers\Ad_Servers\Ad_Server;
+
+if ( ! class_exists( 'Ad_Layers\Ad_Layers_Widget' ) ) :
 
 	/**
 	 * Ad_Layers_Widget Class.
@@ -42,7 +47,7 @@ if ( ! class_exists( 'Ad_Layers_Widget' ) ) :
 			// Ensure there is a valid ad unit to display before continuing.
 			// Although the unit may exist on the site, it may not be available on this particular page.
 			// In that instance, fail gracefully and just hide the widget to avoid extra whitespace in the sidebar.
-			$ad_unit_html = Ad_Layers_Ad_Server::instance()->get_ad_unit( $ad_unit, false );
+			$ad_unit_html = Ad_Server::instance()->get_ad_unit( $ad_unit, false );
 			if ( empty( $ad_unit_html ) ) {
 				return;
 			}
@@ -107,7 +112,7 @@ if ( ! class_exists( 'Ad_Layers_Widget' ) ) :
 			// This will also prevent the widget from being saved due to the validation rules in update().
 			$no_units = '<p>' . esc_html__( 'No ad units are currently available.', 'ad-layers' ) . '</p>';
 
-			$ad_units = Ad_Layers_Ad_Server::instance()->get_ad_units();
+			$ad_units = Ad_Server::instance()->get_ad_units();
 
 			// Build the option list.
 			$options = '';
@@ -134,8 +139,8 @@ if ( ! class_exists( 'Ad_Layers_Widget' ) ) :
 	 * Register the widget
 	 */
 	function ad_layers_register_widget() {
-		register_widget( 'Ad_Layers_Widget' );
+		register_widget( 'Ad_Layers\Ad_Layers_Widget' );
 	}
-	add_action( 'widgets_init', 'ad_layers_register_widget' );
+	add_action( 'widgets_init', __NAMESPACE__ . '\ad_layers_register_widget' );
 
 endif;
