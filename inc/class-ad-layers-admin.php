@@ -71,7 +71,13 @@ if ( ! class_exists( 'Ad_Layers_Admin' ) ) :
 			// Load the CSS to customize some Fieldmanager features.
 			$current_screen = get_current_screen();
 			if ( 'edit-ad-layer' === $current_screen->id || 'ad-layer_page_ad_layers' === $current_screen->base ) {
-				wp_enqueue_style( 'ad-layers-admin-css', AD_LAYERS_ASSETS_DIR . '/css/ad-layers-admin.css', [], AD_LAYERS_GLOBAL_ASSET_VERSION );
+				wp_enqueue_script(
+					'ad-layers-admin',
+					get_asset_path( 'adLayersAdmin.js' ),
+					get_asset_dependencies( 'adLayersAdmin.php' ),
+					get_asset_hash( 'adLayersAdmin.js' ),
+					true
+				);
 			}
 		}
 

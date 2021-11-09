@@ -1,0 +1,52 @@
+.dfp-debug {
+	background-color: #CCCCCC;
+}
+
+.dfp-debug-size, .dfp-console {
+	color: #0000EE;
+	text-decoration: underline;
+	padding-right: 10px;
+	font-size: 14px;
+}
+
+.dfp-debug-size:hover, .dfp-console:hover {
+	color: #0000EE;
+}
+
+.dfp-debug-size.selected {
+	font-weight: bold;
+	text-decoration: none;
+}
+
+.dfp-debug-unit {
+	color: #000000;
+	font-weight: bold;
+	font-size: 14px;
+}
+
+.dfp-debug-container {
+	margin: auto;
+	text-align: center;
+	position: relative;
+}
+
+#dfp-debug-bar {
+	min-height: 32px;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	z-index: 999999;
+}
+
+.dfp-ad-layer {
+	float: left;
+	font-size: 14px;
+	font-weight: bold;
+	padding: 5px 0px 0px 10px;
+}
+
+.dfp-console {
+	float: right;
+	padding: 5px 10px 0px 0px;
+}

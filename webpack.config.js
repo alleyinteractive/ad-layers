@@ -28,6 +28,10 @@ module.exports = (env, { mode }) => ({
         .replace('/index.js', '');
       acc[entry] = item;
       return acc;
+    }, {
+      adLayers: './entries/ad-layers/index.js',
+      adLayersAdmin: './entries/ad-layers-admin/index.js',
+      adLayersDfp: './entries/ad-layers-dfp/index.js',
     }),
 
   // Configure loaders based on extension.

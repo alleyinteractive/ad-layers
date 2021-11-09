@@ -14,6 +14,7 @@
 
 namespace Ad_Layers;
 
+// TODO: Remove if this remains unused.
 if ( ! defined( 'AD_LAYERS_OPTION_NAME' ) ) {
 	/**
 	 * Option name for ad layers settings.

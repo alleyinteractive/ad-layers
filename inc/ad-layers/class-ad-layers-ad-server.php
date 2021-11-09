@@ -114,7 +114,7 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 			$this->ad_servers = apply_filters(
 				'ad_layers_ad_servers',
 				[
-					'Ad_Layers_DFP' => AD_LAYERS_BASE_DIR . '/php/ad-servers/class-ad-layers-dfp.php',
+					'Ad_Layers_DFP' => __DIR__. '/inc/ad-servers/class-ad-layers-dfp.php',
 				]
 			);
 
@@ -153,14 +153,17 @@ if ( ! class_exists( 'Ad_Layers_Ad_Server' ) ) :
 			}
 
 			// Load the base Javascript library (in header to ensure early ad loading).
-			wp_enqueue_script( $this->handle, AD_LAYERS_ASSETS_DIR . 'js/ad-layers.js', $dependencies, AD_LAYERS_GLOBAL_ASSET_VERSION, false );
-
-			// Load the CSS. Mostly used in debug mode.
-			wp_enqueue_style( $this->handle, AD_LAYERS_ASSETS_DIR . 'css/ad-layers.css', [], AD_LAYERS_GLOBAL_ASSET_VERSION );
+			wp_enqueue_script(
+				$this->handle,
+				get_asset_path( 'adLayers.js' ),
+				$dependencies,
+				get_asset_hash( 'adLayers.js' ),
+				true
+			);
 
 			// Localize the base API with the class name.
 			wp_localize_script(
-				'ad-layers',
+				$this->handle,
 				'adLayersAdServer',
 				[
 					'jsAPIClass' => $js_api_class,

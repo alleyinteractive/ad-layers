@@ -44,7 +44,7 @@ remove_action( 'init', 'js_concat_init' );
  * A callback for the enqueue_block_editor_assets action hook.
  */
 function action_enqueue_block_editor_assets() {
-	// TODO: Remove?
+	// TODO: Remove this action if it remains unused.
 }
 
 /**
