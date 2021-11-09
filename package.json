@@ -1,7 +1,7 @@
 {
   "name": "ad-layers",
   "version": "0.2.0",
-  "license": "unlicensed",
+  "license": "GPL-3.0-or-later",
   "main": "index.php",
   "author": {
     "name": "Alley Interactive",
