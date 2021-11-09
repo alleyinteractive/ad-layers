@@ -175,7 +175,7 @@ ad_layers_ad_server_settings
 
 ad_layers_ad_servers
 
-ad_layer_ad_server_setting
+ad_layers_ad_server_setting
 
 ad_layers_ad_server_get_domain
 
