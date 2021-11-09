@@ -14,6 +14,15 @@
 
 namespace Ad_Layers;
 
+if ( ! defined( 'AD_LAYERS_OPTION_NAME' ) ) {
+	/**
+	 * Option name for ad layers settings.
+	 *
+	 * @var string
+	 */
+	define( 'AD_LAYERS_OPTION_NAME', 'ad_layers' );
+}
+
 // Include functions for working with assets (primarily JavaScript).
 require_once __DIR__ . '/inc/assets.php';
 require_once __DIR__ . '/inc/asset-loader-bridge.php';
