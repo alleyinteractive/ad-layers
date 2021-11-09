@@ -2,11 +2,12 @@
 /**
  * Reusable extensions for the Ad Layers site.
  *
- * Plugin Name: Ad Layers Extensions
+ * Plugin Name: Ad Layers
  * Plugin URI: https://github.com/alleyinteractive/ad-layers
- * Description: Extensions to the Ad Layers site.
- * Version: 1.0.0
- * Author: Alley
+ * Description: Manages custom ad layers.
+ * Author: Bradford Campeau-Laurion, Matthew Boynes, jomurgel, Alley Interactive
+ * Author URI: http://www.alleyinteractive.com/
+ * Version: 0.2.0
  *
  * @package Ad_Layers
  */
