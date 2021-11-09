@@ -1,0 +1,24 @@
+{
+  "ad_layers_open_graph_description": {
+    "default": "",
+    "post_types": [
+      "page",
+      "post"
+    ]
+  },
+  "ad_layers_open_graph_image": {
+    "default": 0,
+    "post_types": [
+      "page",
+      "post"
+    ],
+    "type": "integer"
+  },
+  "ad_layers_open_graph_title": {
+    "default": "",
+    "post_types": [
+      "page",
+      "post"
+    ]
+  }
+}

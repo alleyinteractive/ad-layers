@@ -1,0 +1,123 @@
+//--------------------------------------------------------------
+// AutoComplete Styles
+//--------------------------------------------------------------
+
+/* stylelint-disable max-nesting-depth */
+
+//-----------------------------------------
+// Accommodate editor well, or the sidebar.
+//-----------------------------------------
+.edit-post-sidebar,
+.editor-styles-wrapper {
+  .autocomplete {
+
+    //-----------------------------------------
+    // Parent form wrapper.
+    //-----------------------------------------
+    &__component {
+      margin-bottom: 20px;
+    }
+
+    //-----------------------------------------
+    // Wrapper
+    //-----------------------------------------
+    &-base-control {
+      position: relative;
+    }
+
+    //-----------------------------------------
+    // Input
+    //-----------------------------------------
+    &-text-control__input {
+      margin: 0;
+    }
+
+    //-----------------------------------------
+    // Selected buttons.
+    //-----------------------------------------
+    &__selection-list {
+      list-style-type: none;
+      margin: 0 0 6px;
+      padding: 0;
+
+      &--item {
+        display: inline-block;
+        list-style: none;
+
+        &--button {
+          margin-bottom: 4px;
+          margin-right: 3px;
+
+          &::after {
+            content: '×';
+            font-size: 16px;
+            line-height: 20px;
+            margin-left: 5px;
+          }
+        }
+      }
+    }
+
+    //-----------------------------------------
+    // Results
+    //-----------------------------------------
+    &__dropdown {
+      background-color: #fff;
+      border-color: transparent #e2e4e7 #e2e4e7;
+      border-radius: 0 0 4px 4px;
+      border-style: solid;
+      border-width: 0 1px 1px;
+      left: 0;
+      max-height: 0;
+      overflow-y: hidden;
+      position: absolute;
+      top: calc(100% + 1px); // Offset focus border.
+      visibility: hidden;
+      width: 100%;
+      z-index: 10;
+
+      // Container is open.
+      &--is-open {
+        box-shadow: 0 3px 30px rgba(25, 30, 35, 0.1);
+        max-height: 225px;
+        overflow-y: scroll;
+        visibility: visible;
+      }
+
+      // Notice handler.
+      &--notice {
+        padding: 15px;
+      }
+
+      // Results container.
+      &--results {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+
+    //-----------------------------------------
+    // List/Results
+    //-----------------------------------------
+    &__list--item {
+      list-style: none;
+
+      > button {
+        background: transparent;
+        border-color: #e2e4e7;
+        border-style: solid;
+        border-width: 0 0 1px;
+        height: 100%;
+        line-height: 1.25;
+        text-align: left;
+        white-space: inherit;
+        width: 100%;
+      }
+
+      &:last-child > button {
+        border-bottom: 0;
+      }
+    }
+  }
+}

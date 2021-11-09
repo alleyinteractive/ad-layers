@@ -2,6 +2,22 @@
 
 The Ad Layers plugin ("ad-layers") will provide an advanced mechanism for ad ops teams and other digital producers to customize the layout of advertisements in WordPress templates with minimal developer intervention.
 
+## Running builds
+
+Run `npm run build` to build all production assets. Run `npm run dev` for a
+development build of assets, which also watches files for changes and
+automatically recompiles.
+
+## Running Tests
+
+Run `npm run test` to run Jest tests against JavaScript files. Run
+`npm run test:watch` to keep the test runner open and watching for changes.
+
+Run `npm run lint` to run ESLint against all JavaScript files. Linting will also
+happen when running development or production builds.
+
+Run `composer phpcs` to run PHP CodeSniffer tests against PHP files.
+
 # Managing Ad Layers
 
 The plugin adds an Ad Layers custom post type to the WordPress dashboard for managing available add layers. There are multiple options under this menu.
@@ -63,11 +79,11 @@ The architecture of Ad Layers abstracts the functionality that would be common t
 
 DFP adds the following settings to the Ad Server Settings page:
 
-*Account ID*
+#### Account ID
 
 This sets the DFP account ID which is used throughout the DFP header code.
 
-*Path Template*
+#### Path Template
 
 This allows the creation of one or more templates to define the path for DFP ad units. Under the help tab in the upper right, there are multiple template tags to make these dynamic. They include:
 
@@ -96,7 +112,7 @@ The post type of the current page, if applicable
 ```
 The current term from the specified taxonomy, if applicable. If the taxonomy is hierarchical, each term in the hierarchy above the current term will be added to the path. If there is more than one term, only the first will be used. This is repeated for each taxonomy used with Ad Layers.
 
-*Breakpoints*
+#### Breakpoints
 
 This allows for the addition of one or more breakpoints for responsive ad serving and is the heart of creating the DFP ad setup. For each breakpoint, you can add:
 
@@ -106,7 +122,7 @@ Maximum Width: The maximum width at which this breakpoint is displayed.
 
 The above two fields correspond to how DFP handles responsive ad serving. Depending on how your ad units are configured, these might not correspond exactly to your design breakpoints.
 
-*Ad Units*
+#### Ad Units
 
 You can then click "Add Ad Unit" to add one or more ad units. For each you can add:
 
@@ -141,7 +157,7 @@ There are numerous action hooks and filters available throughout the plugin to c
 
 ### Action Hooks by Class
 
-*Ad_Layers_DFP*
+#### Ad_Layers_DFP
 
 ad_layers_dfp_before_setup
 
@@ -153,7 +169,7 @@ ad_layers_dfp_after_ad_units
 
 ### Filter Hooks by Class
 
-*Ad_Layers_Ad_Server*
+#### Ad_Layers_Ad_Server
 
 ad_layers_ad_server_settings
 
@@ -167,7 +183,7 @@ ad_layers_custom_targeting_args
 
 ad_layers_custom_targeting_sources
 
-*Ad_Layers_DFP*
+#### Ad_Layers_DFP
 
 ad_layers_dfp_formatting_tags
 
@@ -221,11 +237,11 @@ ad_layers_dfp_get_settings_fields
 
 ad_layers_dfp_custom_targeting_field_args
 
-*Ad_Layers_Meta_Boxes*
+#### Ad_Layers_Meta_Boxes
 
 ad_layers_post_types
 
-*Ad_Layers_Post_Type*
+#### Ad_Layers_Post_Type
 
 ad_layers_taxonomies
 
@@ -247,7 +263,7 @@ ad_layers_post_types_field_args
 
 ad_layers_custom_targeting_field_args
 
-*Ad_Layers*
+#### Ad_Layers
 
 ad_layers
 

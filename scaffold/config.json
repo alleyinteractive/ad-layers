@@ -1,0 +1,5 @@
+{
+  "core_term_meta": true,
+  "domain": "ad-layers",
+  "require_path": "__DIR__"
+}
