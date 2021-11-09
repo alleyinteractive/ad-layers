@@ -1053,7 +1053,7 @@ if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Layers_DFP' ) ) :
 			get_current_screen()->add_help_tab(
 				[
 					'id'       => 'dfp-setup-help',
-					'title'    => __( 'Ad Server Settings Help', 'wp-seo' ),
+					'title'    => __( 'Ad Server Settings Help', 'ad-layers' ),
 					'callback' => [ $this, 'formatting_tags_help_tab' ],
 				]
 			);
@@ -1070,7 +1070,7 @@ if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Layers_DFP' ) ) :
 			if ( ! empty( $this->formatting_tags ) ) :
 				?>
 				<aside>
-					<h2><?php esc_html_e( 'The following formatting tags are available for the path template:', 'wp-seo' ); ?></h2>
+					<h2><?php esc_html_e( 'The following formatting tags are available for the path template:', 'ad-layers' ); ?></h2>
 					<dl class="formatting-tags">
 						<?php foreach ( $this->formatting_tags as $tag => $description ) : ?>
 							<div class="formatting-tag-wrapper">
