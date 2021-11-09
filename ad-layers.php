@@ -23,3 +23,9 @@ require_once __DIR__ . '/inc/meta.php';
 
 // Include functions.php for registering custom post types, etc.
 require_once __DIR__ . '/functions.php';
+
+// Include admin-facing features.
+if ( is_admin() ) {
+	require_once __DIR__ . '/inc/class-ad-layers-admin.php';
+	require_once __DIR__ . '/inc/class-ad-layers-meta-boxes.php';
+}
