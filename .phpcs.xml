@@ -36,4 +36,13 @@
 
   <!-- The version set here matches the minimum version tested in buddy.yml. -->
   <config name="minimum_supported_wp_version" value="5.8" />
+
+  <!-- Sets the global prefix value WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedNamespaceFound -->
+  <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+      <properties>
+          <property name="prefixes" type="array">
+              <element value="ad_layers"/>
+          </property>
+      </properties>
+  </rule>
 </ruleset>
