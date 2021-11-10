@@ -48,10 +48,7 @@ function add_admin_notices() {
  */
 function ad_layers_init() {
 	// Implements common ad server functionality for Ad Layers.
-	require_once __DIR__ . '/inc/ad-servers/class-ad-server.php';
-
-	// Implements the DFP Ad Server for Ad Layers.
-	require_once __DIR__ . '/inc/ad-servers/class-ad-layers-dfp.php';
+	require_once __DIR__ . '/inc/class-ad-server.php';
 
 	if ( is_admin() ) {
 		// Manages the Ad Layers settings page and associated functions.
