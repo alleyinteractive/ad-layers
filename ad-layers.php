@@ -23,7 +23,7 @@ if ( ! class_exists( '\Fieldmanager_Field' ) ) {
 	// Include functions for working with assets (primarily JavaScript).
 	require_once __DIR__ . '/inc/assets.php';
 
-	// TODO: Resolve conflict with other plugins.
+	// TODO: Resolve conflict with other plugins or remove once other fields/posts were registered.
 	require_once __DIR__ . '/inc/asset-loader-bridge.php';
 
 	// Include functions for working with meta.

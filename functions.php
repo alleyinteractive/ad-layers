@@ -26,4 +26,10 @@ require_once __DIR__ . '/inc/class-ad-layers-widget.php';
 // them, leave the Begin and End comments in place.
 /* Begin Data Structures */
 
+// Post Type Base Class.
+require_once __DIR__ . '/inc/post-types/class-ad-layers-post-type.php';
+
+// Ad Layers Post Type (cpt:ad-layer).
+require_once __DIR__ . '/inc/post-types/class-ad-layers-post-type-ad-layer.php';
+
 /* End Data Structures */
