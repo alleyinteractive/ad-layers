@@ -5,7 +5,6 @@
  * @package Ad_Layers
  */
 
-
 use Ad_Layers\Ad_Layers;
 use Ad_Layers\Ad_Layers_Post_Type;
 use Ad_Layers\Ad_Servers\Ad_Server;
