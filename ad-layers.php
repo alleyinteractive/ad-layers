@@ -14,6 +14,9 @@
 
 namespace Ad_Layers;
 
+// TODO: Require Fieldmanager as a Depenency.
+// class_exists( '\Fieldmanager_Field' )
+
 // TODO: Remove if this remains unused.
 if ( ! defined( 'AD_LAYERS_OPTION_NAME' ) ) {
 	/**
