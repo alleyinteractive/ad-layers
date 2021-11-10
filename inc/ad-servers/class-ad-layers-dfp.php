@@ -301,7 +301,7 @@ if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Layers_DFP' ) ) :
 		 * @return array
 		 */
 		public function get_settings_fields() {
-			if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			if ( ! class_exists( '\Fieldmanager_Field' ) ) {
 				return [];
 			}
 
@@ -419,7 +419,7 @@ if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Layers_DFP' ) ) :
 		 * @return array
 		 */
 		public function get_size_options() {
-			if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			if ( ! class_exists( '\Fieldmanager_Field' ) ) {
 				return [];
 			}
 

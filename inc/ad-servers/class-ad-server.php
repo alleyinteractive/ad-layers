@@ -378,7 +378,7 @@ if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Server' ) ) :
 		 * @return array
 		 */
 		public function get_custom_targeting_args( $name = 'ad_layer_custom_targeting' ) {
-			if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			if ( ! class_exists( '\Fieldmanager_Field' ) ) {
 				return [];
 			}
 

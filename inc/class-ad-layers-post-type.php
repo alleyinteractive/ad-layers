@@ -204,7 +204,7 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 		 * Adds the meta boxes required to manage an ad layer.
 		 */
 		public function add_meta_boxes() {
-			if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			if ( ! class_exists( '\Fieldmanager_Field' ) ) {
 				return;
 			}
 
