@@ -11,6 +11,7 @@ use Ad_Layers\Ad_Layers;
 use Ad_Layers\Ad_Layers_Singleton;
 use \Fieldmanager_Select;
 use \Fieldmanager_TextField;
+use \Fieldmanager_Group;
 
 if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Server' ) ) :
 
