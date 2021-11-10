@@ -47,6 +47,9 @@ function add_admin_notices() {
  * Wait until plugins loaded to load plugin assets.
  */
 function ad_layers_init() {
+	// Implements common ad server functionality for Ad Layers.
+	require_once __DIR__ . '/inc/class-ad-server.php';
+
 	if ( is_admin() ) {
 		// Manages the Ad Layers settings page and associated functions.
 		require_once __DIR__ . '/inc/class-ad-layers-admin.php';
