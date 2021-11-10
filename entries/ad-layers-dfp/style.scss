@@ -1,0 +1,59 @@
+//--------------------------------------------------------------
+// Ad Layers Admin DFP Stylers.
+//--------------------------------------------------------------
+
+.dfp-debug {
+  background-color: #ccc;
+}
+
+.dfp-console,
+.dfp-debug-size {
+  color: #00e;
+  font-size: 14px;
+  padding-right: 10px;
+  text-decoration: underline;
+
+  &:hover {
+    color: #00e;
+  }
+}
+
+.dfp-console {
+  float: right;
+  padding: 5px 10px 0 0;
+}
+
+.dfp-debug-size {
+  &.selected {
+    font-weight: bold;
+    text-decoration: none;
+  }
+}
+
+.dfp-debug-unit {
+  color: #000;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.dfp-debug-container {
+  margin: auto;
+  position: relative;
+  text-align: center;
+}
+
+#dfp-debug-bar { // stylelint-disable selector-max-id
+  left: 0;
+  min-height: 32px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 999999;
+}
+
+.dfp-ad-layer {
+  float: left;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 5px 0 0 10px;
+}
