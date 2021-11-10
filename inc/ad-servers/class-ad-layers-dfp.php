@@ -5,14 +5,12 @@
  * @package Ad_Layers
  */
 
-namespace Ad_Layers\Ad_Servers;
 
 use Ad_Layers\Ad_Layers;
 use Ad_Layers\Ad_Layers_Post_Type;
 use Ad_Layers\Ad_Servers\Ad_Server;
-use \Fieldmanager_TextField;
 
-if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Layers_DFP' ) ) :
+if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 
 	/**
 	 * Ad_Layers_DFP Class.
