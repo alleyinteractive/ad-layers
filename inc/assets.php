@@ -7,18 +7,7 @@
 
 namespace Ad_Layers;
 
-/**
- * Asset map json.
- *
- * @var object
- */
 define( 'AD_LAYERS_ASSET_MAP', read_asset_map( dirname( __DIR__ ) . '/build/assetMap.json' ) );
-
-/**
- * Asset mode.
- *
- * @var string
- */
 define( 'AD_LAYERS_ASSET_MODE', AD_LAYERS_ASSET_MAP['mode'] ?? 'production' );
 
 // Register action and filter hooks.

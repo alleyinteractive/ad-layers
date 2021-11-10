@@ -8,9 +8,12 @@
 namespace Ad_Layers;
 
 use Ad_Layers\Ad_Layers;
-use Ad_Layers\Ad_Server;
+use Ad_Layers\Ad_Servers\Ad_Server;
+use \Fieldmanager_Select;
+use \Fieldmanager_Group;
+use \Fieldmanager_Checkbox;
 
-if ( ! class_exists( 'Ad_Layers\Ad_Layers_Post_Type' ) ) :
+if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 
 	/**
 	 * Ad_Layers_Post_Type Class.
