@@ -32,17 +32,19 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 		 * Setup the singleton.
 		 */
 		public function setup() {
+			// Ensure out registered post type exists before kicking off.
+			if ( post_type_exists( 'ad-layers' ) ) {
+				// Add the custom meta boxes for managing this post type.
+				add_action( 'fm_post_' . $this->post_type, [ $this, 'add_meta_boxes' ] );
 
-			// Add the custom meta boxes for managing this post type.
-			add_action( 'fm_post_' . $this->post_type, [ $this, 'add_meta_boxes' ] );
+				// Add custom columns for the list table.
+				add_filter( 'manage_' . $this->post_type . '_posts_columns', [ $this, 'manage_edit_columns' ], 15, 1 );
+				add_action( 'manage_' . $this->post_type . '_posts_custom_column', [ $this, 'manage_custom_columns' ], 10, 2 );
 
-			// Add custom columns for the list table.
-			add_filter( 'manage_' . $this->post_type . '_posts_columns', [ $this, 'manage_edit_columns' ], 15, 1 );
-			add_action( 'manage_' . $this->post_type . '_posts_custom_column', [ $this, 'manage_custom_columns' ], 10, 2 );
-
-			// Add and remove data from the options list of available ad layers.
-			add_action( 'save_post_' . $this->post_type, [ $this, 'save_post' ], 99, 3 );
-			add_action( 'delete_post', [ $this, 'delete_post' ] );
+				// Add and remove data from the options list of available ad layers.
+				add_action( 'save_post_' . $this->post_type, [ $this, 'save_post' ], 99, 3 );
+				add_action( 'delete_post', [ $this, 'delete_post' ] );
+			}
 		}
 
 		/**

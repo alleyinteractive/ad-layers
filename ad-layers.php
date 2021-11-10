@@ -14,6 +14,10 @@
 
 namespace Ad_Layers;
 
+// TODO: List.
+// - Remove scaffolder once Gutenberg block(s) are build.
+// - Remove or rename redundant asset-loader-bridge functions.
+
 if ( ! class_exists( '\Fieldmanager_Field' ) ) {
 	add_action( 'admin_notices', __NAMESPACE__ . '\add_admin_notices' );
 } else {
