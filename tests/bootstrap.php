@@ -48,3 +48,17 @@ tests_add_filter(
 
 // Include core's bootstrap.
 require $ad_layers_tests_dir . '/includes/bootstrap.php'; // phpcs:ignore WordPressVIPMinimum.Files.IncludingFile.UsingVariable
+
+// Load a custom UnitTestCase for this plugin
+require dirname( __FILE__ ) . '/class-ad-layers-testcase.php';
+
+/**
+ * Is the current version of WordPress at least ... ?
+ *
+ * @param  float $min_version Minimum version required, e.g. 3.9.
+ * @return bool True if it is, false if it isn't.
+ */
+function _fm_phpunit_is_wp_at_least( $min_version ) {
+	global $wp_version;
+	return floatval( $wp_version ) >= $min_version;
+}

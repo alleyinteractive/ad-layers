@@ -7,7 +7,18 @@
 
 namespace Ad_Layers;
 
+/**
+ * Asset map json.
+ *
+ * @var object
+ */
 define( 'AD_LAYERS_ASSET_MAP', read_asset_map( dirname( __DIR__ ) . '/build/assetMap.json' ) );
+
+/**
+ * Asset mode.
+ *
+ * @var string
+ */
 define( 'AD_LAYERS_ASSET_MODE', AD_LAYERS_ASSET_MAP['mode'] ?? 'production' );
 
 // Register action and filter hooks.
@@ -33,7 +44,7 @@ remove_action( 'init', 'js_concat_init' );
  * A callback for the enqueue_block_editor_assets action hook.
  */
 function action_enqueue_block_editor_assets() {
-	// TODO: Remove?
+	// TODO: Remove this action if it remains unused.
 }
 
 /**
