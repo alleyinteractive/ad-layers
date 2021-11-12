@@ -7,6 +7,10 @@
 
 namespace Ad_Layers;
 
+use \Fieldmanager_TextField;
+use \Fieldmanager_Hidden;
+use \Fieldmanager_Group;
+
 if ( ! class_exists( 'Ad_Layers\Ad_Layers_Admin' ) ) :
 
 	/**

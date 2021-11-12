@@ -5,13 +5,11 @@
  * @package Ad_Layers
  */
 
-namespace Ad_Layers\Ad_Servers;
-
 use Ad_Layers\Ad_Layers;
 use Ad_Layers\Ad_Layers_Post_Type;
 use Ad_Layers\Ad_Servers\Ad_Server;
 
-if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Layers_DFP' ) ) :
+if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 
 	/**
 	 * Ad_Layers_DFP Class.
@@ -300,7 +298,7 @@ if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Layers_DFP' ) ) :
 		 * @return array
 		 */
 		public function get_settings_fields() {
-			if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			if ( ! class_exists( '\Fieldmanager_Field' ) ) {
 				return [];
 			}
 
@@ -418,7 +416,7 @@ if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Layers_DFP' ) ) :
 		 * @return array
 		 */
 		public function get_size_options() {
-			if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			if ( ! class_exists( '\Fieldmanager_Field' ) ) {
 				return [];
 			}
 

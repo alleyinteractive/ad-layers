@@ -22,14 +22,14 @@ require_once __DIR__ . '/inc/class-ad-layers-shortcodes.php';
 // Manages the widget for inserting an ad unit.
 require_once __DIR__ . '/inc/class-ad-layers-widget.php';
 
-// Implements common ad server functionality for Ad Layers.
-require_once __DIR__ . '/inc/ad-servers/class-ad-server.php';
-
-// Implements the DFP Ad Server for Ad Layers.
-require_once __DIR__ . '/inc/ad-servers/class-ad-layers-dfp.php';
-
 // Content types and taxonomies should be included below. In order to scaffold
 // them, leave the Begin and End comments in place.
 /* Begin Data Structures */
+
+// Post Type Base Class.
+require_once __DIR__ . '/inc/post-types/class-ad-layers-post-type.php';
+
+// Ad Layers Post Type (cpt:ad-layer).
+require_once __DIR__ . '/inc/post-types/class-ad-layers-post-type-ad-layer.php';
 
 /* End Data Structures */

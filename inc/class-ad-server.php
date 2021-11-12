@@ -7,7 +7,11 @@
 
 namespace Ad_Layers\Ad_Servers;
 
+use Ad_Layers\Ad_Layers;
 use Ad_Layers\Ad_Layers_Singleton;
+use \Fieldmanager_Select;
+use \Fieldmanager_TextField;
+use \Fieldmanager_Group;
 
 if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Server' ) ) :
 
@@ -118,7 +122,7 @@ if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Server' ) ) :
 			$this->ad_servers = apply_filters(
 				'ad_layers_ad_servers',
 				[
-					'Ad_Layers_DFP' => '\Ad_Layers\Ad_Servers\Ad_Layers_DFP',
+					'Ad_Layers_DFP' => dirname( __FILE__ ) . '/ad-servers/class-ad-layers-dfp.php',
 				]
 			);
 
@@ -375,7 +379,7 @@ if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Server' ) ) :
 		 * @return array
 		 */
 		public function get_custom_targeting_args( $name = 'ad_layer_custom_targeting' ) {
-			if ( ! class_exists( 'Fieldmanager_Field' ) ) {
+			if ( ! class_exists( '\Fieldmanager_Field' ) ) {
 				return [];
 			}
 

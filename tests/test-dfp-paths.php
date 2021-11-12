@@ -6,8 +6,6 @@
  * @subpackage Tests
  */
 
-use Ad_Layers\Ad_Servers\Ad_Layers_DFP;
-
 /**
  * Test_DFP_Paths Class.
  */
