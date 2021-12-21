@@ -163,9 +163,9 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			// Load the base Javascript library (in header to ensure early ad loading).
 			wp_enqueue_script(
 				$this->handle,
-				get_asset_path( 'adLayersDfp.js' ),
+				get_ad_layers_path( 'adLayersDfp.js' ),
 				[ 'jquery' ],
-				get_asset_hash( 'adLayersDfp.js' ),
+				get_ad_layers_hash( 'adLayersDfp.js' ),
 				false
 			);
 
@@ -178,6 +178,11 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					'consoleDebugLabel' => __( 'Switch to Google console', 'ad-layers' ),
 					'adUnitPrefix'      => $this->ad_unit_prefix,
 				]
+			);
+			wp_localize_script(
+				$this->handle,
+				'AdLayersDFPAPI',
+				[]
 			);
 		}
 
