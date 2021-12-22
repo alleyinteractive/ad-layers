@@ -79,9 +79,9 @@ if ( ! class_exists( 'Ad_Layers\Ad_Layers_Admin' ) ) :
 			if ( 'edit-ad-layer' === $current_screen->id || 'ad-layer_page_ad_layers' === $current_screen->base ) {
 				wp_enqueue_script(
 					'ad-layers-admin',
-					get_asset_path( 'adLayersAdmin.js' ),
-					get_asset_dependencies( 'adLayersAdmin.php' ),
-					get_asset_hash( 'adLayersAdmin.js' ),
+					get_ad_layers_path( 'adLayersAdmin.js' ),
+					get_ad_layers_dependencies( 'adLayersAdmin.php' ),
+					get_ad_layers_hash( 'adLayersAdmin.js' ),
 					true
 				);
 			}
