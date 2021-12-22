@@ -43,9 +43,9 @@ function action_enqueue_block_editor_assets() {
  *
  * @return array An array of dependencies for this asset.
  */
-function get_asset_dependencies( string $asset ) : array {
+function get_ad_layers_dependencies( string $asset ) : array {
 	// Get the path to the PHP file containing the dependencies.
-	$dependency_file = get_asset_path( $asset, true );
+	$dependency_file = get_ad_layers_path( $asset, true );
 	if ( empty( $dependency_file ) ) {
 		return [];
 	}
@@ -72,8 +72,8 @@ function get_asset_dependencies( string $asset ) : array {
  *
  * @return string The asset's hash.
  */
-function get_asset_hash( string $asset ) : string {
-	return get_asset_property( $asset, 'hash' )
+function get_ad_layers_hash( string $asset ) : string {
+	return get_ad_layers_property( $asset, 'hash' )
 		?? AD_LAYERS_ASSET_MAP['hash']
 		?? '1.0.0';
 }
@@ -86,9 +86,9 @@ function get_asset_hash( string $asset ) : string {
  *
  * @return string The asset URL.
  */
-function get_asset_path( string $asset, bool $dir = false ) : string {
+function get_ad_layers_path( string $asset, bool $dir = false ) : string {
 	// Try to get the relative path.
-	$relative_path = get_asset_property( $asset, 'path' );
+	$relative_path = get_ad_layers_property( $asset, 'path' );
 	if ( empty( $relative_path ) ) {
 		return '';
 	}
@@ -109,7 +109,7 @@ function get_asset_path( string $asset, bool $dir = false ) : string {
  *
  * @return string|null The asset property based on entry and type.
  */
-function get_asset_property( string $asset, string $prop ) : ?string {
+function get_ad_layers_property( string $asset, string $prop ) : ?string {
 	/*
 	 * Appending a '.' ensures the explode() doesn't generate a notice while
 	 * allowing the variable names to be more readable via list().
@@ -126,7 +126,7 @@ function get_asset_property( string $asset, string $prop ) : ?string {
  *
  * @param string $to_handle The script handle to attach the inline script to.
  */
-function inline_locale_data( string $to_handle ) {
+function inline_ad_layers_locale_data( string $to_handle ) {
 	// Define locale data for Jed.
 	$locale_data = [
 		'' => [
