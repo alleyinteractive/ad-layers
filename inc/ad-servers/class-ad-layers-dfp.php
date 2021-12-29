@@ -534,6 +534,11 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					}
 					$sizes = apply_filters( 'ad_layers_dfp_ad_unit_sizes', $sizes, $ad_unit, $breakpoint );
 
+					// If we have no defaults, assume to use all of the sizes for this breakpoint.
+					if ( empty( $this->default_by_unit[ $ad_unit['code'] ] ) ) {
+						$this->default_by_unit[ $ad_unit['code'] ] = $sizes;
+					}
+
 					// Generate the mapping JS and store it with the unit.
 					$unit_key = $this->sanitize_key( $ad_unit['code'] );
 					if ( empty( $unit_key ) ) {
