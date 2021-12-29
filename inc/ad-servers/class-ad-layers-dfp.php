@@ -621,7 +621,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					// method call, and is prefixed with a comma:.
 					$is_oop ? '' : ',' . wp_json_encode( $this->default_by_unit[ $ad_unit ] ),
 					wp_json_encode( $this->get_ad_unit_id( $ad_unit ) ),
-					( ! empty( $this->mapping_by_unit[ $ad_unit ] ) && ! in_array( $ad_unit, $this->oop_units, true ) ) ? '.defineSizeMapping(dfpBuiltMappings[' . wp_json_encode( $ad_unit ) . '])' : '',
+					( ! empty( $this->mapping_by_unit[ str_replace( '-', '', $ad_unit ) ] ) && ! in_array( $ad_unit, $this->oop_units, true ) ) ? '.defineSizeMapping(dfpBuiltMappings[' . wp_json_encode( $ad_unit ) . '])' : '',
 					( ! empty( $this->targeting_by_unit[ $ad_unit ] ) ) ? $this->targeting_by_unit[ $ad_unit ] : '' // This is escaped above as it is built.
 				);
 				// phpcs:enable
