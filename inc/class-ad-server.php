@@ -455,6 +455,6 @@ if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Server' ) ) :
 		}
 	}
 
-	Ad_Server::instance();
+	add_action( 'after_setup_theme', [ 'Ad_Layers\Ad_Servers\Ad_Server', 'instance' ] );
 
 endif;
