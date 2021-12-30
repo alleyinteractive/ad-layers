@@ -540,6 +540,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					}
 
 					// Generate the mapping JS and store it with the unit.
+					// TODO: streamline targeting so mappings and units are 1:1.
 					$unit_key = $this->sanitize_key( $ad_unit['code'] );
 					if ( empty( $unit_key ) ) {
 						continue;

@@ -100,9 +100,8 @@ import './style.scss';
         args.targeting = dfpAdDetails[args.format].targeting;
       }
       if (!args.sizeMapping) {
-        const formatSlug = args.format.replace('-', '');
-        if (dfpBuiltMappings && dfpBuiltMappings[formatSlug]) {
-          args.sizeMapping = dfpBuiltMappings[formatSlug];
+        if (dfpBuiltMappings) {
+          args.sizeMapping = dfpBuiltMappings[args.format];
         } else {
           args.sizeMapping = null;
         }
