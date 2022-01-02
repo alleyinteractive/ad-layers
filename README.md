@@ -163,6 +163,8 @@ ad_layers_dfp_before_setup
 
 ad_layers_dfp_after_setup
 
+ad_layers_dfp_get_settings
+
 ad_layers_dfp_custom_targeting
 
 ad_layers_dfp_after_ad_units

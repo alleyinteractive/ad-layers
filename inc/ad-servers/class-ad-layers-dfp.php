@@ -540,6 +540,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					}
 
 					// Generate the mapping JS and store it with the unit.
+					// TODO: streamline targeting so mappings and units are 1:1.
 					$unit_key = $ad_unit['code'];
 					if ( empty( $unit_key ) ) {
 						continue;
@@ -1109,7 +1110,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			// Return what we have at this point.
-			return $settings;
+			return apply_filters( 'ad_layers_dfp_get_settings', $settings );
 		}
 
 		/**
