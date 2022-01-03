@@ -100,7 +100,7 @@ import './style.scss';
         args.targeting = dfpAdDetails[args.format].targeting;
       }
       if (!args.sizeMapping) {
-        if (dfpBuiltMappings) {
+        if (dfpBuiltMappings && dfpBuiltMappings[args.format]) {
           args.sizeMapping = dfpBuiltMappings[args.format];
         } else {
           args.sizeMapping = null;
