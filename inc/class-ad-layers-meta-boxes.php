@@ -53,6 +53,20 @@ if ( ! class_exists( 'Ad_Layers\Ad_Layers_Meta_Boxes' ) ) :
 		}
 
 		/**
+		 * Determine if the current page is using the block editor.
+		 *
+		 * @return boolean
+		 */
+		public function is_gutenberg_page() {
+			$current_screen = get_current_screen();
+
+			return (
+				method_exists( $current_screen, 'is_block_editor' ) &&
+				$current_screen->is_block_editor()
+			);
+		}
+
+		/**
 		 * Adds the meta boxes required to manage ad layers on posts.
 		 *
 		 * @access public
@@ -62,11 +76,11 @@ if ( ! class_exists( 'Ad_Layers\Ad_Layers_Meta_Boxes' ) ) :
 			$post_type = str_replace( 'fm_post_', '', current_filter() );
 
 			// Add ad units.
-			$fm_ad_layer = new Fieldmanager_Autocomplete(
+			$fm_ad_layer = new \Fieldmanager_Autocomplete(
 				[
 					'name'        => 'ad_layer',
 					'description' => __( 'Select a specific custom ad layer to use with this post.', 'ad-layers' ),
-					'datasource'  => new Fieldmanager_Datasource_Post(
+					'datasource'  => new \Fieldmanager_Datasource_Post(
 						[
 							'query_args' => [
 								'post_type'   => [ Ad_Layers_Post_Type::instance()->get_post_type() ],
