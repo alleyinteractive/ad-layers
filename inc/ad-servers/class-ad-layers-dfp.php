@@ -758,7 +758,9 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			foreach ( (array) $custom_targeting as $custom_target ) {
 				if ( ! empty( $custom_target['custom_variable'] ) ) {
 					$values          = ( isset( $custom_target['values'] ) ) ? $custom_target['values'] : null;
-					$targeting_value = $this->get_targeting_value( $custom_target['custom_variable'], $custom_target['source'], $values );
+					if ( isset( $custom_target['source'] ) ) {
+						$targeting_value = $this->get_targeting_value( $custom_target['custom_variable'], $custom_target['source'], $values );
+					}
 					if ( ! empty( $targeting_value ) ) {
 						$targeting_values[ $custom_target['custom_variable'] ] = $targeting_value;
 					}
