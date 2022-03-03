@@ -110,7 +110,7 @@ if ( ! class_exists( 'Ad_Layers\Ad_Layers' ) ) :
 		public function get_ad_layer_priority( $post_id ) {
 			if ( ! empty( $this->ad_layers ) ) {
 				foreach ( $this->ad_layers as $i => $ad_layer ) {
-					if ( $post_id === $ad_layer['post_id'] ) {
+					if ( (int) $post_id === (int) $ad_layer['post_id'] ) {
 						return absint( $i + 1 );
 					}
 				}
