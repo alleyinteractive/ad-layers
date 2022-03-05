@@ -29,7 +29,7 @@ import './style.scss';
     }
   };
 
-  AdLayersDFPAPI.prototype.buildAd = function (slotName, path, sizes, targets, sizeMapping) {
+  AdLayersDFPAPI.prototype.buildAd = function (slotName, path, sizes, targets, sizeMapping, companion = false) {
     if (AdLayersAPI.isDebug()) {
       let adSizes = [];
 
@@ -75,7 +75,14 @@ import './style.scss';
         if (sizeMapping) {
           dfpAdUnits[slotName].defineSizeMapping(sizeMapping);
         }
-        dfpAdUnits[slotName].addService(googletag.pubads());
+        if (companion) {
+          dfpAdUnits[slotName].addService(googletag.companionAds()).addService(googletag.pubads());
+          googletag.companionAds().setRefreshUnfilledSlots(true);
+          googletag.pubads().enableVideoAds();
+          googletag.pubads().disableInitialLoad();
+        } else {
+          dfpAdUnits[slotName].addService(googletag.pubads());
+        }
         googletag.display(divId);
       });
     }
@@ -107,7 +114,7 @@ import './style.scss';
         }
       }
     }
-    return this.buildAd(args.slotName, args.path, args.sizes, args.targeting, args.sizeMapping);
+    return this.buildAd(args.slotName, args.path, args.sizes, args.targeting, args.sizeMapping, args.companion);
   };
 
   // Switches sizes in debug mode
