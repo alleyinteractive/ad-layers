@@ -280,7 +280,26 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				}
 
 				do_action( 'ad_layers_dfp_custom_targeting' );
-				?>
+
+				$lazy_load = $this->get_setting( 'lazy_load' );
+				if ( ! empty( $lazy_load ) ) {
+					// Set defaults for any lazy load options that are not set.
+
+					// Fetch slots within this number viewports. Minimum distance from the current viewport a slot must be before we fetch the ad as a percentage of viewport size. 0 means "when the slot enters the viewport", 100 means "when the ad is 1 viewport away", and so on.
+					$fetch_margin = ! empty( $lazy_load['fetch_margin'] ) ? $lazy_load['fetch_margin'] : 0;
+
+					// Render slots within this number of viewports. Minimum distance from the current viewport a slot must be before we render an ad. This allows for prefetching the ad, but waiting to render and download other subresources. The value works just like fetchMarginPercent as a percentage of viewport.
+					$render_margin = ! empty( $lazy_load['render_margin'] ) ? $lazy_load['render_margin'] : 0;
+
+					// Multiply the fetch and render margins by this number on mobile, where viewports are smaller and users tend to scroll faster. Allows for different margins on mobile and desktop. For example, a mobileScaling of 2 will multiply all margins by 2 on mobile devices, increasing the minimum distance a slot can be before fetching and rendering.
+					$mobile_scaling = ! empty( $lazy_load['mobile_scaling'] ) ? $lazy_load['mobile_scaling'] : 1;
+					?>
+					googletag.pubads().enableLazyLoad({
+						fetchMarginPercent: <?php echo esc_js( $fetch_margin ); ?>,
+						renderMarginPercent: <?php echo esc_js( $render_margin ); ?>,
+						mobileScaling: <?php echo esc_js( sprintf( '%.1f', $mobile_scaling ) ); ?>,
+					});
+				<?php } ?>
 
 				if ( typeof AdLayersAPI === 'undefined' || ! AdLayersAPI.isDebug() ) {
 					googletag.enableServices();
@@ -347,6 +366,40 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					'account_id'     => new Fieldmanager_Textfield(
 						[
 							'label' => __( 'DFP Account ID', 'ad-layers' ),
+						]
+					),
+					'lazy_load'      => new Fieldmanager_Group(
+						[
+							'collapsible'   => true,
+							'collapsed'     => true,
+							'limit'         => 1,
+							'minimum_count' => 0,
+							'label'         => __( 'Lazy Load Options', 'ad-layers' ),
+							// 'label_macro'    => [ __( 'Lazy Load Options: %s %s %s', 'ad-layers' ), 'fetch_margin', 'render_margin', 'mobile_scaling' ],
+							// 'add_more_label' => __( 'Add Lazy Load Options', 'ad-layers' ),
+							'children'      => [
+								'fetch_margin'   => new Fieldmanager_Textfield(
+									[
+										'label'       => __( 'Fetch Margin Percent', 'ad-layers' ),
+										'description' => __( 'Fetch slots within this number viewports. Minimum distance from the current viewport a slot must be before we fetch the ad as a percentage of viewport size. 0 means "when the slot enters the viewport", 100 means "when the ad is 1 viewport away", and so on.', 'ad-layers' ),
+										'input_type'  => 'number',
+									]
+								),
+								'render_margin'  => new Fieldmanager_Textfield(
+									[
+										'label'       => __( 'Render Margin Percent', 'ad-layers' ),
+										'description' => __( 'Render slots within this number of viewports. Minimum distance from the current viewport a slot must be before we render an ad. This allows for prefetching the ad, but waiting to render and download other subresources. The value works just like fetchMarginPercent as a percentage of viewport.', 'ad-layers' ),
+										'input_type'  => 'number',
+									]
+								),
+								'mobile_scaling' => new Fieldmanager_Textfield(
+									[
+										'label'       => __( 'Mobile Scaling Factor', 'ad-layers' ),
+										'description' => __( 'Multiply the fetch and render margins by this number on mobile, where viewports are smaller and users tend to scroll faster. Allows for different margins on mobile and desktop. For example, a mobileScaling of 2 will multiply all margins by 2 on mobile devices, increasing the minimum distance a slot can be before fetching and rendering.', 'ad-layers' ),
+										'input_type'  => 'number',
+									]
+								),
+							],
 						]
 					),
 					'path_templates' => new Fieldmanager_Group(
