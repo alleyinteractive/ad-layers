@@ -76,13 +76,38 @@ import './style.scss';
           dfpAdUnits[slotName].defineSizeMapping(sizeMapping);
         }
         if (companion) {
+          /*
+           * More information on this companion ad functionality can be
+           * found at https://support.google.com/admanager/answer/1191131.
+           */
+
+          /*
+           * Declare that an ad slot may load with a display ad,
+           * but it should defer to the companion if one is available
+           * with the VAST ad which serves in a player on the same page.
+           */
           dfpAdUnits[slotName].addService(googletag.companionAds()).addService(googletag.pubads());
+          /*
+           * Automatically backfill any companion slots that have not
+           * been filled.
+           */
           googletag.companionAds().setRefreshUnfilledSlots(true);
+          /*
+           * Ensure that both the GPT call and the IMA SDK ad calls will
+           * use the same correlator. This allows competitive exclusions
+           * to work across the video and display ads.
+           */
           googletag.pubads().enableVideoAds();
+          /*
+           * Prevent display ads from loading to the ad unit and displaying
+           * for only a few seconds before the companion ad is delivered.
+           */
+          googletag.pubads().disableInitialLoad();
         } else {
           dfpAdUnits[slotName].addService(googletag.pubads());
         }
         googletag.display(divId);
+        googletag.pubads().refresh([dfpAdUnits[slotName]]);
       });
     }
   };
