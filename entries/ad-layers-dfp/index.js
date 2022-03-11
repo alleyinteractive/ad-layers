@@ -79,10 +79,12 @@ import './style.scss';
           dfpAdUnits[slotName].addService(googletag.companionAds()).addService(googletag.pubads());
           googletag.companionAds().setRefreshUnfilledSlots(true);
           googletag.pubads().enableVideoAds();
+          googletag.pubads().disableInitialLoad();
         } else {
           dfpAdUnits[slotName].addService(googletag.pubads());
         }
         googletag.display(divId);
+        googletag.pubads().refresh([dfpAdUnits[slotName]]);
       });
     }
   };
