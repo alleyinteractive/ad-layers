@@ -63,7 +63,16 @@ import './style.scss';
         let value;
         const divId = adLayersDFP.adUnitPrefix + slotName;
         dfpAdUnits = dfpAdUnits || {};
-        dfpAdUnits[slotName] = googletag.defineSlot(path, sizes, divId);
+        if (companion) {
+          /*
+           * Declare that an ad slot may load with a display ad,
+           * but it should defer to the companion if one is available
+           * with the VAST ad which serves in a player on the same page.
+           */
+          dfpAdUnits[slotName] = googletag.defineSlot(path, sizes, divId).addService(googletag.companionAds()).addService(googletag.pubads());
+        } else {
+          dfpAdUnits[slotName] = googletag.defineSlot(path, sizes, divId);
+        }
         if (targets) {
           for (key in targets) {
             if (targets[key]) {
@@ -81,12 +90,6 @@ import './style.scss';
            * found at https://support.google.com/admanager/answer/1191131.
            */
 
-          /*
-           * Declare that an ad slot may load with a display ad,
-           * but it should defer to the companion if one is available
-           * with the VAST ad which serves in a player on the same page.
-           */
-          dfpAdUnits[slotName].addService(googletag.companionAds()).addService(googletag.pubads());
           /*
            * Automatically backfill any companion slots that have not
            * been filled.
