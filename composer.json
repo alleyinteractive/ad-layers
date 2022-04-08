@@ -18,5 +18,10 @@
     "phpcbf": "phpcbf .",
     "phpcs": "phpcs . --runtime-set text_domain ad-layers --runtime-set prefixes ad_layers,_ai,ai_",
     "phpunit": "phpunit"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
   }
 }

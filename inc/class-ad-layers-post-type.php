@@ -289,7 +289,7 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 
 				// Otherwise, find and update the layer.
 				foreach ( $ad_layers as $i => $layer ) {
-					if ( $layer['post_id'] === $post_id ) {
+					if ( (int) $layer['post_id'] === (int) $post_id ) {
 						$position = $i;
 						break;
 					}
@@ -321,7 +321,7 @@ if ( ! class_exists( 'Ad_Layers_Post_Type' ) ) :
 
 			// Find and remove the layer.
 			foreach ( $ad_layers as $i => $layer ) {
-				if ( $layer['post_id'] === $post_id ) {
+				if ( (int) $layer['post_id'] === (int) $post_id ) {
 					unset( $ad_layers[ $i ] );
 					break;
 				}

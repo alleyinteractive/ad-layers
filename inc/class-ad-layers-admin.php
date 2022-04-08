@@ -105,7 +105,7 @@ if ( ! class_exists( 'Ad_Layers\Ad_Layers_Admin' ) ) :
 					/* translators: macro title. */
 					'label_macro'    => [ __( '%s', 'ad-layers' ), 'title' ], // phpcs:ignore WordPress.WP.I18n.NoEmptyStrings
 					'children'       => [
-						'post_id' => new Fieldmanager_Hidden(),
+						'post_id' => new Fieldmanager_Hidden( [ 'sanitize' => 'intval' ] ),
 						'title'   => new Fieldmanager_Textfield(
 							[
 								'label'      => __( 'Title', 'ad-layers' ),
