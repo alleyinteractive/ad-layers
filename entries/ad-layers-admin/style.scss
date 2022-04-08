@@ -15,3 +15,18 @@
     white-space: pre;
   }
 }
+
+.fm-ad_layer_ad_units {
+  padding-left: 1em;
+  position: relative;
+}
+
+.fm-ad_layer_ad_units-wrapper {
+  .fm-group-label-wrapper {
+    border: none;
+
+    &:hover {
+      border: none;
+    }
+  }
+}
