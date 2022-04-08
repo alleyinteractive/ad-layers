@@ -76,7 +76,7 @@ if ( ! class_exists( 'Ad_Layers\Ad_Layers_Admin' ) ) :
 		public function enqueue_scripts() {
 			// Load the CSS to customize some Fieldmanager features.
 			$current_screen = get_current_screen();
-			if ( 'edit-ad-layer' === $current_screen->id || 'ad-layer_page_ad_layers' === $current_screen->base ) {
+			if ( 'ad-layer' === $current_screen->id || 'edit-ad-layer' === $current_screen->id || 'ad-layer_page_ad_layers' === $current_screen->base ) {
 				wp_enqueue_script(
 					'ad-layers-admin',
 					get_ad_layers_path( 'adLayersAdmin.js' ),
