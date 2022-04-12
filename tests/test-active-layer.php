@@ -77,6 +77,17 @@ class Test_Active_Layer extends Ad_Layers_TestCase {
 		$this->assertNotSame( $layer, $this->get_active_ad_layer() );
 	}
 
+	public function test_active_layer_front_page() {
+		$post_id = self::factory()->post->create( [ 'post_type' => 'page' ] );
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $post_id );
+		$layer = $this->build_and_get_layer( array( 'page_types' => 'home' ) );
+
+		$this->go_to( '/' );
+		$this->assertTrue( is_front_page() );
+		$this->assertSame( $layer, $this->get_active_ad_layer() );
+	}
+
 	public function test_active_layer_home() {
 		$layer = $this->build_and_get_layer( array( 'page_types' => 'home' ) );
 
