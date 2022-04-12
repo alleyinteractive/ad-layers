@@ -226,7 +226,15 @@ if ( ! class_exists( 'Ad_Layers\Ad_Layers' ) ) :
 					}
 				}
 
-				if ( is_singular() ) {
+				if ( ( is_home() || is_front_page() )
+					&& empty( $post_types )
+					&& empty( $taxonomies )
+					&& empty( $taxonomy_terms )
+					&& ( empty( $page_types ) || in_array( 'home', $page_types, true ) )
+				) {
+					$this->ad_layer = $ad_layer;
+					break;
+				} elseif ( is_singular() ) {
 					// See if a specific ad layer is set.
 					$ad_layer_id = intval( get_post_meta( get_the_ID(), 'ad_layer', true ) );
 					if ( ! empty( $ad_layer_id ) ) {
@@ -262,13 +270,6 @@ if ( ! class_exists( 'Ad_Layers\Ad_Layers' ) ) :
 					}
 
 					// If we made it here, there's a match.
-					$this->ad_layer = $ad_layer;
-					break;
-				} if ( is_home()
-					&& empty( $post_types )
-					&& empty( $taxonomies )
-					&& empty( $taxonomy_terms )
-					&& ( empty( $page_types ) || in_array( 'home', $page_types, true ) ) ) {
 					$this->ad_layer = $ad_layer;
 					break;
 				} elseif ( ( is_tax() || is_category() || is_tag() )
