@@ -836,7 +836,92 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 					break;
 			}
 
+			// Perform token replacement on each value.
+			$targeting_value = array_map( [ $this, 'replace_tokens' ], $targeting_value );
+
 			return apply_filters( 'ad_layers_dfp_custom_targeting_value', $targeting_value, $key, $source, $values );
+		}
+
+		/**
+		 * Replaces tokens in a given string with dynamic values from registered
+		 * tokens and/or token values passed to the function.
+		 *
+		 * @param string $original_value The original value to be filtered.
+		 * @param string $page_type      The page type slug.
+		 * @param string $ad_unit        The ad unit path slug.
+		 *
+		 * @return string The modified value.
+		 */
+		private function replace_tokens( $original_value, $page_type = '', $ad_unit = '' ) {
+			$replacements = [];
+			$account_id   = $this->get_setting( 'account_id' );
+			$domain       = $this->get_domain();
+
+			// Handle any formatting tags.
+			preg_match_all( apply_filters( 'ad_layers_dfp_formatting_tag_pattern', $this->formatting_tag_pattern ), $original_value, $matches );
+			if ( ! empty( $matches[0] ) ) {
+				// Build a list of found tags for replacement.
+				$unique_matches = array_unique( $matches[0] );
+
+				// Iterate over and replace each.
+				foreach ( $this->formatting_tags as $tag => $description ) {
+					if ( in_array( $tag, $unique_matches, true ) ) {
+						$value = null;
+
+						// Handle built-in formatting tags.
+						switch ( $tag ) {
+							case '#account_id#':
+								$value = $account_id;
+								break;
+							case '#domain#':
+								$value = $domain;
+								break;
+							case '#ad_unit#':
+								$value = $ad_unit;
+								break;
+							case '#post_type#':
+								if ( is_post_type_archive() ) {
+									$value = get_queried_object()->name;
+								} elseif ( is_singular() ) {
+									$value = get_post_type();
+								}
+								break;
+							default:
+								// This is one of the available taxonomy tags if it's not custom.
+								// which would be handled later by the filter.
+								$taxonomy = str_replace( '#', '', $tag );
+								if ( taxonomy_exists( $taxonomy ) ) {
+									if ( is_tax() || is_category() || is_tag() ) {
+										$value = $this->get_term_path( get_queried_object()->term_id, $taxonomy );
+									} elseif ( is_singular() ) {
+										$terms = get_the_terms( get_the_ID(), $taxonomy );
+										if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+											$term  = array_shift( $terms );
+											$value = $this->get_term_path( $term->term_id, $taxonomy );
+										}
+									}
+
+									// If nothing was found, strip this off the path.
+									if ( null === $value ) {
+										$value = '';
+									}
+								}
+								break;
+						}
+
+						// Always allow filtering of the value for custom formatting tags.
+						$value = apply_filters( 'ad_layers_dfp_formatting_tag_value', $value, $tag, $page_type, $ad_unit );
+
+						// If a value was found, we'll replace it.
+						// Otherwise, the "match" will be ignored.
+						if ( null !== $value ) {
+							$replacements[ $tag ] = $value;
+						}
+					}
+				}
+			}
+
+			return str_replace( array_keys( $replacements ), array_values( $replacements ), $original_value );
 		}
 
 		/**
@@ -948,74 +1033,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 			}
 
 			if ( ! empty( $path_template ) ) {
-				$replacements = [];
-
-				// Handle any formatting tags.
-				preg_match_all( apply_filters( 'ad_layers_dfp_formatting_tag_pattern', $this->formatting_tag_pattern ), $path_template, $matches );
-				if ( ! empty( $matches[0] ) ) {
-					// Build a list of found tags for replacement.
-					$unique_matches = array_unique( $matches[0] );
-
-					// Iterate over and replace each.
-					foreach ( $this->formatting_tags as $tag => $description ) {
-						if ( in_array( $tag, $unique_matches, true ) ) {
-							$value = null;
-
-							// Handle built-in formatting tags.
-							switch ( $tag ) {
-								case '#account_id#':
-									$value = $account_id;
-									break;
-								case '#domain#':
-									$value = $domain;
-									break;
-								case '#ad_unit#':
-									$value = $ad_unit;
-									break;
-								case '#post_type#':
-									if ( is_post_type_archive() ) {
-										$value = get_queried_object()->name;
-									} elseif ( is_singular() ) {
-										$value = get_post_type();
-									}
-									break;
-								default:
-									// This is one of the available taxonomy tags if it's not custom.
-									// which would be handled later by the filter.
-									$taxonomy = str_replace( '#', '', $tag );
-									if ( taxonomy_exists( $taxonomy ) ) {
-										if ( is_tax() || is_category() || is_tag() ) {
-											$value = $this->get_term_path( get_queried_object()->term_id, $taxonomy );
-										} elseif ( is_singular() ) {
-											$terms = get_the_terms( get_the_ID(), $taxonomy );
-											if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
-												$term  = array_shift( $terms );
-												$value = $this->get_term_path( $term->term_id, $taxonomy );
-											}
-										}
-
-										// If nothing was found, strip this off the path.
-										if ( null === $value ) {
-											$value = '';
-										}
-									}
-									break;
-							}
-
-							// Always allow filtering of the value for custom formatting tags.
-							$value = apply_filters( 'ad_layers_dfp_formatting_tag_value', $value, $tag, $page_type, $ad_unit );
-
-							// If a value was found, we'll replace it.
-							// Otherwise, the "match" will be ignored.
-							if ( null !== $value ) {
-								$replacements[ $tag ] = $value;
-							}
-						}
-					}
-				}
-
-				// Do the replacements and create the final path.
-				$path = str_replace( array_keys( $replacements ), array_values( $replacements ), $path_template );
+				$path = $this->replace_tokens( $path_template, $page_type, $ad_unit );
 			}
 
 			// Finally, the path should never end in a trailing slash.
