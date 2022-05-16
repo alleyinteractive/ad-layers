@@ -1,7 +1,7 @@
 {
   "name": "alleyinteractive/ad-layers",
   "description": "Ad Layers",
-  "type": "project",
+  "type": "wordpress-plugin",
   "authors": [
     {
       "name": "Alley Interactive",
