@@ -110,7 +110,9 @@ import './style.scss';
           dfpAdUnits[slotName].addService(googletag.pubads());
         }
         googletag.display(divId);
-        googletag.pubads().refresh([dfpAdUnits[slotName]]);
+        if (companion) {
+          this.refresh(slotName);
+        }
       });
     }
   };
