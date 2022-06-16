@@ -29,7 +29,7 @@ import './style.scss';
     }
   };
 
-  AdLayersDFPAPI.prototype.buildAd = function (slotName, path, sizes, targets, sizeMapping, companion = false) {
+  AdLayersDFPAPI.prototype.buildAd = function (slotName, path, sizes, targets, sizeMapping, companion = false, noDisplay = false) {
     if (AdLayersAPI.isDebug()) {
       let adSizes = [];
 
@@ -109,7 +109,9 @@ import './style.scss';
         } else {
           dfpAdUnits[slotName].addService(googletag.pubads());
         }
-        googletag.display(divId);
+        if (!noDisplay) {
+          googletag.display(divId);
+        }
         if (companion) {
           this.refresh(slotName);
         }
@@ -143,7 +145,8 @@ import './style.scss';
         }
       }
     }
-    return this.buildAd(args.slotName, args.path, args.sizes, args.targeting, args.sizeMapping, args.companion || false);
+
+    return this.buildAd(args.slotName, args.path, args.sizes, args.targeting, args.sizeMapping, args.companion || false, args.noDisplay || false);
   };
 
   // Switches sizes in debug mode
