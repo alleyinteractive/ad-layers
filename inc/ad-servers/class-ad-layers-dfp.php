@@ -2,6 +2,8 @@
 /**
  * Implements the DFP Ad Server for Ad Layers.
  *
+ * phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript
+ *
  * @package Ad_Layers
  */
 
@@ -218,10 +220,7 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 		/**
 		 * Handle ad server header setup code.
 		 *
-		 * Should be implemented by all child classes, if needed.
-		 *
-		 * @access public
-		 * @return array
+		 * @link https://developers.google.com/publisher-tag/guides/get-started
 		 */
 		public function header_setup() {
 			// Get the active ad layer.
@@ -233,20 +232,9 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 
 			do_action( 'ad_layers_dfp_before_setup' ); ?>
 			<?php if ( apply_filters( 'ad_layers_dfp_output_default_gpt_library_script', true, $this ) ) : ?>
-				<script type='text/javascript'>
-				var dfpAdUnits = {};
-				var googletag = googletag || {};
-				googletag.cmd = googletag.cmd || [];
-				(function() {
-				var gads = document.createElement('script');
-				gads.async = true;
-				gads.type = 'text/javascript';
-				var useSSL = 'https:' === document.location.protocol;
-				gads.src = (useSSL ? 'https:' : 'http:') +
-				'//securepubads.g.doubleclick.net/tag/js/gpt.js';
-				var node = document.getElementsByTagName('script')[0];
-				node.parentNode.insertBefore(gads, node);
-				})();
+				<script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+				<script>
+					window.googletag = window.googletag || {cmd: []};
 				</script>
 			<?php endif; ?>
 			<?php do_action( 'ad_layers_dfp_after_setup' ); ?>
@@ -269,9 +257,6 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				 */
 				do_action( 'ad_layers_dfp_ad_unit_js_output', $ad_layer, $this );
 
-				if ( apply_filters( 'ad_layers_dfp_enable_async_rendering', true, $this ) ) {
-					echo "googletag.pubads().enableAsyncRendering();\n";
-				}
 				if ( apply_filters( 'ad_layers_dfp_single_request_mode', true, $this ) ) {
 					echo "googletag.pubads().enableSingleRequest();\n";
 				}
@@ -280,11 +265,25 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				}
 
 				do_action( 'ad_layers_dfp_custom_targeting' );
-				?>
 
-				if ( typeof AdLayersAPI === 'undefined' || ! AdLayersAPI.isDebug() ) {
-					googletag.enableServices();
+				/**
+				 * Filters whether to call googletag.enableServices() in the
+				 * document's <head>. Defaults to true. If additional
+				 * configuration of the googletag object is required before
+				 * enabling services, this can be set to false, and
+				 * googletag.enableServices() could be called manually later.
+				 *
+				 * @param bool          $enable_services Whether to call googletag.enableServices() in the document's head or not.
+				 * @param Ad_Layers_DFP $ad_server       The DFP ad server object.
+				 */
+				if ( apply_filters( 'ad_layers_dfp_enable_services_in_head', true, $this ) ) {
+					?>
+						if ( typeof AdLayersAPI === 'undefined' || ! AdLayersAPI.isDebug() ) {
+							googletag.enableServices();
+						}
+					<?php
 				}
+				?>
 			});
 			<?php do_action( 'ad_layers_dfp_after_ad_units' ); ?>
 			var dfpSizeMapping = <?php echo wp_json_encode( $this->mapping_by_unit ); ?>;
