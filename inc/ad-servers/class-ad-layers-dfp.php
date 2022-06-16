@@ -265,13 +265,25 @@ if ( ! class_exists( 'Ad_Layers_DFP' ) ) :
 				}
 
 				do_action( 'ad_layers_dfp_custom_targeting' );
-				?>
 
-				<?php if ( apply_filters( 'ad_layers_dfp_enable_services_in_head', true, $this ) ) : ?>
-					if ( typeof AdLayersAPI === 'undefined' || ! AdLayersAPI.isDebug() ) {
-						googletag.enableServices();
-					}
-				<?php endif; ?>
+				/**
+				 * Filters whether to call googletag.enableServices() in the
+				 * document's <head>. Defaults to true. If additional
+				 * configuration of the googletag object is required before
+				 * enabling services, this can be set to false, and
+				 * googletag.enableServices() could be called manually later.
+				 *
+				 * @param bool          $enable_services Whether to call googletag.enableServices() in the document's head or not.
+				 * @param Ad_Layers_DFP $ad_server       The DFP ad server object.
+				 */
+				if ( apply_filters( 'ad_layers_dfp_enable_services_in_head', true, $this ) ) {
+					?>
+						if ( typeof AdLayersAPI === 'undefined' || ! AdLayersAPI.isDebug() ) {
+							googletag.enableServices();
+						}
+					<?php
+				}
+				?>
 			});
 			<?php do_action( 'ad_layers_dfp_after_ad_units' ); ?>
 			var dfpSizeMapping = <?php echo wp_json_encode( $this->mapping_by_unit ); ?>;
