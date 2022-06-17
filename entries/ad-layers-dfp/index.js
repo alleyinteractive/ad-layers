@@ -146,7 +146,7 @@ import './style.scss';
       }
     }
 
-    return this.buildAd(args.slotName, args.path, args.sizes, args.targeting, args.sizeMapping, args.companion || false, args.noDisplay || false);
+    return this.buildAd(args.slotName, args.path, args.sizes, args.targeting, args.sizeMapping, args.companion ?? false, args.noDisplay ?? false);
   };
 
   // Switches sizes in debug mode
