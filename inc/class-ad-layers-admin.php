@@ -82,7 +82,7 @@ if ( ! class_exists( 'Ad_Layers\Ad_Layers_Admin' ) ) :
 					get_ad_layers_path( 'adLayersAdmin.js' ),
 					get_ad_layers_dependencies( 'adLayersAdmin.php' ),
 					get_ad_layers_hash( 'adLayersAdmin.js' ),
-					true
+					false
 				);
 			}
 		}
