@@ -166,7 +166,7 @@ if ( ! class_exists( 'Ad_Layers\Ad_Servers\Ad_Server' ) ) :
 				get_ad_layers_path( 'adLayers.js' ),
 				$dependencies,
 				get_ad_layers_hash( 'adLayers.js' ),
-				true
+				false
 			);
 
 			// Localize the base API with the class name.
