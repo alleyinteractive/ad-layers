@@ -245,6 +245,8 @@ if ( ! class_exists( 'Ad_Layers' ) ) :
 						continue;
 					}
 
+					$taxonomy_match = false;
+
 					// Check taxonomies
 					if ( ! empty( $taxonomy_terms ) ) {
 						foreach ( $taxonomy_terms as $taxonomy => $terms ) {
