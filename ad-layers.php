@@ -3,7 +3,7 @@
  * Ad Layers Base Plugin File.
  *
  * @package AdLayers
- * @version 0.1
+ * @version 0.1.1
  */
 
 /*
@@ -11,7 +11,7 @@
 	Plugin URI: https://github.com/alleyinteractive/ad-layers
 	Description: Manages custom ad layers.
 	Author: Bradford Campeau-Laurion, Matthew Boynes, Alley Interactive
-	Version: 0.1
+	Version: 0.1.1
 	Author URI: http://www.alleyinteractive.com/
 */
 
@@ -36,7 +36,7 @@
  *
  * @var string
  */
-define( 'AD_LAYERS_VERSION', '0.1' );
+define( 'AD_LAYERS_VERSION', '0.1.1' );
 
 /**
  * Filesystem path to Ad Layers.
@@ -109,5 +109,10 @@ function ad_layers_load_files() {
 		require_once( AD_LAYERS_BASE_DIR . '/php/class-ad-layers-meta-boxes.php' );
 		require_once( AD_LAYERS_BASE_DIR . '/php/class-ad-layers-admin.php' );
 	}
+
+	/**
+	 * Import/Export
+	 */
+	require_once( AD_LAYERS_BASE_DIR . '/php/class-ad-layers-importer.php' );
 }
 add_action( 'after_setup_theme', 'ad_layers_load_files' );
